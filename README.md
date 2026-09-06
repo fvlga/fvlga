@@ -18,6 +18,9 @@ Right now I'm focused on **SwiftUI/iOS**, **React + Tailwind**, and **Java**, bu
 [**Jump Game**](https://github.com/fvlga/jump-game) · Java, JavaFX
 > Side-scrolling obstacle game with parallax scrolling, collision detection, and sound effects
 
+[**CashFlow**](https://github.com/fvlga/cashflow) · React, Tailwind CSS, Chart.js
+> Personal expense tracker with category filtering, doughnut chart breakdown, and localStorage persistence
+
 ## What I work with
 
 **Languages** · Java, Swift, TypeScript, JavaScript, HTML/CSS, PHP, SQL
