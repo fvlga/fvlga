@@ -30,4 +30,5 @@ Right now I'm focused on **SwiftUI/iOS**, **React + Tailwind**, and **Java**, bu
 
 Open to junior dev roles, co-op placements, and app support positions in Windsor-Essex or remote.
 
+💼 [LinkedIn](https://www.linkedin.com/in/david-alabi-2250bb404/)
 📷 [Instagram](https://instagram.com/lekeee.a)
