@@ -1,28 +1,33 @@
-# Hey, I'm David Alabi
+# Hi, I'm David Alabi
 
-Computer Programming student at St. Clair College (Windsor, ON) looking for entry-level developer and app support roles.
+Computer Programming student at St. Clair College in Windsor, ON. I like building things that work and look good doing it.
 
-I build things with **SwiftUI/iOS**, **React + Tailwind**, and **Java** — and I'm always picking up something new.
+Right now I'm focused on **SwiftUI/iOS**, **React + Tailwind**, and **Java**, but I'm always picking up something new.
 
 ## Projects
 
-| Project | Stack | What it does |
-|---------|-------|-------------|
-| [**Torque & Shine**](https://github.com/fvlga/torque-and-shine) | Next.js, TypeScript, Tailwind | Responsive car detailing landing page with booking form, before/after slider, and accessible navigation |
-| [**Robby's Barbershop**](https://github.com/fvlga/robbys-barbershop) | HTML, CSS, JavaScript | Multi-page barbershop site with responsive hamburger menu, form validation, and a black & gold design system |
-| [**House POS**](https://github.com/fvlga/house-pos) | Java, JavaFX, MySQL | Property rental management system with DAO pattern, singleton DB connection, and tabbed desktop UI |
-| [**Jump Game**](https://github.com/fvlga/jump-game) | Java, JavaFX, Maven | Side-scrolling obstacle game with parallax scrolling, collision detection, and sound effects |
+[**Torque & Shine**](https://github.com/fvlga/torque-and-shine) · Next.js, TypeScript, Tailwind
+> Car detailing landing page with a booking form, before/after comparison slider, and full accessibility
+
+[**Robby's Barbershop**](https://github.com/fvlga/robbys-barbershop) · HTML, CSS, JavaScript
+> Multi-page barbershop site with a responsive hamburger menu, form validation, and a black & gold design system
+
+[**House POS**](https://github.com/fvlga/house-pos) · Java, JavaFX, MySQL
+> Property rental management app with DAO pattern, singleton DB connection, and a tabbed desktop UI
+
+[**Jump Game**](https://github.com/fvlga/jump-game) · Java, JavaFX
+> Side-scrolling obstacle game with parallax scrolling, collision detection, and sound effects
 
 ## What I work with
 
-**Languages:** Java, Swift, TypeScript, JavaScript, HTML/CSS, PHP, SQL
+**Languages** · Java, Swift, TypeScript, JavaScript, HTML/CSS, PHP, SQL
 
-**Frameworks:** Next.js, React, SwiftUI, JavaFX, Tailwind CSS
+**Frameworks** · Next.js, React, SwiftUI, JavaFX, Tailwind CSS
 
-**Tools:** Git, IntelliJ IDEA, Xcode, VS Code, MySQL, Gradle, Maven
+**Tools** · Git, IntelliJ IDEA, Xcode, VS Code, MySQL, Gradle, Maven
 
 ## Get in touch
 
-I'm open to junior dev roles, co-op placements, and app support positions in the Windsor-Essex area or remote.
+Open to junior dev roles, co-op placements, and app support positions in Windsor-Essex or remote.
 
-- [LinkedIn](https://linkedin.com/in/david-alabi) *(update with your actual LinkedIn URL)*
+📷 [Instagram](https://instagram.com/lekeee.a)
