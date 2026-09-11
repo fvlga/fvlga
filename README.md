@@ -6,9 +6,6 @@ Right now I'm focused on **SwiftUI/iOS**, **React + Tailwind**, and **Java**, bu
 
 ## Projects
 
-[**Torque & Shine**](https://github.com/fvlga/torque-and-shine) · Next.js, TypeScript, Tailwind
-> Car detailing landing page with a booking form, before/after comparison slider, and full accessibility
-
 [**Robby's Barbershop**](https://github.com/fvlga/robbys-barbershop) · HTML, CSS, JavaScript
 > Multi-page barbershop site with a responsive hamburger menu, form validation, and a black & gold design system
 
@@ -23,9 +20,9 @@ Right now I'm focused on **SwiftUI/iOS**, **React + Tailwind**, and **Java**, bu
 
 ## What I work with
 
-**Languages** · Java, Swift, TypeScript, JavaScript, HTML/CSS, PHP, SQL
+**Languages** · Java, Swift, JavaScript, HTML/CSS, PHP, SQL
 
-**Frameworks** · Next.js, React, SwiftUI, JavaFX, Tailwind CSS
+**Frameworks** · React, SwiftUI, JavaFX, Tailwind CSS
 
 **Tools** · Git, IntelliJ IDEA, Xcode, VS Code, MySQL, Gradle, Maven
 
