@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:CNDisplay;src:url(Anton.ttf)}@font-face{font-family:CNBody;src:url(Oswald.ttf)}
+html,body{margin:0;background:#000}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div style="font-family:CNDisplay;position:absolute;opacity:0">$</div><div style="font-family:CNBody;position:absolute;opacity:0">0</div>
+<script src="story.js"></script>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+window.A=null; fetch('analysis.json').then(r=>r.json()).then(a=>{window.A=a;});
+window.renderBatch=(t0,n,fps,q)=>{const out=[];for(let i=0;i<n;i++){CuffStory.drawFrame(ctx,1080,1920,t0+i/fps,A,null);out.push(c.toDataURL("image/jpeg",q).slice(23));}return out;};
+</script></body></html>
