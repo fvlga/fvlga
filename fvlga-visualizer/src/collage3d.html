@@ -1,0 +1,10 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:CNDisplay;src:url(Anton.ttf)}@font-face{font-family:CNBody;src:url(Oswald.ttf)}@font-face{font-family:CNGoth;src:url(UnifrakturMaguntia.ttf)}@font-face{font-family:CNVcr;src:url(VT323.ttf)}@font-face{font-family:CNMarker;src:url(PermanentMarker.ttf)}
+html,body{margin:0;background:#000}</style></head><body>
+<canvas id="col" width="1080" height="1920"></canvas>
+<script src="collage3.js"></script>
+<script>
+window.ready=false;
+Promise.all([fetch("analysis.json").then(r=>r.json()),document.fonts.load('40px CNDisplay'),document.fonts.load("600 20px CNBody"),document.fonts.load("40px CNVcr"),document.fonts.load("40px CNMarker"),document.fonts.load("40px CNGoth")]).then(([A])=>{Collage.init(document.getElementById("col"),A,null);window.ready=true;}).catch(e=>{window.err=String(e.stack||e)});
+window.renderBatch=(t0,n,fps,q)=>{const c=document.getElementById('col');const r=[];for(let i=0;i<n;i++){Collage.render(t0+i/fps);r.push(c.toDataURL('image/jpeg',q).slice(23));}return r;};
+</script></body></html>
