@@ -1,0 +1,94 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}</style></head><body>
+<canvas id="gl" width="1080" height="1920"></canvas>
+<script>
+// Performance cutaways: the artist's selfie footage, full-frame 9:16, graded + beat-driven. Deterministic per (t, frame).
+const VS = `#version 300 es
+in vec2 p; out vec2 uv; void main(){ uv = p * 0.5 + 0.5; uv.y = 1.0 - uv.y; gl_Position = vec4(p, 0.0, 1.0); }`;
+const FS = `#version 300 es
+precision highp float; in vec2 uv; out vec4 o;
+uniform sampler2D cur, ech; uniform float t, kick, bass, hit, mode, flip, alt; uniform vec2 res;
+float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float luma(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
+vec3 tx(sampler2D s, vec2 q){ q = clamp(q, 0.001, 0.999); if (flip > 0.5) q.x = 1.0 - q.x; return texture(s, q).rgb; }
+void main(){
+  float wt = floor(t * 24.0);
+  // zoom punch on kicks, slow handheld drift, gate weave
+  float z = 1.13 + 0.07 * kick + 0.03 * bass;
+  vec2 q = (uv - 0.5) / z + 0.5;
+  q += vec2(sin(t * 1.3), cos(t * 1.1)) * 0.004 + (vec2(h(vec2(wt, 1.0)), h(vec2(wt, 2.0))) - 0.5) * 0.004 * (1.0 + 3.0 * kick);
+  // VHS line tears on hits
+  float row = floor(uv.y * 90.0);
+  q.x += (h(vec2(row, wt)) - 0.5) * 0.06 * hit * step(0.8, h(vec2(row, wt + 7.0)));
+  float ab = 0.002 + 0.012 * kick + 0.02 * hit;
+  vec3 c = vec3(tx(cur, q + vec2(ab, 0)).r, tx(cur, q).g, tx(cur, q - vec2(ab, 0)).b);
+  vec3 e = tx(ech, q);
+  vec3 col;
+  if (mode < 0.5) {
+    // FILM: echo trail, crushed blacks, warm highlights, cool shadows, halation, light leak
+    c = max(c, e * 0.55);
+    c = pow(c, vec3(1.7)) * 0.95; c = smoothstep(0.02, 0.92, c);
+    float l = luma(c);
+    c = mix(c, vec3(l), 0.25);
+    c = mix(c * vec3(0.85, 0.95, 1.15), c * vec3(1.15, 1.0, 0.85), smoothstep(0.2, 0.8, l));
+    vec3 g = vec3(0.0); for (int i = 0; i < 8; i++) { float a = float(i) * 0.785; g += max(tx(cur, q + vec2(cos(a), sin(a) * 0.56) * 0.012) - 0.82, 0.0); }
+    c += g / 8.0 * vec3(1.6, 0.6, 0.9) * (1.0 + 2.0 * kick);
+    float lk = smoothstep(0.75, 0.0, length((uv - vec2(0.1 + 0.8 * fract(t * 0.07 + alt), 0.15)) * vec2(1.6, 1.0)));
+    c += lk * mix(vec3(1.0, 0.25, 0.6), vec3(0.3, 1.0, 0.15), alt) * 0.22;
+    col = c * (0.85 + 0.25 * kick);
+  } else {
+    // XEROX: hard photocopy threshold into acid green / hot pink, halftone, misregistered second ink
+    float l = luma(c), le = luma(e);
+    vec2 cell = uv * res / 9.0; vec2 f = fract(cell) - 0.5;
+    float dots = smoothstep(0.0, 0.08, (1.0 - l) * 0.62 - length(f));
+    float ink = max(step(l, 0.32 + 0.08 * h(vec2(floor(uv.y * res.y / 3.0), wt))), dots);
+    float ink2 = step(luma(tx(cur, q + vec2(0.012, 0.006) * (1.0 + 2.0 * kick))), 0.3);
+    vec3 paper = mix(vec3(0.22, 1.0, 0.08), vec3(1.0, 0.18, 0.62), alt);
+    vec3 ink2c = mix(vec3(1.0, 0.18, 0.62), vec3(0.22, 1.0, 0.08), alt);
+    col = paper * (0.9 + 0.1 * h(uv * 300.0 + wt));
+    col = mix(col, ink2c, ink2 * 0.55 * (1.0 - ink));
+    col = mix(col, vec3(0.03), ink);
+    col = mix(col, vec3(0.03), step(le, 0.2) * 0.35);
+    col *= 0.9 + 0.3 * kick;
+  }
+  // finish: grain, scanlines, vignette, flash on hits
+  col += (h(uv * res + fract(t * 13.1) * 91.0) - 0.5) * 0.12;
+  col *= 0.9 + 0.1 * sin(uv.y * res.y * 1.4);
+  col *= 1.0 - 0.45 * pow(length((uv - 0.5) * vec2(1.3, 1.0)), 2.4);
+  col += vec3(1.0) * hit * 0.25;
+  o = vec4(clamp(col, 0.0, 1.0), 1.0);
+}`;
+let gl, U = {}, A, T = [];
+function init(analysis) {
+  A = analysis; const cv = document.getElementById('gl'); gl = cv.getContext('webgl2', { preserveDrawingBuffer: true });
+  const sh = (ty, s) => { const x = gl.createShader(ty); gl.shaderSource(x, s); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(x); return x; };
+  const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  for (let i = 0; i < 2; i++) { const x = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, x);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); T.push(x); }
+  for (const n of ['cur', 'ech', 't', 'kick', 'bass', 'hit', 'mode', 'flip', 'alt', 'res']) U[n] = gl.getUniformLocation(prog, n);
+  gl.uniform1i(U.cur, 0); gl.uniform1i(U.ech, 1); gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(U.res, cv.width, cv.height);
+}
+const cache = new Map();
+function img(clip, f) { const k = clip + f; if (!cache.has(k)) { if (cache.size > 40) cache.delete(cache.keys().next().value);
+  cache.set(k, new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = `../../clips/${clip}/${String(f + 1).padStart(4, '0')}.jpg`; })); } return cache.get(k); }
+// job = {t0, clip, f0, mode, nframes}; i = frame index within the cut
+async function render(job, i, fps, maxf) {
+  const t = job.t0 + i / fps, bp = 60 / A.bpm, beat = Math.max(0, (t - A.t0) / bp), ph = beat % 1, kick = Math.exp(-(ph * bp) * 9);
+  const fa = Math.min(A.frames - 1, Math.round(t * fps)), bass = A.bass[fa];
+  const hit = i < 2 ? 1 : 0;                                                                   // hard flash on the cut in
+  // stutter: in the back half of every other beat, hold/repeat frames (classic edit stutter)
+  let sf = i; if (Math.floor(beat) % 2 === 1 && ph > 0.5) sf = i - Math.floor((ph - 0.5) * bp * fps) % 3;
+  const f = Math.min(maxf - 1, Math.max(0, job.f0 + sf)), fe = Math.max(0, f - 4);
+  const [a, e] = await Promise.all([img(job.clip, f), img(job.clip, fe)]);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, T[0]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, a);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, T[1]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, e);
+  gl.uniform1f(U.t, t); gl.uniform1f(U.kick, kick); gl.uniform1f(U.bass, bass); gl.uniform1f(U.hit, hit);
+  gl.uniform1f(U.mode, job.mode === 'xerox' ? 1 : 0); gl.uniform1f(U.flip, Math.floor(beat / 8) % 2); gl.uniform1f(U.alt, Math.floor(beat / 4) % 2);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+window.ready = false;
+fetch('../analysis.json').then(r => r.json()).then(a => { init(a); window.ready = true; }).catch(e => { window.err = String(e.stack || e); });
+window.renderBatch = async (job, i0, n, fps, q, maxf) => { const r = []; for (let i = i0; i < i0 + n; i++) { await render(job, i, fps, maxf); r.push(gl.canvas.toDataURL('image/jpeg', q).slice(23)); } return r; };
+</script></body></html>
