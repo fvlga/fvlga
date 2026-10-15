@@ -12,11 +12,11 @@
 
   // ---------- cast ----------
   const CAST = {
-    hero:   { skin: '#8d5524', top: '#e63946', bottom: '#1d3557', hair: '#151515', cap: '#ffd166', h: 1.0 },
+    hero:   { shoe: '#ffd166', skin: '#8d5524', top: '#e63946', bottom: '#1d3557', hair: '#151515', cap: '#ffd166', h: 1.0 },
     crew1:  { skin: '#c68642', top: '#2a9d8f', bottom: '#264653', hair: '#2b1d14', h: 1.08 },
     crew2:  { skin: '#f1c27d', top: '#f4a261', bottom: '#3d405b', hair: '#6b3e26', glasses: true, h: 0.94 },
-    dancer: { skin: '#e0ac69', top: '#9b5de5', bottom: '#f15bb5', hair: '#f15bb5', pony: true, skirt: true, h: 0.98 },
-    rival:  { skin: '#5c3a21', top: '#111111', bottom: '#111111', hair: '#0a0a0a', shades: true, chain: true, h: 1.15 },
+    dancer: { shoe: '#ffffff', skin: '#e0ac69', top: '#9b5de5', bottom: '#f15bb5', hair: '#f15bb5', pony: true, skirt: true, h: 0.98 },
+    rival:  { shoe: '#c9a227', skin: '#5c3a21', top: '#111111', bottom: '#111111', hair: '#0a0a0a', shades: true, chain: true, h: 1.15 },
   };
 
   // ---------- poses ----------
@@ -51,7 +51,10 @@
   function limb(ctx, x, y, dir, len1, len2, a1, a2, w, col) {
     const x1 = x + Math.sin(a1) * len1 * dir, y1 = y + Math.cos(a1) * len1;
     const x2 = x1 + Math.sin(a1 + a2) * len2 * dir, y2 = y1 + Math.cos(a1 + a2) * len2;
-    ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = INK; ctx.lineWidth = w + 9 * (w / 26);
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.strokeStyle = col; ctx.lineWidth = w;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
     return [x2, y2];
   }
@@ -60,6 +63,12 @@
     ctx.bezierCurveTo(x - r * 1.6, y - r * 0.2, x - r * 0.7, y - r * 1.4, x, y - r * 0.45);
     ctx.bezierCurveTo(x + r * 0.7, y - r * 1.4, x + r * 1.6, y - r * 0.2, x, y + r * 0.9); ctx.fill();
   }
+  const INK = '#0b0412';
+  let TALK = 0, SQ = 0; // per-frame lip-sync amount for the hero and squash for dancers
+  function dot(ctx, x, y, r, col) { ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(x, y, r + 4.5 * (r / 14), 0, TAU); ctx.fill(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+  function shoe(ctx, x, y, s, dir, col) { ctx.fillStyle = INK; ctx.beginPath(); ctx.roundRect(x - 26 * s + 6 * s * dir, y - 14 * s, 54 * s, 28 * s, 13 * s); ctx.fill();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(x - 22 * s + 6 * s * dir, y - 10 * s, 46 * s, 20 * s, 10 * s); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillRect(x - 22 * s + 6 * s * dir, y + 4 * s, 46 * s, 5 * s); }
   function shade(hex, f) { const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255; r = clamp(Math.round(r * f), 0, 255); g = clamp(Math.round(g * f), 0, 255); b = clamp(Math.round(b * f), 0, 255); return `rgb(${r},${g},${b})`; }
 
   // x = feet center, y = ground; s = scale; dir = 1 faces right, -1 faces left; face = expression; spin 0..1 squashes for a turn.
@@ -71,20 +80,24 @@
     if (opt.spin !== undefined) ctx.scale(Math.cos(opt.spin * TAU) || 0.001, 1);
     if (opt.alpha !== undefined) ctx.globalAlpha = opt.alpha;
     if (opt.rot) { ctx.translate(0, y); ctx.rotate(opt.rot); ctx.translate(0, -y); }
+    else if (SQ && !opt.still) { ctx.translate(0, y); ctx.scale(1 + SQ, 1 - SQ); ctx.translate(0, -y); }
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(0, y + 6 * s, 70 * s, 12 * s, 0, 0, TAU); ctx.fill();
     const lw = 26 * s;
     // back limbs
-    limb(ctx, -6 * s * dir, hipY, dir, thigh, shin, pose.lB[0], pose.lB[1], lw, shade(c.bottom, 0.75));
+    const footB = limb(ctx, -6 * s * dir, hipY, dir, thigh, shin, pose.lB[0], pose.lB[1], lw, shade(c.bottom, 0.75));
+    shoe(ctx, footB[0] + 4 * s * dir, footB[1] + 6 * s, s, dir, shade(c.shoe || '#f5f5f5', 0.8));
     const shX = Math.sin(pose.lean) * torso * dir, shY = hipY - Math.cos(pose.lean) * torso;
-    limb(ctx, shX - 8 * s * dir, shY + 14 * s, dir, up, fore, pose.aB[0], pose.aB[1], lw * 0.85, shade(c.skin, 0.8));
+    const handB = limb(ctx, shX - 8 * s * dir, shY + 14 * s, dir, up, fore, pose.aB[0], pose.aB[1], lw * 0.85, shade(c.skin, 0.8));
+    dot(ctx, handB[0], handB[1], 14 * s, shade(c.skin, 0.8));
     // legs front
     const foot = limb(ctx, 6 * s * dir, hipY, dir, thigh, shin, pose.lF[0], pose.lF[1], lw, c.bottom);
-    ctx.fillStyle = '#f5f5f5'; ctx.beginPath(); ctx.ellipse(foot[0] + 10 * s * dir, foot[1] + 4 * s, 22 * s, 11 * s, 0, 0, TAU); ctx.fill();
+    shoe(ctx, foot[0] + 4 * s * dir, foot[1] + 6 * s, s, dir, c.shoe || '#f5f5f5');
     // torso
     ctx.save(); ctx.translate(0, hipY); ctx.rotate(pose.lean * dir);
     ctx.fillStyle = c.top; const tw = 74 * hs;
-    ctx.beginPath(); ctx.roundRect(-tw / 2, -torso - 6 * s, tw, torso + 18 * s, 26 * s); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(-tw / 2, -torso - 6 * s, tw, torso + 18 * s, 26 * s); ctx.strokeStyle = INK; ctx.lineWidth = 9 * s; ctx.stroke(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.beginPath(); ctx.roundRect(-tw / 2 + 8 * s, -torso + 4 * s, tw * 0.28, torso * 0.8, 12 * s); ctx.fill(); ctx.fillStyle = c.top;
     if (c.skirt) { ctx.fillStyle = c.bottom; ctx.beginPath(); ctx.moveTo(-tw * 0.6, 12 * s); ctx.lineTo(tw * 0.6, 12 * s); ctx.lineTo(tw * 0.42, -28 * s); ctx.lineTo(-tw * 0.42, -28 * s); ctx.fill(); }
     if (c.chain) { ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 6 * s; ctx.beginPath(); ctx.arc(0, -torso + 10 * s, 26 * s, 0.2, Math.PI - 0.2); ctx.stroke(); }
     if (who === 'hero') { ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = `${Math.round(34 * s)}px ${FONT_D}`; ctx.textAlign = 'center'; ctx.fillText('C', 0, -torso * 0.45); }
@@ -93,17 +106,20 @@
     const hx = shX + Math.sin(pose.lean + pose.tilt) * (headR + 6 * s) * dir, hy = shY - Math.cos(pose.lean + pose.tilt) * (headR + 6 * s);
     if (c.pony) { const sw = Math.sin((opt.t || 0) * 8) * 0.5; ctx.strokeStyle = c.hair; ctx.lineWidth = 22 * s; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(hx - headR * 0.7 * dir, hy - headR * 0.5); ctx.quadraticCurveTo(hx - headR * (1.8 + sw) * dir, hy, hx - headR * (1.3 + sw) * dir, hy + headR * 1.4); ctx.stroke(); }
+    ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(hx, hy, headR + 4.5 * s, 0, TAU); ctx.fill();
     ctx.fillStyle = c.skin; ctx.beginPath(); ctx.arc(hx, hy, headR, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.16)'; ctx.beginPath(); ctx.arc(hx - headR * 0.25 * dir, hy - headR * 0.3, headR * 0.45, 0, TAU); ctx.fill();
     ctx.fillStyle = c.hair; ctx.beginPath(); ctx.arc(hx, hy, headR, Math.PI * 1.05, Math.PI * 1.95); ctx.closePath(); ctx.fill();
     if (c.cap) { ctx.fillStyle = c.cap; ctx.beginPath(); ctx.arc(hx, hy - 6 * s, headR * 1.02, Math.PI * 1.08, Math.PI * 1.92); ctx.closePath(); ctx.fill();
       ctx.fillRect(hx - headR * 1.25 * dir - (dir < 0 ? 0 : 0), hy - headR * 0.62, headR * 0.6 * dir, 10 * s); }
-    faceDraw(ctx, hx, hy, headR, dir, face, c, opt.t || 0);
+    faceDraw(ctx, hx, hy, headR, dir, face, c, opt.t || 0, who === 'hero' ? TALK : 0);
     // front arm (drawn last, over the torso)
     const hand = limb(ctx, shX + 8 * s * dir, shY + 14 * s, dir, up, fore, pose.aF[0], pose.aF[1], lw * 0.85, c.skin);
+    dot(ctx, hand[0], hand[1], 15 * s, c.skin);
     ctx.restore();
     return { hand: [x + hand[0], hand[1]], head: [x + hx, hy], headR };
   }
-  function faceDraw(ctx, x, y, r, dir, face, c, t) {
+  function faceDraw(ctx, x, y, r, dir, face, c, t, talk) {
     const ex = x + r * 0.35 * dir, ey = y - r * 0.05, gap = r * 0.42;
     ctx.fillStyle = '#111'; ctx.strokeStyle = '#111'; ctx.lineWidth = r * 0.09; ctx.lineCap = 'round';
     if (face === 'heart') { heart(ctx, ex - gap / 2, ey, r * 0.2, '#ff2e63'); heart(ctx, ex + gap / 2, ey, r * 0.2, '#ff2e63'); }
@@ -113,7 +129,10 @@
     if (c.glasses && face !== 'cool') { ctx.lineWidth = r * 0.06; for (const k of [-1, 1]) { ctx.beginPath(); ctx.arc(ex + k * gap / 2, ey, r * 0.17, 0, TAU); ctx.stroke(); } }
     ctx.lineWidth = r * 0.09; const mx = x + r * 0.42 * dir, my = y + r * 0.42;
     ctx.beginPath();
-    if (face === 'sad') { ctx.arc(mx, my + r * 0.12, r * 0.18, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+    if (talk > 0.12 && face !== 'sad' && face !== 'shock' && face !== 'heart') { // lip-sync: open mouth sized by vocal energy
+      ctx.fillStyle = '#3b0710'; ctx.ellipse(mx, my - r * 0.02, r * (0.12 + 0.06 * talk), r * (0.05 + 0.17 * talk), 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#ff6b81'; ctx.beginPath(); ctx.ellipse(mx, my + r * 0.07 * talk, r * 0.08, r * 0.05 * talk, 0, 0, TAU); ctx.fill(); }
+    else if (face === 'sad') { ctx.arc(mx, my + r * 0.12, r * 0.18, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
       ctx.fillStyle = '#7ec8ff'; ctx.beginPath(); ctx.ellipse(ex - gap / 2, ey + r * 0.25 + (t * 60 % 20), r * 0.06, r * 0.1, 0, 0, TAU); ctx.fill(); }
     else if (face === 'shock') { ctx.fillStyle = '#111'; ctx.ellipse(mx, my, r * 0.1, r * 0.14, 0, 0, TAU); ctx.fill(); }
     else if (face === 'laugh') { ctx.fillStyle = '#5a0d16'; ctx.arc(mx, my - r * 0.05, r * 0.2, 0, Math.PI); ctx.fill(); }
@@ -208,6 +227,28 @@
   ];
   function sceneAt(t) { let s0 = 0; for (let i = 0; i < SCENES.length; i++) { if (t < SCENES[i].end) return { ...SCENES[i], i, start: s0, local: t - s0, len: SCENES[i].end - s0 }; s0 = SCENES[i].end; } }
 
+  // Camera: [centerX, centerY, zoom] keyframes per scene, in local scene seconds. Eased between keys; kick punch-zoom on top.
+  const CAM = {
+    arrive: [[0, 540, 960, 1.0], [8.6, 520, 980, 1.05]],
+    inside: [[0, 470, 1050, 1.12], [8.7, 610, 1050, 1.12]],
+    spot:   [[0, 540, 960, 1.0], [2.2, 540, 980, 1.02], [3.0, 330, 1130, 1.75], [6.0, 340, 1100, 1.7], [7.2, 560, 1050, 1.12]],
+    dance:  [[0, 560, 1100, 1.1], [8.1, 560, 1100, 1.1], [8.5, 420, 1390, 1.65], [10.8, 430, 1380, 1.6], [11.8, 560, 1100, 1.1]],
+    gifts:  [[0, 560, 1130, 1.08], [4.2, 600, 1170, 1.3], [8.6, 560, 1130, 1.1], [12.9, 600, 1170, 1.32]],
+    ring:   [[0, 540, 1000, 1.0], [4.0, 470, 1330, 1.75], [5.0, 480, 1320, 1.75], [6.2, 600, 1150, 1.2]],
+    gone:   [[0, 440, 1150, 1.15], [4.1, 420, 1260, 1.45]],
+    back:   [[0, 450, 1250, 1.35], [4.5, 540, 1050, 1.05], [13, 540, 1030, 1.08]],
+    star:   [[0, 540, 1000, 1.05], [12.8, 540, 1000, 1.05], [13.6, 560, 1130, 1.5], [17.3, 560, 1120, 1.55]],
+    end:    [[0, 540, 960, 1.0]],
+  };
+  function camera(S, k, len, kick) {
+    const keys = CAM[S.id]; let c = keys[keys.length - 1];
+    for (let i = 0; i < keys.length - 1; i++) if (k < keys[i + 1][0]) { const a = keys[i], b = keys[i + 1], e = ease((k - a[0]) / (b[0] - a[0]));
+      c = [0, lerp(a[1], b[1], e), lerp(a[2], b[2], e), lerp(a[3], b[3], e)]; break; }
+    if (k < keys[0][0]) c = keys[0];
+    let z = c[3] * (S.id === 'gone' ? 1 : 1 + 0.022 * kick);
+    const hw = 540 / z, hh = 960 / z;
+    return [clamp(c[1], hw, 1080 - hw), clamp(c[2], hh, 1920 - hh), z];
+  }
   function drawFrame(ctx, W, H, t, A, L) {
     const bp = 60 / A.bpm, beatF = (t - A.t0) / bp, beat = Math.max(0, beatF);
     const half = beat / 2, ph = half % 1, hb = Math.floor(half); // body moves on the half-time (74 BPM) groove
@@ -217,6 +258,12 @@
     ctx.save(); ctx.setTransform(W / 1080, 0, 0, H / 1920, 0, 0);
     const GY = 1560; // ground line
     const opt = { t };
+    // lip-sync: mouth follows mid-band energy while vocals are present (vocal timings from the transcription)
+    const vocal = (A.voc || []).some(v => t >= v[0] && t <= v[1]);
+    TALK = vocal ? clamp((feat(A, 'mid', t) - 0.3) * 2.2, 0, 1) * (0.45 + 0.55 * Math.abs(Math.sin(t * 17))) : 0;
+    SQ = 0.045 * Math.exp(-((beat % 1) * bp) * 14);
+    const [cx, cy, cz] = camera(S, k, len, kick);
+    ctx.save(); ctx.translate(540, 960); ctx.scale(cz, cz); ctx.translate(-cx, -cy);
 
     switch (S.id) {
       case 'arrive': {
@@ -229,7 +276,7 @@
         person(ctx, 'hero', xs[0], GY, 1, 1, pose, 'smile', opt);
         // title card
         const ta = clamp(k / 0.6, 0, 1) * clamp((len - k) / 0.8, 0, 1);
-        ctx.save(); ctx.globalAlpha = ta; ctx.textAlign = 'center'; const sc = 1 + kick * 0.05; ctx.translate(540, 150); ctx.scale(sc, sc);
+        ctx.save(); ctx.globalAlpha = ta; ctx.textAlign = 'center'; const sc = 1 + kick * 0.05; ctx.translate(540, 200); ctx.scale(sc, sc);
         ctx.font = `150px ${FONT_D}`; ctx.fillStyle = '#000'; ctx.fillText('CUFF NO', 6, 6); ctx.fillText('DANCER', 6, 156);
         ctx.fillStyle = '#ffd166'; ctx.fillText('CUFF NO', 0, 0); ctx.fillStyle = '#ff2e9a'; ctx.fillText('DANCER', 0, 150); ctx.restore();
         break;
@@ -345,6 +392,7 @@
       }
     }
 
+    ctx.restore(); // end camera
     // story caption (top) and lyric subtitle (bottom)
     if (S.cap) { const a = clamp(k / 0.4, 0, 1) * clamp((Math.min(len, 4.5) - k) / 0.5, 0, 1);
       if (a > 0) { ctx.save(); ctx.globalAlpha = a; ctx.font = `54px ${FONT_B}`; ctx.textAlign = 'center'; const w = ctx.measureText(S.cap).width + 60;

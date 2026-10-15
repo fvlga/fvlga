@@ -7,5 +7,5 @@ html,body{margin:0;background:#000}</style></head><body>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 window.A=null; fetch('analysis.json').then(r=>r.json()).then(a=>{window.A=a;});
-window.renderBatch=(t0,n,fps,q)=>{const out=[];for(let i=0;i<n;i++){CuffStory.drawFrame(ctx,1080,1920,t0+i/fps,A,null);out.push(c.toDataURL("image/jpeg",q).slice(23));}return out;};
+window.renderBatch=(t0,n,fps,q)=>{const out=[];const off=document.createElement("canvas");off.width=1080;off.height=1920;const oc=off.getContext("2d");const SUB=3;for(let i=0;i<n;i++){const t=t0+i/fps;CuffStory.drawFrame(ctx,1080,1920,t-0.25/fps,A,null);for(let j=1;j<SUB;j++){CuffStory.drawFrame(oc,1080,1920,t-0.25/fps+j*0.5/fps/(SUB-1),A,null);ctx.globalAlpha=1/(j+1);ctx.drawImage(off,0,0);ctx.globalAlpha=1;}out.push(c.toDataURL("image/jpeg",q).slice(23));}return out;};
 </script></body></html>
