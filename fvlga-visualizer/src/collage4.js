@@ -5,7 +5,7 @@
   const TAU = Math.PI * 2, clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k;
   const ease = x => { x = clamp(x, 0, 1); return 1 - Math.pow(1 - x, 3); };
   function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-  const FM = 'CNMarker, cursive', FD = 'CNDisplay, Impact, sans-serif', FB = 'CNBody, "Arial Narrow", sans-serif', FG = 'CNGoth, serif', FV = 'CNVcr, monospace';
+  const FS = 'CNSerif, serif', FK = 'CNSerifBlack, serif', FP = 'CNScript, cursive', FM = 'CNMarker, cursive', FD = 'CNDisplay, Impact, sans-serif', FB = 'CNBody, "Arial Narrow", sans-serif', FG = 'CNGoth, serif', FV = 'CNVcr, monospace';
   const ARTIST = 'FVLGA';
   const C = { acid: '#39ff14', sage: '#9bc48a', purple: '#a51cf0', pink: '#ff2fa8', yellow: '#ffe600', red: '#ff1a2a', blue: '#2a3cff', cyan: '#19f0ff', ink: '#050505', white: '#ffffff', grey: '#bdbdbd' };
   const MARKERS = [C.pink, C.yellow, C.acid, C.cyan, C.red, '#ffffff'];
@@ -156,7 +156,7 @@
       s.fillStyle = 'rgba(0,0,0,.25)'; for (let y = 0; y < SH; y += 4) s.fillRect(0, y, SW, 2); }
     else { cover(img, 1, null, mode === 'sepia' ? 'sepia(0.6) contrast(1.3)' : null); }
   }
-  function serifCaption(text, x, y) { s.save(); s.font = `600 ${Math.round(SH * 0.045)}px "DejaVu Serif", serif`; s.letterSpacing = '3px'; s.fillStyle = 'rgba(255,255,255,.92)'; s.shadowColor = 'rgba(0,0,0,.6)'; s.shadowBlur = 6; s.textBaseline = 'alphabetic'; s.fillText(text, x, y); s.restore(); }
+  function serifCaption(text, x, y) { s.save(); s.font = `${Math.round(SH * 0.06)}px ${FS}`; s.letterSpacing = '4px'; s.fillStyle = 'rgba(255,255,255,.92)'; s.shadowColor = 'rgba(0,0,0,.6)'; s.shadowBlur = 6; s.textBaseline = 'alphabetic'; s.fillText(text, x, y); s.restore(); }
   function prism(t, amt) { s.save(); s.globalCompositeOperation = 'screen'; s.filter = 'blur(18px)'; s.globalAlpha = amt;
     const x0 = ((t * 260) % (SW * 1.6)) - SW * 0.3, g = s.createLinearGradient(x0, 0, x0 + SW * 0.5, SH);
     ['#ff0040', '#ff9a00', '#fff200', '#00ff6a', '#00c8ff', '#7a00ff', '#ff00c8'].forEach((c, i, a) => g.addColorStop(i / (a.length - 1), c));
@@ -188,13 +188,13 @@
         s.beginPath(); s.moveTo(dx - 6, size * 0.3); s.lineTo(dx - 4, size * 0.3 + len); s.arc(dx, size * 0.3 + len, 6, Math.PI, 0, true); s.lineTo(dx + 6, size * 0.3); s.fill(); } }
     s.restore(); return w * sx; }
   function liquid(text, t, amp, fg, bg, font) {
-    tctx.setTransform(1, 0, 0, 1, 0, 0); tctx.clearRect(0, 0, SW, SH); tctx.fillStyle = bg; tctx.fillRect(0, 0, SW, SH); tctx.font = `${SH * 0.8}px ${font || FD}`; tctx.textAlign = 'center'; tctx.textBaseline = 'middle';
+    tctx.setTransform(1, 0, 0, 1, 0, 0); tctx.clearRect(0, 0, SW, SH); tctx.fillStyle = bg; tctx.fillRect(0, 0, SW, SH); tctx.font = `${SH * 0.8}px ${font || FK}`; tctx.textAlign = 'center'; tctx.textBaseline = 'middle';
     const w = tctx.measureText(text).width; tctx.save(); tctx.translate(SW / 2, SH / 2 + SH * 0.05); tctx.scale(Math.min((SW * 0.98) / w, 1.5), 1.2);
     tctx.lineWidth = SH * 0.05; tctx.strokeStyle = fg === '#fff' ? '#000' : '#fff'; tctx.strokeText(text, 0, 0); tctx.fillStyle = fg; tctx.fillText(text, 0, 0); tctx.restore();
     const sl = 6; for (let x = 0; x < SW; x += sl) { const dy = Math.sin(x * 0.012 + t * 7) * amp + Math.sin(x * 0.031 - t * 5) * amp * 0.4; s.drawImage(tmp, x, 0, sl, SH, x, dy, sl, SH); } }
-  function caption(text) { s.save(); s.font = `600 ${Math.round(SH * 0.078)}px ${FB}`; s.textAlign = 'center'; s.textBaseline = 'middle'; s.lineJoin = 'round';
-    s.lineWidth = 8; s.strokeStyle = C.ink; s.strokeText(text, SW / 2, SH * 0.88); s.fillStyle = C.yellow; s.fillText(text, SW / 2, SH * 0.88); s.restore(); }
-  function ticker(text, y, size, col, speed, t) { s.save(); s.font = `${size}px ${FV}`; s.fillStyle = col; s.textBaseline = 'middle'; const w = s.measureText(text + '   ').width, off = -((t * speed) % w);
+  function caption(text) { s.save(); s.font = `${Math.round(SH * 0.085)}px ${FS}`; s.textAlign = 'center'; s.textBaseline = 'middle'; s.lineJoin = 'round'; s.letterSpacing = '1px';
+    s.shadowColor = 'rgba(255,60,170,.8)'; s.shadowBlur = 14; s.lineWidth = 5; s.strokeStyle = C.ink; s.strokeText(text, SW / 2, SH * 0.88); s.fillStyle = '#fff'; s.fillText(text, SW / 2, SH * 0.88); s.restore(); }
+  function ticker(text, y, size, col, speed, t) { s.save(); s.font = `${size}px ${FS}`; s.letterSpacing = '3px'; s.fillStyle = col; s.textBaseline = 'middle'; const w = s.measureText(text + '   ').width, off = -((t * speed) % w);
     for (let x = off; x < SW; x += w) s.fillText(text + '   ', x, y); s.restore(); }
 
   // ---------- pixel distortion + grade (post) ----------
@@ -234,23 +234,23 @@
         sparkles(cut.seed, 14, '#fff');
         word('cuff no', SW * 0.45, SH * 0.32, SH * 0.42, FG, { chrome: true, echo: 3, echoCol: C.acid, rot: -0.06 + jit(1, 0.02), drips: cut.seed, stroke: C.ink, thick: 0.06 });
         word('dancer', SW * 0.56, SH * 0.68, SH * 0.46, FG, { chrome: true, echo: 3, echoCol: C.pink, rot: 0.04 + jit(2, 0.02), drips: cut.seed + 1, stroke: C.ink, thick: 0.06 });
-        word(ARTIST, SW * 0.86, SH * 0.12, SH * 0.1, FV, { fill: C.yellow, stroke: C.ink, thick: 0.15, rot: 0.1 });
+        word('Fvlga', SW * 0.84, SH * 0.13, SH * 0.17, FP, { fill: '#fff', stroke: C.ink, thick: 0.04, rot: -0.06 });
         scribble(cut.seed, 3, [C.acid, C.pink], 1); sigil(0, SW * 0.12, SH * 0.78, SH * 0.2, t * 0.5, 'rgba(255,255,255,.8)'); break; }
       case 'artist': { // FVLGA stacked echoes, giant + cropped, mixed type
         bgFlat(cut.bg % 2 ? C.acid : C.purple); bgTiles(t, 2, true); s.fillStyle = 'rgba(0,0,0,.25)'; s.fillRect(0, 0, SW, SH);
-        for (let i = 3; i >= 0; i--) word(ARTIST, SW / 2 + i * 26, SH * 0.5 + i * 18, SH * 0.78, FD, { outline: i > 0, stroke: i ? '#fff' : C.ink, thick: i ? 0.02 : 0.1, fill: '#fff', stretch: 1.4, maxW: SW * 1.05, extrude: i ? 0 : 7 });
-        word('cuff no dancer', SW * 0.28, SH * 0.86, SH * 0.13, FG, { fill: C.yellow, rot: -0.12, stroke: C.ink });
+        for (let i = 3; i >= 0; i--) if (i < 3) word('Fvlga', SW / 2 + i * 22 * Math.sin(t * 2 + i), SH * 0.42 - i * 10, SH * 0.6 * (1 + i * 0.06), FS, { outline: i > 0, stroke: i ? [C.pink, C.acid][i - 1] : C.ink, thick: i ? 0.012 : 0.025, fill: '#fff', rot: -0.05 });
+        word('cuff no dancer', SW * 0.64, SH * 0.84, SH * 0.22, FP, { fill: '#fff', rot: -0.06, stroke: '#ff3fb8', thick: 0.09 });
         sigil(2, SW * 0.5, SH * 0.5, SH * 0.48, -t * 0.3, 'rgba(255,255,255,.55)'); break; }
       case 'adlib': { // huge, cropped off the frame, burst behind, echoes
         bgBurst(t * 2, cut.bg % 2 ? C.acid : C.yellow, cut.bg % 2 ? '#0a3a00' : C.pink, SW * (0.3 + cut.k * 0.4), SH * 0.5);
-        word(cut.text, SW / 2 + jit(3, 30), SH * 0.58, SH * 1.15, FD, { fill: '#fff', extrude: 12, echo: 4, echoCol: C.ink, rot: cut.rot, skew: -0.15, stretch: 1.3, maxW: SW * 1.1 });
+        word(cut.text, SW / 2 + jit(3, 30), SH * 0.58, SH * 1.0, FK, { fill: '#fff', extrude: 6, echo: 4, echoCol: C.ink, rot: cut.rot, skew: -0.15, stretch: 1.3, maxW: SW * 1.1 });
         scribble(cut.seed, 4, [C.ink, C.red], 1.3); break; }
       case 'word': { // liquid lyric word + gothic overlay + ticker
         liquid(cut.text, t, 16 + kick * 30, cut.bg % 2 ? '#fff' : C.ink, cut.bg % 2 ? C.ink : '#f2f2f2');
         ticker(cut.text.toLowerCase() + ' * fvlga * ', SH * 0.08, SH * 0.07, cut.bg % 2 ? C.acid : C.red, 400, t);
         word(cut.text.toLowerCase(), SW * 0.72, SH * 0.82, SH * 0.2, FG, { fill: cut.bg % 2 ? C.pink : C.red, rot: -0.15, stroke: cut.bg % 2 ? C.ink : '#fff', thick: 0.05 }); break; }
       case 'japan': { bgBurst(t, C.red, '#fff');
-        word('JAPAN', SW / 2, SH / 2, SH * 0.6, FD, { fill: '#fff', extrude: 9, echo: 3, echoCol: C.red, rot: cut.rot * 0.6, maxW: SW * 0.85, stretch: 1.6 });
+        word('Japan', SW / 2, SH / 2, SH * 0.62, FK, { fill: '#fff', extrude: 5, echo: 3, echoCol: C.red, rot: cut.rot * 0.6, maxW: SW * 0.85, stretch: 1.6 });
         word('tokyo', SW * 0.82, SH * 0.2, SH * 0.2, FG, { fill: C.ink, stroke: '#fff', thick: 0.1 });
         sigil(3, SW * 0.12, SH * 0.78, SH * 0.14, t, '#fff'); break; }
       case 'collage': { // cut-out collage: 5-6 overlapping stickers, off-centre hero icon, scribbles, gothic stamp
@@ -267,7 +267,7 @@
         sparkles(cut.seed, 10, C.acid); graffiti('fvlga', SW * 0.82, SH * 0.82, SH * 0.13, C.red, -0.1); break; }
       case 'pattern': { bgFlat(C.ink); bgTiles(t, cut.icon % 2 ? 0 : 1, true);
         sticker(3, SW * (0.25 + cut.k * 0.5), SH * 0.55, SH * 0.5 * (1 + kick * 0.15), Math.sin(t * 4) * 0.15, { ghost: C.red });
-        word(ARTIST, SW * 0.5, SH * 0.12, SH * 0.14, FV, { fill: C.acid, stroke: C.ink, thick: 0.15 }); break; }
+        word('Fvlga', SW * 0.5, SH * 0.13, SH * 0.18, FP, { fill: C.acid, stroke: C.ink, thick: 0.04 }); break; }
       case 'emboss': bgEmboss(t, cut.seed, cut.bg % 2 ? [[255, 255, 255], [70, 110, 255], [20, 30, 160], [5, 5, 30]] : [[255, 255, 255], [255, 70, 190], [120, 20, 160], [10, 0, 20]]);
         word(['fvlga', 'cuff', 'dancer'][cut.bg % 3], SW * (0.35 + cut.k * 0.3), SH * 0.5, SH * 0.5, FG, { chrome: true, stroke: C.ink, thick: 0.05, rot: cut.rot * 0.4 }); sigil(cut.bg % 4, SW * 0.5, SH * 0.5, SH * 0.45, t * 0.3, 'rgba(255,255,255,.5)');
         ticker('CUFF NO DANCER  FVLGA', SH * 0.93, SH * 0.07, '#fff', 300, t); scribble(cut.seed, 2, ['#fff'], 0.8); break;
@@ -281,11 +281,11 @@
         s.save(); for (const [sx, sy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { s.setTransform(sx, 0, 0, sy, sx < 0 ? SW : 0, sy < 0 ? SH : 0); s.drawImage(tmp, 0, 0, SW / 2, SH / 2, 0, 0, SW / 2, SH / 2); } s.restore();
         break; }
       case 'stack': { bgFlat(cut.bg % 2 ? C.ink : C.purple); bgTiles(t, 0, false); s.fillStyle = 'rgba(0,0,0,.55)'; s.fillRect(0, 0, SW, SH);
-        const fonts = [FD, FG, FD], cols = ['#fff', C.yellow, C.acid];
-        ['CUFF', 'no', 'DANCER'].forEach((w, i) => { if (lt > i * 0.08) word(w, SW * (0.35 + i * 0.15), SH * (0.22 + i * 0.29), SH * (i === 1 ? 0.34 : 0.3), fonts[i], { fill: cols[i], stretch: i === 1 ? 1 : 2.2, maxW: SW * 0.8, extrude: i === 1 ? 0 : 5, rot: (i - 1) * 0.08, chrome: i === 1 }); });
+        const fonts = [FS, FP, FS], cols = ['#fff', '#fff', '#fff'];
+        ['Cuff', 'no', 'Dancer'].forEach((w, i) => { if (lt > i * 0.08) word(w, SW * (0.38 + i * 0.12), SH * (0.24 + i * 0.27), SH * (i === 1 ? 0.5 : 0.34), fonts[i], { fill: cols[i], stroke: i === 1 ? '#ff3fb8' : C.ink, thick: i === 1 ? 0.09 : 0.03, rot: -0.06, chrome: i === 2 }); });
         sigil(0, SW * 0.12, SH * 0.75, SH * 0.2, t * 0.5, 'rgba(255,255,255,.8)'); break; }
       case 'xeroxface': { bgHalftone(C.ink, 1.1, t); sticker(3, SW * 0.5, SH * 0.5, SH * 0.48 * (1 + kick * 0.15), cut.rot);
-        word('NO', SW * 0.15, SH * 0.3, SH * 0.35, FD, { fill: C.red, extrude: 5, rot: -0.2 }); word('DANCER', SW * 0.82, SH * 0.75, SH * 0.25, FD, { fill: C.red, extrude: 5, rot: 0.15, maxW: SW * 0.35 });
+        word('no', SW * 0.15, SH * 0.3, SH * 0.4, FP, { fill: C.red, extrude: 5, rot: -0.2 }); word('Dancer', SW * 0.8, SH * 0.75, SH * 0.25, FK, { fill: C.red, extrude: 5, rot: 0.15, maxW: SW * 0.35 });
         scribble(cut.seed, 3, [C.red], 1.2); cut.fx = 'xerox'; break; }
       case 'ticker': { bgFlat(C.ink); for (let i = 0; i < 7; i++) ticker(i % 2 ? 'FVLGA FVLGA FVLGA' : 'CUFF NO DANCER', SH * (0.08 + i * 0.14), SH * 0.13, i % 3 === 0 ? C.acid : i % 3 === 1 ? '#fff' : C.pink, (i % 2 ? -1 : 1) * (300 + i * 60), t);
         sticker(cut.icon, SW / 2, SH / 2, SH * 0.36 * (1 + kick * 0.15), cut.rot, { ghost: C.acid }); break; }
@@ -297,10 +297,10 @@
       case 'filmxerox': { await film((cut.k > 0.5 ? CITY : DREAMY)[cut.clip % (cut.k > 0.5 ? CITY.length : DREAMY.length)], lt, 'xerox', cut);
         scribble(cut.seed, 1, [C.ink], 1.4); s.save(); s.strokeStyle = C.ink; s.lineWidth = 9; s.lineCap = 'round'; const x = SW * (0.3 + cut.k * 0.4), y = SH * 0.35;
         s.beginPath(); s.moveTo(x - 40 + jit(1, 6), y - 50); s.lineTo(x + 40, y + 50 + jit(2, 6)); s.moveTo(x + 45, y - 45); s.lineTo(x - 45 + jit(3, 6), y + 45); s.stroke(); s.restore();
-        word('fvlga', SW * 0.9, SH * 0.08, SH * 0.07, FV, { fill: C.ink, stroke: '#fff', thick: 0.2 }); break; }
+        word('Fvlga', SW * 0.88, SH * 0.1, SH * 0.12, FP, { fill: C.ink, stroke: '#fff', thick: 0.05 }); break; }
       case 'filmblue': { await film([12, 13, 14, 15, 7, 8, 5, 3][cut.clip % 8], lt, 'blue', cut);
-        s.save(); s.translate(SW * 0.04, SH * 0.06); s.rotate(Math.PI / 2); s.font = `${Math.round(SH * 0.07)}px ${FV}`; s.fillStyle = 'rgba(255,255,255,.85)'; s.fillText('CUFF NO DANCER', 0, 0); s.restore();
-        s.save(); s.font = `${Math.round(SH * 0.07)}px ${FV}`; s.fillStyle = 'rgba(255,255,255,.85)'; s.textAlign = 'right'; s.fillText('FVLGA', SW * 0.97, SH * 0.1); s.restore(); break; }
+        s.save(); s.translate(SW * 0.04, SH * 0.06); s.rotate(Math.PI / 2); s.font = `${Math.round(SH * 0.07)}px ${FS}`; s.letterSpacing = '5px'; s.fillStyle = 'rgba(255,255,255,.85)'; s.fillText('cuff no dancer', 0, 0); s.restore();
+        s.save(); s.font = `${Math.round(SH * 0.11)}px ${FP}`; s.fillStyle = 'rgba(255,255,255,.9)'; s.textAlign = 'right'; s.fillText('Fvlga', SW * 0.96, SH * 0.13); s.restore(); break; }
       case 'filmprism': { await film(DREAMY[cut.clip % DREAMY.length], lt, 'dream', cut); prism(t, 0.6 + 0.3 * kick); prism(t + 2.3, 0.4);
         serifCaption('fvlga', SW * 0.035, SH * 0.94); break; }
       case 'filmtext': { await film(cut.t0 < 1 ? 0 : DREAMY[cut.clip % DREAMY.length], lt, 'dream', cut); s.fillStyle = 'rgba(0,0,0,.25)'; s.fillRect(0, 0, SW, SH);
@@ -319,15 +319,15 @@
         if (cut.k > 0.6) graffiti(['no dancer', 'cuffin?', 'fvlga'][cut.bg % 3], SW * 0.75, SH * 0.2, SH * 0.14, C.red, -0.15); break; }
       case 'smear': { // vertically smeared title strip + sigil + graffiti (finish() adds the vertical blur)
         bgFlat(C.ink); s.fillStyle = C.acid; s.fillRect(0, SH * 0.52, SW * (0.7 + 0.3 * ease(lt / 0.3)), SH * 0.48);
-        word('CUFF NO DANCER', SW * 0.36, SH * 0.27, SH * 0.3, FD, { fill: '#e8e8e8', stroke: C.ink, maxW: SW * 0.66, stretch: 1.2 });
-        word(ARTIST, SW * 0.33, SH * 0.77, SH * 0.36, FD, { fill: C.ink, stroke: C.acid, maxW: SW * 0.55, stretch: 1.4 });
+        word('Cuff no Dancer', SW * 0.38, SH * 0.27, SH * 0.24, FS, { fill: '#e8e8e8', stroke: C.ink, thick: 0.03, maxW: SW * 0.7 });
+        word('Fvlga', SW * 0.33, SH * 0.76, SH * 0.42, FP, { fill: C.ink, stroke: C.acid, thick: 0.02, maxW: SW * 0.6 });
         sigil(cut.bg % 4, SW * 0.34, SH * 0.5, SH * 0.42, t * 0.4, 'rgba(200,200,200,.85)');
         graffiti(['getting', 'no dancer', 'cuffed', 'bands'][cut.bg % 4], SW * 0.72, SH * 0.2, SH * 0.17, C.red, -0.12);
         break; }
       case 'drop': { await film(1, lt * 0.45, 'dream', cut, 2); s.fillStyle = 'rgba(20,0,40,.18)'; s.fillRect(0, 0, SW, SH);
         word('alone', SW * 0.5, SH * 0.85, SH * 0.12, FG, { fill: '#9a9a9a', stroke: C.ink, thick: 0.05 });
-        if (t > 67.8) word('uh', SW / 2, SH * 0.45, SH * 0.5, FD, { fill: '#fff', extrude: 6 }); break; }
-      case 'end': { await film(11, lt * 0.6, 'dream', cut); s.fillStyle = `rgba(0,0,0,${0.35 + 0.5 * clamp(lt / 2, 0, 1)})`; s.fillRect(0, 0, SW, SH); s.save(); s.translate(SW / 2, SH / 2); s.rotate(lt * 1.6); const txt = '@' + ARTIST.toLowerCase() + ' · cuff no dancer · '; s.font = `${Math.round(SH * 0.07)}px ${FV}`; s.fillStyle = '#fff'; s.textAlign = 'center';
+        if (t > 67.8) word('uh', SW / 2, SH * 0.45, SH * 0.5, FK, { fill: '#fff', extrude: 6 }); break; }
+      case 'end': { await film(11, lt * 0.6, 'dream', cut); s.fillStyle = `rgba(0,0,0,${0.35 + 0.5 * clamp(lt / 2, 0, 1)})`; s.fillRect(0, 0, SW, SH); s.save(); s.translate(SW / 2, SH / 2); s.rotate(lt * 1.6); const txt = '@' + ARTIST.toLowerCase() + ' · cuff no dancer · '; s.font = `${Math.round(SH * 0.07)}px ${FS}`; s.fillStyle = '#fff'; s.textAlign = 'center';
         const rad = SH * 0.3 * ease(lt / 0.6); [...txt].forEach((ch, i) => { s.save(); s.rotate(i * TAU / txt.length); s.translate(0, -rad); s.fillText(ch, 0, 0); s.restore(); }); s.restore();
         s.globalAlpha = ease((lt - 0.8) / 0.6); word('fvlga', SW / 2, SH / 2, SH * 0.24, FG, { chrome: true, stroke: C.ink, thick: 0.05 }); s.globalAlpha = 1; break; }
     }
