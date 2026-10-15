@@ -10,6 +10,11 @@ uniform sampler2D cur, ech; uniform float t, kick, bass, hit, mode, flip, alt; u
 float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float luma(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
 vec3 tx(sampler2D s, vec2 q){ q = clamp(q, 0.001, 0.999); if (flip > 0.5) q.x = 1.0 - q.x; return texture(s, q).rgb; }
+float edge(sampler2D s, vec2 q){ vec2 d = vec2(1.6 / 720.0, 1.6 / 1280.0); float l[9]; int k = 0;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) { l[k] = luma(tx(s, q + vec2(float(i), float(j)) * d)); k++; }
+  float gx = l[2] + 2.0 * l[5] + l[8] - l[0] - 2.0 * l[3] - l[6], gy = l[6] + 2.0 * l[7] + l[8] - l[0] - 2.0 * l[1] - l[2];
+  return smoothstep(0.2, 0.55, length(vec2(gx, gy))); }
+vec3 hsv(float h){ return clamp(abs(fract(h + vec3(0.0, 2.0, 1.0) / 3.0) * 6.0 - 3.0) - 1.0, 0.0, 1.0); }
 void main(){
   float wt = floor(t * 24.0);
   // zoom punch on kicks, slow handheld drift, gate weave
@@ -23,7 +28,19 @@ void main(){
   vec3 c = vec3(tx(cur, q + vec2(ab, 0)).r, tx(cur, q).g, tx(cur, q - vec2(ab, 0)).b);
   vec3 e = tx(ech, q);
   vec3 col;
-  if (mode < 0.5) {
+  if (mode > 1.5) {
+    // NEON: glowing outlines on pure black, hue cycling, rainbow echo copies sliding sideways, strobing exposure
+    float hb = abs(fract(t * 0.1) * 2.0 - 1.0);                                    // ping-pong round the colour wheel
+    float ed = edge(cur, q);
+    float gl = 0.0; for (int i = 0; i < 6; i++) { float a = float(i) * 1.047; gl += edge(cur, q + vec2(cos(a), sin(a) * 0.56) * 0.006); }
+    vec3 nc = hsv(hb) * (ed * 1.4 + gl / 6.0 * 0.9);
+    nc += hsv(hb) * smoothstep(0.4, 0.05, luma(c)) * 0.32;                         // faint fill so the face reads
+    float sl = 0.06 + 0.1 * kick;
+    nc += hsv(hb + 0.33) * edge(ech, q + vec2(sl, 0.0)) * 0.45 + hsv(hb + 0.66) * edge(ech, q - vec2(sl, 0.0)) * 0.45;
+    float ex = 0.35 + 0.9 * kick + 0.25 * h(vec2(wt, 9.0));
+    ex *= 1.0 - 0.9 * step(0.93, h(vec2(wt, 11.0)));                               // random near-black dropouts
+    col = nc * ex;
+  } else if (mode < 0.5) {
     // FILM: echo trail, crushed blacks, warm highlights, cool shadows, halation, light leak
     c = max(c, e * 0.55);
     c = pow(c, vec3(1.7)) * 0.95; c = smoothstep(0.02, 0.92, c);
@@ -85,7 +102,7 @@ async function render(job, i, fps, maxf) {
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, T[0]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, a);
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, T[1]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, e);
   gl.uniform1f(U.t, t); gl.uniform1f(U.kick, kick); gl.uniform1f(U.bass, bass); gl.uniform1f(U.hit, hit);
-  gl.uniform1f(U.mode, job.mode === 'xerox' ? 1 : 0); gl.uniform1f(U.flip, Math.floor(beat / 8) % 2); gl.uniform1f(U.alt, Math.floor(beat / 4) % 2);
+  gl.uniform1f(U.mode, job.mode === 'neon' ? 2 : job.mode === 'xerox' ? 1 : 0); gl.uniform1f(U.flip, Math.floor(beat / 8) % 2); gl.uniform1f(U.alt, Math.floor(beat / 4) % 2);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 window.ready = false;
