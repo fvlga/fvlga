@@ -1,0 +1,4 @@
+# Full-song render is ~130 MB (over GitHub's 100 MB limit); regenerate with src/render.js
+money_muscle_full.mp4
+# The source track is not committed; put song.mp3 in src/ to re-render
+src/song.mp3
