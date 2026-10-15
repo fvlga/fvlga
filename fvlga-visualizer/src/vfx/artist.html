@@ -1,0 +1,91 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}</style></head><body>
+<canvas id="gl" width="1080" height="608" style="display:none"></canvas>
+<canvas id="out" width="1080" height="1920"></canvas>
+<script>
+// FVLGA giant VFX: slam zoom, pulsing ghost outlines, colour-flipping halftone, marker write-on. Deterministic per time t.
+const VS = `#version 300 es
+in vec2 p; out vec2 uv; void main(){ uv = p * 0.5 + 0.5; uv.y = 1.0 - uv.y; gl_Position = vec4(p, 0.0, 1.0); }`;
+const FS = `#version 300 es
+precision highp float; in vec2 uv; out vec4 o;
+uniform sampler2D img; uniform float t, kick, bass, hit, bar, alt, prog; uniform vec2 res;
+float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+vec3 hue(vec3 c, float a){ const vec3 k = vec3(0.57735); float ca = cos(a); return c * ca + cross(k, c) * sin(a) + k * dot(k, c) * (1.0 - ca); }
+vec3 tex(vec2 q){ return texture(img, clamp(q, 0.001, 0.999)).rgb; }
+float white(vec2 q){ vec3 c = tex(q); return smoothstep(0.72, 0.85, min(c.r, min(c.g, c.b))); }
+float green(vec3 c){ return smoothstep(0.15, 0.35, c.g - max(c.r, c.b)); }
+float redm(vec3 c){ return smoothstep(0.25, 0.45, c.r - max(c.g, c.b)) * step(0.6, 1.0 - c.g); }
+void main(){
+  float wt = floor(t * 24.0);
+  vec2 q = uv;
+  // slam zoom on kicks + shake
+  float z = 1.0 + 0.05 * kick + 0.02 * bass;
+  q = (q - 0.5) / z + 0.5;
+  q += (vec2(h(vec2(wt, 3.0)), h(vec2(wt, 4.0))) - 0.5) * 0.012 * kick;
+  // bass slit-scan: horizontal slices slide
+  float sl = floor(q.y * 18.0);
+  q.x += sin(sl * 1.7 + t * 9.0) * 0.006 * bass + (h(vec2(sl, wt)) - 0.5) * 0.05 * hit * step(0.75, h(vec2(sl, wt + 3.0)));
+  float ab = 0.003 + 0.012 * kick + 0.02 * hit;
+  vec3 c = vec3(tex(q + vec2(ab, 0)).r, tex(q).g, tex(q - vec2(ab, 0)).b);
+  vec3 base = tex(q);
+  float gm = green(base), rm = redm(base), wm = white(q);
+  // background: acid green <-> hot pink every 4 beats, halftone pulse on kicks
+  vec2 cell = uv * res / 8.0; float dts = smoothstep(0.32, 0.22, length(fract(cell) - 0.5) - 0.18 * kick);
+  vec3 bg = mix(c, vec3(1.0, 0.1, 0.6) * (0.25 + 1.1 * c.g), alt);
+  bg *= 0.82 + 0.18 * dts + 0.2 * kick;
+  // extra ghost outlines that pulse outward from the letters on every kick
+  float gh = 0.0;
+  for (int k = 1; k <= 4; k++) {
+    float s = 1.0 + float(k) * (0.035 + 0.05 * kick) + 0.01 * sin(t * 3.0 + float(k));
+    vec2 p = (q - vec2(0.5, 0.48)) / s + vec2(0.5, 0.48);
+    p += vec2(float(k) * 0.006 * sin(t * 2.0), -float(k) * 0.01);
+    float e = abs(white(p) - white(p + vec2(0.0025, 0.0045)));
+    gh += e * (1.0 - float(k) * 0.2);
+  }
+  bg = mix(bg, vec3(1.0), clamp(gh, 0.0, 1.0) * 0.85);
+  vec3 col = mix(c, bg, gm);
+  // letters: chrome-ish specular sweep across the white faces
+  float sw = exp(-pow((uv.x - uv.y * 0.4 - fract(t * 0.35) * 1.8 + 0.4) * 9.0, 2.0));
+  col = mix(col, col * vec3(0.92, 0.97, 1.05) + vec3(0.6, 0.9, 1.0) * sw * 0.5, wm);
+  // invert strobe on downbeat hit (letters flash black/acid)
+  col = mix(col, vec3(1.0) - col * vec3(1.0, 0.2, 1.0), hit * 0.85 * step(0.5, fract(t * 15.0)));
+  // red marker text writes on left->right
+  float wr = smoothstep(prog * 0.42 - 0.02, prog * 0.42, uv.x);
+  col = mix(col, bg, rm * wr);
+  col += rm * (1.0 - wr) * vec3(0.5, 0.0, 0.05) * (0.6 + 0.6 * kick);
+  // print finish
+  col += (h(uv * res + fract(t * 13.1) * 91.0) - 0.5) * 0.1;
+  col *= 0.9 + 0.1 * sin(uv.y * res.y * 1.5);
+  col *= 1.0 - 0.35 * pow(length((uv - 0.5) * vec2(1.1, 1.6)), 2.2);
+  o = vec4(clamp(col, 0.0, 1.0), 1.0);
+}`;
+let gl, U = {}, A, out, octx;
+function init(analysis, image) {
+  A = analysis; const cv = document.getElementById('gl'); gl = cv.getContext('webgl2', { preserveDrawingBuffer: true });
+  const sh = (ty, s) => { const x = gl.createShader(ty); gl.shaderSource(x, s); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(x); return x; };
+  const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const tx = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tx); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  for (const n of ['t', 'kick', 'bass', 'hit', 'bar', 'alt', 'prog', 'res']) U[n] = gl.getUniformLocation(prog, n);
+  gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(U.res, cv.width, cv.height);
+  out = document.getElementById('out'); octx = out.getContext('2d');
+}
+function render(t) {
+  const bp = 60 / A.bpm, beat = Math.max(0, (t - A.t0) / bp), kick = Math.exp(-((beat % 1) * bp) * 9);
+  const f = Math.min(A.frames - 1, Math.max(0, Math.round(t * A.fps))), bass = A.bass[f];
+  const hit = (Math.floor(beat) % 4 === 0 && (beat % 1) < 0.15) ? 1 : 0;
+  gl.uniform1f(U.t, t); gl.uniform1f(U.kick, kick); gl.uniform1f(U.bass, bass); gl.uniform1f(U.hit, hit); gl.uniform1f(U.bar, beat / 4);
+  gl.uniform1f(U.alt, Math.floor(beat / 4) % 2); gl.uniform1f(U.prog, ((beat / 2) % 1) * 2.6);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  octx.fillStyle = '#000'; octx.fillRect(0, 0, out.width, out.height);
+  const SH = 608, SY = Math.round((out.height - SH) / 2), z = 1 + 0.02 * kick;
+  octx.save(); octx.translate(out.width / 2, SY + SH / 2); octx.scale(z, z); octx.drawImage(gl.canvas, -540, -SH / 2); octx.restore();
+  octx.fillRect(0, 0, out.width, SY - 1); octx.fillRect(0, SY + SH + 1, out.width, out.height - SY - SH);
+}
+window.ready = false;
+Promise.all([fetch('../analysis.json').then(r => r.json()), new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = 'artist.jpg'; })])
+  .then(([a, im]) => { init(a, im); window.ready = true; }).catch(e => { window.err = String(e.stack || e); });
+window.renderBatch = (t0, n, fps, q) => { const r = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); r.push(out.toDataURL('image/jpeg', q).slice(23)); } return r; };
+</script></body></html>
