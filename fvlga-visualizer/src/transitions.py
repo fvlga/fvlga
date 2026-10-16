@@ -55,3 +55,22 @@ def vhs_tracking(fr, seed=0, n_on=7):
 def flash(fr, color=255):
     """#6 flash frame: pure white (impact) or black (dread), no fade. Applied to the last frames of A."""
     return np.full_like(fr, color)
+
+BURN_IN = (1.0, 1.12, 1.3, 1.55, 1.9, 2.4, 3.1, 4.2, 5.8, 8.5, 13, 22, 60, 200)   # measured off the artist's stairs clip
+BURN_OUT = tuple(reversed(BURN_IN))
+
+def _expose(f, g):
+    lin = (f.astype(np.float32) / 255) ** 2.2 * g                 # push exposure in linear light: highlights clip first
+    blo = cv2.GaussianBlur(np.clip(lin - 0.8, 0, None), (0, 0), 18) * 0.6   # halation off the clipped areas
+    out = np.clip(lin + blo, 0, 1) ** (1 / 2.2)
+    out[..., 2] *= 1 - 0.06 * min(1, (g - 1) / 8)                   # the phone's burn runs a touch warm
+    return (np.clip(out, 0, 1) * 255).astype(np.uint8)
+
+def exposure_burn_in(fr, gains=BURN_IN):
+    """The artist's 'crazy transition' (stairs clip): shot A over-exposes over ~12 frames, darks go last, ends pure white.
+    Window = the last len(gains) frames of A; follow with a shot that comes out of white (exposure_burn_out or real footage)."""
+    return np.array([_expose(f, gains[i]) for i, f in enumerate(fr)])
+
+def exposure_burn_out(fr, gains=BURN_OUT):
+    """Mirror: shot B resolves out of white (slow start, fast finish)."""
+    return np.array([_expose(f, gains[i]) if i < len(gains) else f for i, f in enumerate(fr)])

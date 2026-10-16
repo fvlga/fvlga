@@ -5,12 +5,12 @@ T0, T1, FPS, W, H = 65.133, 69.25, 30, 1080, 608
 beat = lambda k: 0.01 + k * 60 / 148
 pops = [beat(k) for k in range(161, 169)] + [beat(168) + 0.5 * i * 60 / 148 for i in range(1, 6)]   # 8 on the beat, then 8ths
 # (cut-out, x centre, y bottom, height px, rotation deg) — sides first, closing in on the lone figure
-PLAN = [('p07', 150, 650, 540, -4), ('p04', 935, 650, 520, 5), ('m0.6', 330, 330, 300, -10), ('p01', 770, 640, 470, -3),
-        ('p09', 50, 640, 400, 8), ('m7.4', 1010, 330, 320, 12), ('p05', 420, 650, 430, -6), ('p10', 640, 660, 470, 4),
-        ('p02', 245, 640, 380, 10), ('p08', 860, 650, 410, -8), ('m2.6', 560, 320, 290, -5), ('p06', 110, 470, 300, -12),
-        ('p03', 990, 640, 380, 7)]
+PLAN = [('p07', 150, 650, 540, -4), ('n03', 935, 650, 520, 5), ('m0.6', 330, 330, 300, -10), ('n01', 770, 640, 480, -3),
+        ('n08', 50, 640, 420, 8), ('m7.4', 1010, 330, 320, 12), ('n02', 420, 650, 450, -6), ('p01', 640, 660, 470, 4),
+        ('n09', 245, 640, 400, 10), ('n06', 860, 650, 380, -8), ('n04', 560, 520, 300, -5), ('n10', 110, 470, 320, -12),
+        ('p04', 990, 640, 380, 7)]          # every outfit: poncho, tan jacket, white sweater, 00 jersey, blue sweater, gym, horses tee
 def sticker(name, h):
-    im = cv2.imread(f'{CUT}/{name}.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
+    im = cv2.imread(f'{CUT}/{name}.png' if os.path.exists(f'{CUT}/{name}.png') else f'{CUT}2/{name}.png', cv2.IMREAD_UNCHANGED).astype(np.float32)
     if name.startswith('m'):    # selfie frames: drop leftover sky
         b, g, r = im[..., 0], im[..., 1], im[..., 2]; im[..., 3] *= 1 - np.clip((b - np.maximum(r, g) - 25) / 30, 0, 1)
     s = h / im.shape[0]; im = cv2.resize(im, (max(1, int(im.shape[1] * s)), h), interpolation=cv2.INTER_AREA)
