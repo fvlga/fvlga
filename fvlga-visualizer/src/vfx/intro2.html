@@ -29,6 +29,43 @@ function giant(txt, age, color, maxW, maxH, dy) {   // fitted serif word, slams 
   ctx.save(); ctx.translate(W / 2, H / 2 + dy); ctx.scale(s, s); ctx.font = 'italic 900 ' + px + 'px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   ctx.lineWidth = px * 0.07; ctx.strokeStyle = '#0b0b0b'; ctx.strokeText(txt, 0, 0); ctx.fillStyle = color; ctx.fillText(txt, 0, 0); ctx.restore();
 }
+// ---- letter collage: every letter is its own hand-cut paper tile in its own font, composed on purpose ----
+// rules that keep it "artist, not sloppy": equal tile height (+-8%), tight even gaps, small tilts (+-3 deg), 6 paper colours,
+// never the same font or paper twice in a row, at most one pink tile per word, one piece of tape, jittered-but-clean cut edges.
+const LF = [(px) => 'italic 900 ' + px + 'px Ser', (px) => '900 ' + px + 'px Ser', (px) => px + 'px Mk', (px) => (px * 1.15) + 'px Mono', (px) => '800 ' + (px * 0.82) + 'px Cap', (px) => 'italic 400 ' + px + 'px Ser'];
+const LUP = [false, false, false, true, true, false];   // fonts that look right in capitals
+const PAP = [['#F5E9A8', '#14110d'], ['#14110d', '#E4FF3F'], ['#E4FF3F', '#14110d'], ['#ff2e7e', '#fff6c8'], ['#f4f4f2', '#14110d'], ['#1f6f86', '#F5E9A8']];
+function collageWord(txt, age, maxW, maxH, dy, seed) {
+  const r = rng(seed * 733 + 11), hs0 = Math.min(maxH, 300), items = []; let pf = -1, pp = -1, pinkUsed = false, taped = false;
+  const xh = LF.map((f, i) => { ctx.font = f(200); const m = ctx.measureText(LUP[i] ? 'X' : 'x'); return m.actualBoundingBoxAscent; });
+  [...txt].forEach(ch => {
+    if (ch === ' ') { items.push({ gap: hs0 * 0.3 }); return; }
+    let f; do { f = Math.floor(r() * 6); } while (f === pf); pf = f;
+    let p; do { p = Math.floor(r() * 6); } while (p === pp || (p === 3 && pinkUsed)); pp = p; if (p === 3) pinkUsed = true;
+    const g = LUP[f] ? ch.toUpperCase() : ch, hs = hs0 * (0.92 + r() * 0.16);
+    ctx.font = LF[f](200); const m = ctx.measureText(g), gw = m.actualBoundingBoxLeft + m.actualBoundingBoxRight, gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+    let gs = (0.5 * hs) / xh[f]; if (gh * gs > 0.86 * hs) gs *= 0.86 * hs / (gh * gs);
+    const w = Math.max(gw * gs + 0.36 * hs, 0.55 * hs);
+    items.push({ ch: g, f, p, hs, gs, w, gw, gh, m, rot: (r() - 0.5) * 0.1, up: (r() - 0.5) * 0.1 * hs0, tape: !taped && r() > 0.7 && (taped = true), jit: [0, 1, 2, 3, 4, 5, 6, 7].map(() => (r() - 0.5) * 0.035) });
+  });
+  const total = items.reduce((a, it) => a + (it.gap || it.w) + hs0 * 0.04, 0), k = Math.min(1.25, maxW / total);
+  let x = -total * k / 2, li = 0; ctx.save(); ctx.translate(W / 2, H / 2 + dy);
+  for (const it of items) {
+    if (it.gap) { x += (it.gap + hs0 * 0.04) * k; continue; }
+    const a = age - li * 0.028; li++; if (a < 0) { x += (it.w + hs0 * 0.04) * k; continue; }
+    const e = ease(a / 0.13), sc = 1 + 1.7 * (1 - e), cx = x + it.w * k / 2, w = it.w * k, h = it.hs * k, pair = PAP[it.p];
+    ctx.save(); ctx.translate(cx, it.up * k); ctx.rotate(it.rot + (1 - e) * 0.5 * (li % 2 ? 1 : -1)); ctx.scale(sc, sc);
+    const pts = [[-w / 2, -h / 2], [0, -h / 2], [w / 2, -h / 2], [w / 2, 0], [w / 2, h / 2], [0, h / 2], [-w / 2, h / 2], [-w / 2, 0]].map((q, i) => [q[0] + it.jit[i] * w, q[1] + it.jit[(i + 3) % 8] * h]);
+    ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 12 * k; ctx.shadowOffsetY = 6 * k;
+    ctx.beginPath(); pts.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fillStyle = pair[0]; ctx.fill(); ctx.shadowColor = 'transparent';
+    ctx.lineWidth = Math.max(1, 2 * k); ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.stroke();
+    const fpx = 200 * it.gs * k; ctx.font = LF[it.f](fpx); ctx.fillStyle = pair[1]; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText(it.ch, -(it.gw * it.gs * k) / 2 + it.m.actualBoundingBoxLeft * it.gs * k, (it.m.actualBoundingBoxAscent - it.gh / 2) * it.gs * k);
+    if (it.tape) { ctx.save(); ctx.translate(w * 0.12, -h / 2); ctx.rotate(-0.12); ctx.fillStyle = 'rgba(235,225,200,.78)'; ctx.fillRect(-w * 0.22, -h * 0.07, w * 0.44, h * 0.14); ctx.restore(); }
+    ctx.restore(); x += (it.w + hs0 * 0.04) * k;
+  }
+  ctx.restore();
+}
 function sticker(cx, cy, sc, rot) {
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot); ctx.scale(sc, sc);
   ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(4, 5, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
@@ -74,11 +111,11 @@ function render(t) {
   footage(sc[2], Math.max(0, local), zoom);
   ctx.save(); ctx.globalCompositeOperation = 'source-over'; const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.75); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore();
   // words
-  if (WORDS[bi]) giant(WORDS[bi], age, bi % 2 ? CREAM : YEL, W * 0.9, 430, 0);
-  if (bi === 3) giant('cuff no dancer', age, YEL, W * 0.94, 300, -6);
+  if (WORDS[bi]) collageWord(WORDS[bi], age, W * 0.9, 330, 0, bi + 1);
+  if (bi === 3) collageWord('cuff no dancer', age, W * 0.95, 150, -6, 31);
   if (bi >= 16) {   // bar 5: the title stacked, held
     const a = (bt - 16) * BP, lines = [['cuff', -150, YEL], ['no', 0, CREAM], ['dancer', 150, YEL]];
-    lines.forEach(([w2, dy, col], i) => giant(w2, a - i * 0.2, col, W * 0.66, 190, dy));
+    lines.forEach(([w2, dy, col], i) => collageWord(w2, a - i * 0.2, W * 0.72, 150, dy, 50 + i));
   }
   // hold bar: a sticky note pops in; the pink sticker pops around the edges from bar 2 on, new font + colour each time
   if (bi >= 6 && bi < 8) note('stay|outside', 170, 190, -0.07, (bt - 6) * BP);
@@ -95,7 +132,7 @@ window.ready = false;
 (async () => {
   try {
     ctx = document.getElementById('c').getContext('2d'); man = await fetch('../foot/manifest.json').then(r => r.json());
-    await document.fonts.load('italic 900 40px Ser'); await document.fonts.load('20px Mk'); await document.fonts.load('20px Cap'); await document.fonts.load('30px Mono'); await document.fonts.load('30px Scr');
+    await document.fonts.load('italic 900 40px Ser'); await document.fonts.load('900 40px Ser'); await document.fonts.load('italic 400 40px Ser'); await document.fonts.load('20px Mk'); await document.fonts.load('20px Cap'); await document.fonts.load('30px Mono'); await document.fonts.load('30px Scr');
     const jobs = []; for (const s of SC) for (let i = 1; i <= Math.min(man[s[2]].n, 30); i++) jobs.push(load(`../foot/c${s[2]}/${String(i).padStart(4, '0')}.jpg`).then(im => { if (im) FR[s[2] + '_' + i] = im; }));
     await Promise.all(jobs); window.ready = true;
   } catch (e) { window.err = String(e.stack || e); }
