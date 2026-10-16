@@ -23,7 +23,12 @@ rules. Binding rules for every song:
 Transitions: follow `fvlga-visualizer/references/rage_transition_bible.md`,
 deployment rules first — 70% hard cuts / 20% ONE workhorse / 10% spectacle,
 impact frame ON the transient, never the same transition on adjacent cuts,
-render each transition as its own clip then assemble. Reusable presets:
+render each transition as its own clip then assemble.
+VFX tier + quality principles: `fvlga-visualizer/references/vfx_transitions_and_quality.md`
+(song is the script, cut on the beat ~80%, one palette, first 3 seconds, text with
+purpose, sound under transitions, build order ending in a 30% restraint pass).
+Sound design: synthesized locally in `src/sfx25.py` (no stock downloads); never alter the
+master file — write a new mix and limit to -1 dBTP. Reusable presets:
 `fvlga-visualizer/src/transitions.py` (shake_rgb, zoom_punch, camera_drop,
 vhs_tracking, flash); planner example: `src/plan22.py`.
 Where the playbook and the per-project notes disagree, the artist's later

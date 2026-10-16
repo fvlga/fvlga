@@ -74,3 +74,26 @@ def exposure_burn_in(fr, gains=BURN_IN):
 def exposure_burn_out(fr, gains=BURN_OUT):
     """Mirror: shot B resolves out of white (slow start, fast finish)."""
     return np.array([_expose(f, gains[i]) if i < len(gains) else f for i, f in enumerate(fr)])
+
+def _fbm(h, w, seed, oct=5):
+    r = np.random.default_rng(seed); out = np.zeros((h, w), np.float32); amp = 1.0
+    for o in range(oct):
+        s = 2 ** (o + 2); n = r.random((h // s + 2, w // s + 2)).astype(np.float32)
+        out += cv2.resize(n, (w, h), interpolation=cv2.INTER_CUBIC) * amp; amp *= 0.5
+    return (out - out.min()) / (out.max() - out.min())
+
+def ink_reveal(fr, c=10, seed=0):
+    """VFX #12 ink reveal (procedural, no stock): black ink blooms in from the left edge and swallows shot A,
+    the cut hides under full ink, then the ink drains to the right and reveals shot B. Window = 10 frames A + 10 B."""
+    n, H, W = fr.shape[:3]; noise = _fbm(H, W, seed)
+    x = np.linspace(0, 1, W, dtype=np.float32)[None, :].repeat(H, 0)
+    field = 0.62 * x + 0.38 * noise                                        # organic, uneven front
+    out = []
+    for i, f in enumerate(fr):
+        if i < c: p = ((i + 1) / c) ** 1.6 * 1.05; m = np.clip((p - field) / 0.06, 0, 1)        # ink covers where field < p
+        else: p = ((i - c) / (n - c - 1)) ** 0.7 * 1.05; m = np.clip((field - p) / 0.06, 0, 1)  # ink left where field > p
+        bleed = cv2.GaussianBlur(m, (0, 0), 6)
+        g = f.astype(np.float32) * (1 - 0.35 * bleed[..., None])          # soft dark bleed ahead of the edge
+        g = g * (1 - m[..., None]) + np.array([8, 10, 12], np.float32) * m[..., None]
+        out.append(np.clip(g, 0, 255).astype(np.uint8))
+    return np.array(out)
