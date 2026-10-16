@@ -94,6 +94,7 @@ direct corrections (per-project notes) win.
   Quote styles are now 9 (adds highlight-bar caps, repeating-word wall, chat thread).
 - Intro (v28): first bar is a flash-montage of title variants with squiggly neon lines; the
   rest eases in (soft-attack beat envelope, no hard strobe).
+- Deliverables: the full-song video + the 15 s clip ONLY. No 30 s versions (artist, Oct 16).
 - Alone shot (65.13–69.25): the artist's cut-outs pop up as stickers on the beat (v21).
 - Picture layout: the legacy 16:9 strip, explicitly requested by the artist:
   1080x608 centred in a 1080x1920 black frame at y=656 (see

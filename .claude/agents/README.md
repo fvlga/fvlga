@@ -25,7 +25,7 @@
 | `colorist` | sonnet | Grade looks and where to apply them |
 | `video-finisher` | sonnet | Composites a version, compresses it under 30 MB, runs checks, scans, commits (pushes only when asked) |
 | `visualizer-qa` | inherit | Frame-by-frame audit with timestamps and fixes |
-| `social-cutter` | sonnet | Bar-aligned 15 s / 30 s cuts and loops |
+| `social-cutter` | sonnet | Bar-aligned 15 s hook cut (30 s cuts and loops only on request) |
 | `release-manager` | sonnet | Covers, captions, hashtags, platform spec checks and a posting plan (never posts) |
 
 "inherit" uses whatever model the main session uses (the strongest, for jobs that need visual judgment). "sonnet" is for routine, well-specified work; "haiku" is for pure measurement. This keeps quality where it matters and cost and time low elsewhere.
