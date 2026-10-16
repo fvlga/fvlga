@@ -69,6 +69,8 @@ direct corrections (per-project notes) win.
 - Kaleidoscope bubble (v24): the neon smiley is retired (artist: "doesn't fit any more");
   the bubble now holds the artist's face, blue-cyan duotone + neon silhouette
   (src/crystal_ball_face.py). Don't bring the smiley back.
+  The loud red/yellow/blue neon skull pattern around it is also retired: the
+  mandala is now folded from teal-graded 1960s rapids footage, no hue cycling.
 - Alone shot (65.13–69.25): the artist's cut-outs pop up as stickers on the beat (v21).
 - Picture layout: the legacy 16:9 strip, explicitly requested by the artist:
   1080x608 centred in a 1080x1920 black frame at y=656 (see

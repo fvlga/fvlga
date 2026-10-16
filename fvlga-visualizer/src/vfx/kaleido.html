@@ -41,9 +41,9 @@ void main(){
     float ab = 0.004 + 0.012 * kick + 0.03 * hit;
     vec2 q = toUV(fc);
     col = vec3(tex(q + vec2(ab, 0)).r, tex(q).g, tex(q - vec2(ab, 0)).b);
-    col = hue(col, pal + kick * 0.25);                                                // original palette; new scheme every 4 bars
+    col = hue(col, pal);                                                // original palette; new scheme every 4 bars
     float glow = 0.0; for (int i = 0; i < 8; i++) { float a = float(i) * 0.785; vec3 s = tex(q + vec2(cos(a), sin(a)) * 0.006); glow += max(max(s.r, max(s.g, s.b)) - 0.5, 0.0); }
-    col += hue(vec3(1.0, 0.75, 0.3), pal) * glow / 8.0 * (1.0 + 1.8 * kick);
+    col += hue(vec3(0.55, 0.9, 1.0), pal) * glow / 8.0 * (1.0 + 1.8 * kick);
     col *= 0.85 + 0.35 * kick;
     col *= smoothstep(R0, R0 + 0.03, r) * 0.55 + 0.45;                            // shadow under the bubble rim
   } else {
@@ -92,7 +92,7 @@ function render(t) {
   const shock = Math.floor(beat) % 4 === 0 ? Math.min(1, (beat % 1) * 1.6) : 1;
   gl.uniform1f(U.t, t); gl.uniform1f(U.kick, kick); gl.uniform1f(U.bass, bass);
   gl.uniform1f(U.segs, SEGS[block % SEGS.length]); gl.uniform1f(U.segsPrev, SEGS[(block + SEGS.length - 1) % SEGS.length]);
-  gl.uniform1f(U.morph, Math.min(1, within * 4)); gl.uniform1f(U.dir, block % 2 ? -1 : 1); gl.uniform1f(U.hit, hit); gl.uniform1f(U.shock, shock); gl.uniform1f(U.pal, [0, 0, 2.094, 4.189][Math.floor(beat / 16) % 4]);
+  gl.uniform1f(U.morph, Math.min(1, within * 4)); gl.uniform1f(U.dir, block % 2 ? -1 : 1); gl.uniform1f(U.hit, hit); gl.uniform1f(U.shock, shock); gl.uniform1f(U.pal, 0);   // v24: no hue cycling — the footage mandala stays in the teal palette
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   octx.fillStyle = '#000'; octx.fillRect(0, 0, out.width, out.height);
   const SH = 608, SY = Math.round((out.height - SH) / 2), z = 1 + 0.02 * kick;
