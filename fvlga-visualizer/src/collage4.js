@@ -138,7 +138,9 @@
     PEOPLE = [16,  60,  41,  61,  17,  62,  42,  63,  18,  64,  43,  65,  19,  66,  44,  67,  20,  68,  45,  69,  21,  70,  49,  71,  22,  72,  50,  73,  23,  74,  51,  75,  24,  76,  52,  77,  25,  78,  53,  79,  27,  80,  55,  81,  28,  82,  56,  83,  29,  84,  57,  85,  30,  86,  31,  87,  32,  88,  89,  90];   // the boy outdoors + people walking (Prelinger)
   // after the intro, name/title cards become people footage (less FVLGA / CUFF NO DANCER on screen)
   const REMAP = new Set(['chrome', 'gothic', 'artist', 'stack', 'smear', 'burst', 'filmtext', 'ticker', 'emboss']);
-  const PSY_FOOT = [10.551, 20.686, 24.74, 51.091, 70.551, 77.848, 86.361, 91.226, 95.28, 100.551];   // half the kaleidoscope cuts become footage (QA: kaleidoscope was overused)
+  const PSY_FOOT_OFF = [10.551, 20.686, 24.74, 51.091, 70.551, 77.848, 86.361, 91.226, 95.28, 100.551];   // half the kaleidoscope cuts become footage (QA: kaleidoscope was overused)
+  const PSY_FOOT = [8.118, 10.551, 12.172, 20.686, 21.902, 24.74, 41.361, 51.091, 62.442, 70.551, 73.388, 77.848, 81.902, 86.361, 87.578, 91.226, 94.469, 95.28, 96.496, 100.551];   // v26: kaleidoscope retired entirely (artist: 'doesn't fit the vibe') -> every psyche cut becomes a footage/composite shot
+  const COMP = {"9.74": 94, "17.848": 92, "28.388": 96, "32.442": 99, "54.334": 91, "57.578": 97, "64.064": 102, "70.145": 95, "78.253": 98, "85.145": 100, "98.118": 93, "8.118": 101, "12.172": 94, "21.902": 92, "41.361": 96, "62.442": 99, "73.388": 91, "81.902": 97, "87.578": 102, "94.469": 95, "96.496": 98};   // cuts where the artist is composited into the 1960s scenes
   const toFoot = cut => cut.t0 > 8.1 && (REMAP.has(cut.type) || (cut.type === 'psyche' && PSY_FOOT.some(x => Math.abs(x - cut.t0) < 0.002)));
   const IMGS = new Map();
   function loadFrame(ci, f) { const c = CLIPS[ci], idx = 1 + (((f % c.n) + c.n) % c.n), key = ci + ':' + idx; if (IMGS.has(key)) return IMGS.get(key);
@@ -310,7 +312,7 @@
         scribble(cut.seed, 3, [C.red], 1.2); cut.fx = 'xerox'; break; }
       case 'ticker': { bgFlat(C.ink); for (let i = 0; i < 7; i++) ticker(i % 2 ? 'FVLGA FVLGA FVLGA' : 'CUFF NO DANCER', SH * (0.08 + i * 0.14), SH * 0.13, i % 3 === 0 ? C.acid : i % 3 === 1 ? '#fff' : C.pink, (i % 2 ? -1 : 1) * (300 + i * 60), t);
         sticker(cut.icon, SW / 2, SH / 2, SH * 0.36 * (1 + kick * 0.15), cut.rot, { ghost: C.acid }); break; }
-      case 'film': { const a = PEOPLE[cut.clip % PEOPLE.length], b = DREAMY[cut.clip2 % DREAMY.length]; await film(a, lt, 'dream', cut, cut.k > 0.55 ? b : undefined);
+      case 'film': { const cc = COMP[(+cut.t0.toFixed(3)).toString()] ?? COMP[cut.t0.toFixed(3)]; const a = cc !== undefined ? cc : PEOPLE[cut.clip % PEOPLE.length], b = DREAMY[cut.clip2 % DREAMY.length]; await film(a, lt, 'dream', cut, cc === undefined && cut.k > 0.55 ? b : undefined);
         break; }
       case 'filmmirror': { await film(PEOPLE[(cut.clip + 11) % PEOPLE.length], lt, 'dream', cut); sigil(cut.bg % 4, SW / 2, SH / 2, SH * 0.3 * (1 + 0.1 * kick), t * 0.4, 'rgba(255,255,255,.9)');
         break; }

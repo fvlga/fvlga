@@ -71,7 +71,10 @@ direct corrections (per-project notes) win.
   camera drop into verse (27.2) and pre-chorus (69.27), VHS tear on the tag (64.9),
   white flash into hook 2 (79.47), zoom punches on hook 4-bar marks; constant 3px
   RGB hum after the intro. No spin / light-leak burn (wrong vibe for this track).
-- Kaleidoscope bubble (v24): the neon smiley is retired (artist: "doesn't fit any more");
+- Kaleidoscope (v26): RETIRED ENTIRELY — artist: the crystal-ball scene "doesn't fit with the
+  vibe of the video". Its ~20 cuts are now 1960s footage / footage with the artist
+  composited in. Don't bring back the smiley, the neon skull mandala, or the ball.
+  (history) Kaleidoscope bubble (v24): the neon smiley is retired (artist: "doesn't fit any more");
   the bubble now holds the artist's face, blue-cyan duotone + neon silhouette
   (src/crystal_ball_face.py). Don't bring the smiley back.
   The loud red/yellow/blue neon skull pattern around it is also retired: the
