@@ -134,7 +134,10 @@
   }
 
   // ---------- footage (public-domain Prelinger films, pre-extracted at 15 fps) ----------
-  let CLIPS = [], DREAMY = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], CITY = [12, 13, 14, 15];
+  let CLIPS = [], DREAMY = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], CITY = [12, 13, 14, 15],
+    PEOPLE = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 37, 38, 39];   // the boy outdoors + people walking (Prelinger)
+  // after the intro, name/title cards become people footage (less FVLGA / CUFF NO DANCER on screen)
+  const REMAP = new Set(['chrome', 'gothic', 'artist', 'stack', 'smear', 'burst', 'filmtext', 'ticker']);
   const IMGS = new Map();
   function loadFrame(ci, f) { const c = CLIPS[ci], idx = 1 + (((f % c.n) + c.n) % c.n), key = ci + ':' + idx; if (IMGS.has(key)) return IMGS.get(key);
     const pr = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = `${c.dir}/${String(idx).padStart(4, '0')}.jpg`; });
@@ -212,10 +215,10 @@
 
   // ---------- pixel distortion + grade (post) ----------
   function post(cut, t, kick, lt) {
-    const img = s.getImageData(0, 0, SW, SH), d = img.data, src = new Uint8ClampedArray(d), fx = cut.fx, cx = SW / 2, cy = SH / 2;
+    const img = s.getImageData(0, 0, SW, SH), d = img.data, src = new Uint8ClampedArray(d), fx = (cut.t0 > 8.1 && REMAP.has(cut.type)) ? ['none', 'bulge', 'wave'][cut.seed % 3] : cut.fx, cx = SW / 2, cy = SH / 2;
     const shift = Math.round(4 + kick * 20 + (lt < 0.07 ? 26 : 0)), r = rng(Math.floor(t * 30) * 13 + 1);
     const strength = 0.6 + 0.8 * kick, tw = (cut.k - 0.5) * 3.2 * strength, rad = SH * 0.75;
-    const isFilm = cut.type.startsWith('film') || cut.type === 'drop' || cut.type === 'end'; const xerox = fx === 'xerox', inv = !isFilm && (cut.k > 0.86 || (lt < 0.05 && cut.k > 0.55)), post4 = !isFilm && cut.k < 0.3;
+    const isFilm = cut.type.startsWith('film') || cut.type === 'drop' || cut.type === 'end' || (cut.t0 > 8.1 && REMAP.has(cut.type)); const xerox = fx === 'xerox', inv = !isFilm && (cut.k > 0.86 || (lt < 0.05 && cut.k > 0.55)), post4 = !isFilm && cut.k < 0.3;
     const sample = (sx, sy) => { sx = clamp(sx | 0, 0, SW - 1); sy = clamp(sy | 0, 0, SH - 1); return (sy * SW + sx) * 4; };
     for (let y = 0; y < SH; y++) { const tear = r() < 0.003 + kick * 0.02 ? (r() - 0.5) * 90 : 0, scan = y % 3 === 0 ? 0.82 : 1;
       for (let x = 0; x < SW; x++) { let sx = x + tear, sy = y;
@@ -241,7 +244,7 @@
     o.setTransform(1, 0, 0, 1, 0, 0); o.fillStyle = C.ink; o.fillRect(0, 0, W, H);
     s.setTransform(1, 0, 0, 1, 0, 0); s.globalAlpha = 1; s.globalCompositeOperation = 'source-over';
     const BG = [C.acid, C.sage, C.purple, C.pink, C.ink, C.blue], pick = a => a[Math.floor(r() * a.length)];
-    switch (cut.type) {
+    switch (cut.t0 > 8.1 && REMAP.has(cut.type) ? 'film' : cut.type) {
       case 'chrome': { // liquid-chrome gothic title over stripes, echoes, drips, scribbles
         if (cut.t0 < 1) bgFlat(C.sage); else bgStripes(C.ink, '#1d1d1d', t);
         sparkles(cut.seed, 14, '#fff');
@@ -260,7 +263,7 @@
         scribble(cut.seed, 4, [C.ink, C.red], 1.3); break; }
       case 'word': { // liquid lyric word + gothic overlay + ticker
         liquid(cut.text, t, 16 + kick * 30, cut.bg % 2 ? '#fff' : C.ink, cut.bg % 2 ? C.ink : '#f2f2f2');
-        ticker(cut.text.toLowerCase() + ' * fvlga * ', SH * 0.08, SH * 0.07, cut.bg % 2 ? C.acid : C.red, 400, t);
+        ticker(cut.text.toLowerCase() + ' * ', SH * 0.08, SH * 0.07, cut.bg % 2 ? C.acid : C.red, 400, t);
         word(cut.text.toLowerCase(), SW * 0.72, SH * 0.82, SH * 0.2, FG, { fill: cut.bg % 2 ? C.pink : C.red, rot: -0.15, stroke: cut.bg % 2 ? C.ink : '#fff', thick: 0.05 }); break; }
       case 'japan': { bgBurst(t, C.red, '#fff');
         word('Japan', SW / 2, SH / 2, SH * 0.62, FK, { fill: '#fff', extrude: 5, echo: 3, echoCol: C.red, rot: cut.rot * 0.6, maxW: SW * 0.85, stretch: 1.6 });
@@ -282,8 +285,8 @@
         sticker(3, SW * (0.25 + cut.k * 0.5), SH * 0.55, SH * 0.5 * (1 + kick * 0.15), Math.sin(t * 4) * 0.15, { ghost: C.red });
         word('Fvlga', SW * 0.5, SH * 0.13, SH * 0.18, FP, { fill: C.acid, stroke: C.ink, thick: 0.04 }); break; }
       case 'emboss': bgEmboss(t, cut.seed, cut.bg % 2 ? [[255, 255, 255], [70, 110, 255], [20, 30, 160], [5, 5, 30]] : [[255, 255, 255], [255, 70, 190], [120, 20, 160], [10, 0, 20]]);
-        word(['fvlga', 'cuff', 'dancer'][cut.bg % 3], SW * (0.35 + cut.k * 0.3), SH * 0.5, SH * 0.5, FG, { chrome: true, stroke: C.ink, thick: 0.05, rot: cut.rot * 0.4 }); sigil(cut.bg % 4, SW * 0.5, SH * 0.5, SH * 0.45, t * 0.3, 'rgba(255,255,255,.5)');
-        ticker('CUFF NO DANCER  FVLGA', SH * 0.93, SH * 0.07, '#fff', 300, t); scribble(cut.seed, 2, ['#fff'], 0.8); break;
+        word(['bands', 'spinning', 'crib'][cut.bg % 3], SW * (0.35 + cut.k * 0.3), SH * 0.5, SH * 0.5, FG, { chrome: true, stroke: C.ink, thick: 0.05, rot: cut.rot * 0.4 }); sigil(cut.bg % 4, SW * 0.5, SH * 0.5, SH * 0.45, t * 0.3, 'rgba(255,255,255,.5)');
+        scribble(cut.seed, 2, ['#fff'], 0.8); break;
       case 'burst': bgBurst(t, C.pink, '#ffd1ef', SW * 0.3, SH * 0.6);
         sigil(0, SW * 0.3, SH * 0.6, SH * 0.45 * (1 + kick * 0.1), t * 0.6, '#fff'); word('fvlga', SW * 0.3, SH * 0.6, SH * 0.26, FG, { chrome: true, stroke: C.ink, thick: 0.05 });
         word('cuff no', SW * 0.75, SH * 0.35, SH * 0.2, FG, { fill: C.ink, stroke: '#fff', thick: 0.06, rot: 0.1 }); word('dancer', SW * 0.75, SH * 0.6, SH * 0.2, FG, { fill: C.red, stroke: '#fff', thick: 0.06, rot: 0.1 });
@@ -302,24 +305,22 @@
         scribble(cut.seed, 3, [C.red], 1.2); cut.fx = 'xerox'; break; }
       case 'ticker': { bgFlat(C.ink); for (let i = 0; i < 7; i++) ticker(i % 2 ? 'FVLGA FVLGA FVLGA' : 'CUFF NO DANCER', SH * (0.08 + i * 0.14), SH * 0.13, i % 3 === 0 ? C.acid : i % 3 === 1 ? '#fff' : C.pink, (i % 2 ? -1 : 1) * (300 + i * 60), t);
         sticker(cut.icon, SW / 2, SH / 2, SH * 0.36 * (1 + kick * 0.15), cut.rot, { ghost: C.acid }); break; }
-      case 'film': { const a = DREAMY[cut.clip % DREAMY.length], b = DREAMY[cut.clip2 % DREAMY.length]; await film(a, lt, 'dream', cut, b !== a && cut.k > 0.4 ? b : undefined);
-        serifCaption('CUFF NO DANCER', SW * 0.035, SH * 0.94); break; }
+      case 'film': { const a = PEOPLE[cut.clip % PEOPLE.length], b = DREAMY[cut.clip2 % DREAMY.length]; await film(a, lt, 'dream', cut, cut.k > 0.55 ? b : undefined);
+        break; }
       case 'filmmirror': { await film(DREAMY[cut.clip % DREAMY.length], lt, 'dream', cut); sigil(cut.bg % 4, SW / 2, SH / 2, SH * 0.3 * (1 + 0.1 * kick), t * 0.4, 'rgba(255,255,255,.9)');
-        word('fvlga', SW / 2, SH / 2, SH * 0.13, FG, { fill: '#fff', stroke: C.ink, thick: 0.05 }); break; }
-      case 'filmflash': { await film(DREAMY[cut.clip % DREAMY.length], lt, 'flash', cut); if (lt < 0.07) { s.fillStyle = '#fff'; s.fillRect(0, 0, SW, SH); } break; }
+        break; }
+      case 'filmflash': { await film(PEOPLE[cut.clip % PEOPLE.length], lt, 'flash', cut); if (lt < 0.07) { s.fillStyle = '#fff'; s.fillRect(0, 0, SW, SH); } break; }
       case 'filmxerox': { await film((cut.k > 0.5 ? CITY : DREAMY)[cut.clip % (cut.k > 0.5 ? CITY.length : DREAMY.length)], lt, 'xerox', cut);
         scribble(cut.seed, 1, [C.ink], 1.4); s.save(); s.strokeStyle = C.ink; s.lineWidth = 9; s.lineCap = 'round'; const x = SW * (0.3 + cut.k * 0.4), y = SH * 0.35;
         s.beginPath(); s.moveTo(x - 40 + jit(1, 6), y - 50); s.lineTo(x + 40, y + 50 + jit(2, 6)); s.moveTo(x + 45, y - 45); s.lineTo(x - 45 + jit(3, 6), y + 45); s.stroke(); s.restore();
         word('Fvlga', SW * 0.88, SH * 0.1, SH * 0.12, FP, { fill: C.ink, stroke: '#fff', thick: 0.05 }); break; }
-      case 'filmblue': { await film([12, 13, 14, 15, 7, 8, 5, 3][cut.clip % 8], lt, 'blue', cut);
-        s.save(); s.translate(SW * 0.04, SH * 0.06); s.rotate(Math.PI / 2); s.font = `${Math.round(SH * 0.07)}px ${FS}`; s.letterSpacing = '5px'; s.fillStyle = 'rgba(255,255,255,.85)'; s.fillText('cuff no dancer', 0, 0); s.restore();
-        s.save(); s.font = `${Math.round(SH * 0.11)}px ${FP}`; s.fillStyle = 'rgba(255,255,255,.9)'; s.textAlign = 'right'; s.fillText('Fvlga', SW * 0.96, SH * 0.13); s.restore(); break; }
-      case 'filmprism': { await film(DREAMY[cut.clip % DREAMY.length], lt, 'dream', cut); prism(t, 0.6 + 0.3 * kick); prism(t + 2.3, 0.4);
-        serifCaption('fvlga', SW * 0.035, SH * 0.94); break; }
+      case 'filmblue': { await film(cut.k > 0.5 ? PEOPLE[(cut.clip + 3) % PEOPLE.length] : [12, 13, 14, 15, 7, 8, 5, 3][cut.clip % 8], lt, 'blue', cut); break; }
+      case 'filmprism': { await film(PEOPLE[(cut.clip + 7) % PEOPLE.length], lt, 'dream', cut); prism(t, 0.6 + 0.3 * kick); prism(t + 2.3, 0.4);
+        break; }
       case 'filmtext': { await film(cut.t0 < 1 ? 0 : DREAMY[cut.clip % DREAMY.length], lt, 'dream', cut); s.fillStyle = 'rgba(0,0,0,.25)'; s.fillRect(0, 0, SW, SH);
         word('cuff no', SW * 0.46, SH * 0.34, SH * 0.36, FG, { chrome: true, echo: 2, echoCol: 'rgba(255,255,255,.6)', rot: -0.05 + jit(1, 0.015), drips: cut.seed, stroke: C.ink, thick: 0.06 });
         word('dancer', SW * 0.55, SH * 0.68, SH * 0.4, FG, { chrome: true, echo: 2, echoCol: 'rgba(255,255,255,.6)', rot: 0.04 + jit(2, 0.015), drips: cut.seed + 1, stroke: C.ink, thick: 0.06 });
-        serifCaption('FVLGA', SW * 0.035, SH * 0.94); break; }
+        break; }
       case 'psyche': { // dense skull/flame wallpaper -> 8-way radial kaleidoscope -> neon edges -> glowing smiley
         const pals = [{ bg: [[255, 255, 255], [70, 110, 255], [20, 30, 160], [5, 5, 30]], f1: '#ff3b1a', f2: '#ffd21a', skull: '#ff4040' },
           { bg: [[255, 255, 255], [40, 230, 255], [10, 120, 160], [0, 20, 30]], f1: '#ffee00', f2: '#ff7a00', skull: '#ffef7a' },
