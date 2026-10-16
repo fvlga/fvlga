@@ -28,3 +28,15 @@ Emotional whiplash: hyper-materialist flex imagery (cash fanning, pool, "flex ti
 ## Notes for CUFF NO DANCER (Claude)
 - Ideas NOT yet applied (artist hasn't asked): a small persistent brand sticker (e.g. FVLGA badge, bottom-left); split-screen as a scene-change device (we have none); a ticker line under a water shot; an iMessage-style screen-record layer; a questionnaire meme; one grade per location (we use one teal grade everywhere).
 - Careful: the artist just removed the red film strip and the volume bars as "in every shot" clutter (v27). A *permanent* watermark is the opposite pattern — only add it if the artist asks, and keep it small and consistent.
+
+## FRAME-SEEN (artist's own screenshots, Oct 16 — 5 frames of the YouTube player, not stored in the repo)
+Confirms the notes above. What is visible:
+- **Permanent sticker badge** — a hot-pink oval with yellow script lettering, bottom-left, present in every screenshot (cash close-up, dark blue frame, red close-up, teal pool).
+- **Permanent texture block** — a green banknote-pattern rectangle with a repeating "IN GOD WE TRUST" style text, bottom-right, in every screenshot. (Our video removed right-edge bars on request, so we do NOT copy this one.)
+- **Opening type** — giant hot-pink rounded "bubble" sans letters over a close-up of a person fanning cash; a green plush flower toy in the corner of the room.
+- **Dark blue frame** — scattered hot-pink ♀ symbols on a near-black blue scene (graphic-icon texture).
+- **Captions** — plain white sans, centred low, short lines or a 5-line stacked quote; no box, just a soft shadow. The red-graded close-up carries the long stacked quote.
+- **Grade** — red-graded close-up (red light, crushed blacks); teal/cyan pool shot; flat pink/white on the opening.
+- **Pool shot type** — a yellow condensed-caps line with a yellow highlighter bar under it, over a wall of repeated serif words on a translucent band along the bottom (three rows).
+- **Letterboxing/aspect** — 16:9 picture.
+Not stored: the screenshots (copyrighted frames; the repo is public). Lyrics shown in the captions are not reproduced here.
