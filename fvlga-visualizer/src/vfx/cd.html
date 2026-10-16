@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:CNSerifBlack;src:url(../Playfair.ttf);font-weight:900}@font-face{font-family:CNScript;src:url(../Pinyon.ttf)}
+html,body{margin:0;background:#000}</style></head><body>
+<canvas id="out" width="1080" height="1920"></canvas>
+<script>
+// CD sticker promo: grows from a dot, sticker logo + spinning CD (duotone kaleidoscope art), liquid blob wipes,
+// beat bounce, shrinks back to a dot. Deterministic per time t (song time); shot starts at T0 and lasts DUR.
+const T0 = 22.0, DUR = 6.0, W = 1080, H = 1920, TAU = Math.PI * 2;
+const RED = [226, 6, 19], PALE = [246, 200, 214], DEEP = [70, 10, 22];
+let A, ctx, disc, discR = 330;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x)), ease = x => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+const back = x => { x = clamp(x, 0, 1); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+function duotone(img) { // pre-render the disc art: red/pink duotone of the kaleidoscope, cut to a ring
+  const c = document.createElement('canvas'); c.width = c.height = discR * 2; const x = c.getContext('2d');
+  const s = discR * 2 / Math.min(img.width, img.height); x.drawImage(img, discR - img.width * s / 2, discR - img.height * s / 2, img.width * s, img.height * s);
+  const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
+  for (let i = 0; i < p.length; i += 4) { const l = Math.pow((p[i] * 0.3 + p[i + 1] * 0.59 + p[i + 2] * 0.11) / 255, 0.8);
+    const m = l < 0.5 ? [RED, PALE, l * 2] : null; const a = l < 0.5 ? RED : PALE, b = l < 0.5 ? RED : PALE;
+    const k = l < 0.5 ? l * 2 : (l - 0.5) * 2, c0 = l < 0.5 ? [150, 0, 15] : RED, c1 = l < 0.5 ? RED : PALE;
+    p[i] = c0[0] + (c1[0] - c0[0]) * k; p[i + 1] = c0[1] + (c1[1] - c0[1]) * k; p[i + 2] = c0[2] + (c1[2] - c0[2]) * k; }
+  x.putImageData(d, 0, 0); return c;
+}
+function blobPath(cx, cy, r, seed, t) { ctx.beginPath(); const n = 9;
+  for (let i = 0; i <= n; i++) { const a = i / n * TAU, rr = r * (1 + 0.28 * Math.sin(a * 3 + seed + t * 4) + 0.15 * Math.sin(a * 5 - seed * 2));
+    const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr * 0.8; if (i === 0) ctx.moveTo(x, y); else { const pa = (i - 0.5) / n * TAU, pr = rr * 1.12; ctx.quadraticCurveTo(cx + Math.cos(pa) * pr, cy + Math.sin(pa) * pr * 0.8, x, y); } }
+  ctx.closePath(); }
+function sticker(text, x, y, size, font, fill, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.font = `${size}px ${font}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.shadowColor = 'rgba(60,0,10,.45)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8; ctx.lineWidth = size * 0.34; ctx.strokeStyle = `rgb(${PALE})`; ctx.strokeText(text, 0, 0);
+  ctx.shadowColor = 'transparent'; ctx.fillStyle = fill; ctx.fillText(text, 0, 0); ctx.restore(); }
+function star(x, y, r, rot) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.beginPath(); for (let i = 0; i < 10; i++) { const rr = i % 2 ? r * 0.45 : r, a = i / 10 * TAU - Math.PI / 2; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.closePath();
+  ctx.lineJoin = 'round'; ctx.lineWidth = r * 0.5; ctx.strokeStyle = `rgb(${PALE})`; ctx.stroke(); ctx.fillStyle = `rgb(${RED})`; ctx.fill(); ctx.restore(); }
+function render(t) {
+  const lt = t - T0, bp = 60 / A.bpm, beat = Math.max(0, (t - A.t0) / bp), ph = beat % 1, kick = Math.exp(-(ph * bp) * 9);
+  // background: maroon -> dusty pink gradient that darkens slightly on kicks
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, `rgb(${DEEP})`); g.addColorStop(0.55, '#7a3a48'); g.addColorStop(1, '#e9b3c2');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.fillStyle = `rgba(30,0,8,${0.12 * kick})`; ctx.fillRect(0, 0, W, H);
+  // global scale: grow from a dot, shrink back to a dot
+  const s = lt < 0.7 ? back(lt / 0.7) : lt > DUR - 0.6 ? 1 - ease((lt - (DUR - 0.6)) / 0.6) : 1;
+  const cx = W / 2 - 55, cy = H / 2 - 40;
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(1.13 * s * (1 + 0.035 * kick), 1.13 * s * (1 + 0.035 * kick)); ctx.rotate(0.03 * Math.sin(t * 2.1));
+  // CD: spins, with rim text
+  const dx = 150, dy = 20, spin = lt * 1.4;
+  ctx.save(); ctx.translate(dx, dy); ctx.rotate(spin);
+  ctx.shadowColor = 'rgba(40,0,10,.5)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12;
+  ctx.beginPath(); ctx.arc(0, 0, discR + 18, 0, TAU); ctx.fillStyle = `rgb(${PALE})`; ctx.fill(); ctx.shadowColor = 'transparent';
+  ctx.save(); ctx.beginPath(); ctx.arc(0, 0, discR, 0, TAU); ctx.arc(0, 0, 62, 0, TAU, true); ctx.clip(); ctx.drawImage(disc, -discR, -discR); ctx.restore();
+  ctx.beginPath(); ctx.arc(0, 0, 62, 0, TAU); ctx.lineWidth = 16; ctx.strokeStyle = `rgb(${PALE})`; ctx.stroke();
+  // rim text
+  ctx.font = '34px CNSerifBlack'; ctx.fillStyle = `rgb(${DEEP})`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const rim = 'FVLGA · cuff no dancer · single · '; let a = -Math.PI / 2;
+  for (const ch of rim) { const w = ctx.measureText(ch).width; a += w / 2 / (discR - 34); ctx.save(); ctx.rotate(a); ctx.translate(0, -(discR - 34)); ctx.fillText(ch, 0, 0); ctx.restore(); a += w / 2 / (discR - 34); }
+  ctx.restore();
+  // sticker logo
+  const wob = 0.04 * Math.sin(t * 3.0);
+  star(-300, -150, 70 * (1 + 0.12 * kick), 0.2 + wob);
+  sticker('Fvlga', -60, -40, 230, 'CNSerifBlack', `rgb(${RED})`, -0.12 + wob);
+  sticker('cuff no dancer', -40, 140, 110, 'CNScript', `rgb(${RED})`, -0.08 + wob);
+  // liquid blob wipes: a red blob sweeps across with a pale smear trailing it
+  for (const [tw, seed] of [[1.6, 1.3], [3.9, 4.1]]) { const p = (lt - tw) / 0.55; if (p < -0.2 || p > 1.3) continue;
+    const bx = -700 + p * 1500, by = -30 + 80 * Math.sin(p * 3);
+    ctx.fillStyle = `rgb(${PALE})`; blobPath(bx - 260, by + 30, 260, seed + 2, t); ctx.fill();
+    ctx.fillStyle = `rgb(${RED})`; blobPath(bx, by, 300, seed, t); ctx.fill(); }
+  ctx.restore();
+  // fine grain
+  ctx.fillStyle = 'rgba(255,255,255,0.025)'; for (let i = 0; i < 400; i++) { const r = Math.sin(i * 12.9898 + Math.floor(t * 24) * 78.233) * 43758.5453; const fx = (r - Math.floor(r)) * W, r2 = Math.sin(i * 4.1 + Math.floor(t * 24)) * 9999, fy = (r2 - Math.floor(r2)) * H; ctx.fillRect(fx, fy, 2, 2); }
+}
+window.ready = false;
+const load = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+Promise.all([fetch('../analysis.json').then(r => r.json()), load('kaleido.jpg'), document.fonts.load('40px CNSerifBlack'), document.fonts.load('40px CNScript')])
+  .then(([a, im]) => { A = a; ctx = document.getElementById('out').getContext('2d'); disc = duotone(im); window.ready = true; }).catch(e => { window.err = String(e.stack || e); });
+window.renderBatch = (t0, n, fps, q) => { const r = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); r.push(document.getElementById('out').toDataURL('image/jpeg', q).slice(23)); } return r; };
+</script></body></html>
