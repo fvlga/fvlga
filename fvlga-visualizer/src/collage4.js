@@ -9,7 +9,7 @@
   const ARTIST = 'FVLGA';
   const C = { acid: '#39ff14', sage: '#9bc48a', purple: '#a51cf0', pink: '#ff2fa8', yellow: '#ffe600', red: '#ff1a2a', blue: '#2a3cff', cyan: '#19f0ff', ink: '#050505', white: '#ffffff', grey: '#bdbdbd' };
   const MARKERS = [C.pink, C.yellow, C.acid, C.cyan, C.red, '#ffffff'];
-  let A, out, o, SW, SH, SY, W, H, S, s, tmp, tctx, noiseC, noiseX, BOIL = 0, G2, g2, LO, lo, PREV, pv;
+  let A, out, o, SW, SH, SY, W, H, S, s, tmp, tctx, noiseC, noiseX, BOIL = 0, KICK = 0, G2, g2, LO, lo, PREV, pv;
 
   // ---------- cue sheet (transcript word timings) ----------
   const CUES = [
@@ -164,7 +164,14 @@
 
   // ---------- backgrounds ----------
   function bgFlat(col) { s.fillStyle = col; s.fillRect(0, 0, SW, SH); }
-  function bgBurst(t, c1, c2, cx, cy) { s.save(); s.translate(cx === undefined ? SW / 2 : cx, cy === undefined ? SH / 2 : cy); s.rotate(t * 0.6); for (let i = 0; i < 28; i++) { s.fillStyle = i % 2 ? c1 : c2; s.beginPath(); s.moveTo(0, 0); s.arc(0, 0, SW * 1.3, i * TAU / 28, (i + 1) * TAU / 28); s.fill(); } s.restore(); }
+  function bgBurst(t, c1, c2, cx, cy) { // spiral rays: each ray bends into a swirling arm; the twist breathes and lurches on kicks
+    s.save(); s.translate(cx === undefined ? SW / 2 : cx, cy === undefined ? SH / 2 : cy); s.rotate(t * 0.6);
+    const R = SW * 1.3, N = 28, ST = 22, tw = 2.4 + 1.2 * Math.sin(t * 0.9) + 0.8 * KICK;
+    for (let i = 0; i < N; i++) { s.fillStyle = i % 2 ? c1 : c2; s.beginPath(); s.moveTo(0, 0);
+      for (let k = 1; k <= ST; k++) { const r = R * k / ST, a = i * TAU / N + tw * Math.pow(r / R, 0.8); s.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+      for (let k = ST; k >= 1; k--) { const r = R * k / ST, a = (i + 1) * TAU / N + tw * Math.pow(r / R, 0.8); s.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
+      s.closePath(); s.fill(); }
+    s.restore(); }
   function bgEmboss(t, seed, palette) {
     const w = noiseC.width, h = noiseC.height, img = noiseX.createImageData(w, h), d = img.data, ph = seed * 0.001;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const v = Math.sin(x * 0.11 + Math.sin(y * 0.07 + t * 1.3 + ph) * 3) * Math.sin(y * 0.13 + Math.cos(x * 0.05 - t + ph) * 2.5) + Math.sin((x + y) * 0.04 + t * 2) * 0.5;
@@ -173,7 +180,13 @@
   function bgHalftone(col, dot, t) { bgFlat('#f6f6f0'); s.fillStyle = col; const g = 18; for (let y = 0; y < SH + g; y += g) for (let x = 0; x < SW + g; x += g) { const v = 0.5 + 0.5 * Math.sin(x * 0.01 + t) * Math.cos(y * 0.013 - t * 0.7); s.beginPath(); s.arc(x + (y / g % 2) * g / 2, y, g * 0.5 * v * dot, 0, TAU); s.fill(); } }
   function bgTiles(t, icon, rot) { const n = 6, sz = SW / n; for (let y = -1; y < SH / sz + 1; y++) for (let x = -1; x < n + 1; x++) {
       s.save(); s.translate(x * sz + sz / 2 + ((t * 60) % sz) + (y % 2) * sz / 2, y * sz + sz / 2); s.rotate(rot ? t * 2 * (x % 2 ? 1 : -1) : 0); ICONS[icon](sz * 0.3, 'fill'); s.restore(); } }
-  function bgStripes(c1, c2, t) { s.save(); s.translate(SW / 2, SH / 2); s.rotate(-0.5); for (let i = -30; i < 30; i++) { s.fillStyle = i % 2 ? c1 : c2; s.fillRect(i * 40 + ((t * 80) % 80), -SW, 40, SW * 2); } s.restore(); }
+  function bgStripes(c1, c2, t) { // wavy diagonal stripes that ripple and flow
+    s.save(); s.translate(SW / 2, SH / 2); s.rotate(-0.5);
+    for (let i = -30; i < 30; i++) { s.fillStyle = i % 2 ? c1 : c2; s.beginPath(); const x0 = i * 40 + ((t * 80) % 80);
+      for (let y = -SW; y <= SW; y += 24) s.lineTo(x0 + 26 * Math.sin(y * 0.006 + t * 2.2 + i * 0.15), y);
+      for (let y = SW; y >= -SW; y -= 24) s.lineTo(x0 + 40 + 26 * Math.sin(y * 0.006 + t * 2.2 + (i + 1) * 0.15), y);
+      s.closePath(); s.fill(); }
+    s.restore(); }
 
   // ---------- type ----------
   function chromeGrad(y0, y1) { const g = s.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#ffffff'); g.addColorStop(0.38, '#d8dde6'); g.addColorStop(0.5, '#3a3f4a'); g.addColorStop(0.56, '#9aa2b4'); g.addColorStop(0.8, '#ffffff'); g.addColorStop(1, '#6d7486'); return g; }
@@ -223,7 +236,7 @@
 
   // ---------- cards ----------
   async function render(t) {
-    const bp = 60 / A.bpm, beat = Math.max(0, (t - A.t0) / bp), kick = Math.exp(-((beat % 1) * bp) * 9), cut = cutAt(t), lt = t - cut.t0, r = rng(cut.seed);
+    const bp = 60 / A.bpm, beat = Math.max(0, (t - A.t0) / bp), kick = Math.exp(-((beat % 1) * bp) * 9), cut = cutAt(t), lt = t - cut.t0, r = rng(cut.seed); KICK = kick;
     BOIL = Math.floor(t * 12);
     o.setTransform(1, 0, 0, 1, 0, 0); o.fillStyle = C.ink; o.fillRect(0, 0, W, H);
     s.setTransform(1, 0, 0, 1, 0, 0); s.globalAlpha = 1; s.globalCompositeOperation = 'source-over';
@@ -243,7 +256,7 @@
         sigil(2, SW * 0.5, SH * 0.5, SH * 0.48, -t * 0.3, 'rgba(255,255,255,.55)'); break; }
       case 'adlib': { // huge, cropped off the frame, burst behind, echoes
         bgBurst(t * 2, cut.bg % 2 ? C.acid : C.yellow, cut.bg % 2 ? '#0a3a00' : C.pink, SW * (0.3 + cut.k * 0.4), SH * 0.5);
-        word(cut.text, SW / 2 + jit(3, 30), SH * 0.58, SH * 1.0, FK, { fill: '#fff', extrude: 6, echo: 4, echoCol: C.ink, rot: cut.rot, skew: -0.15, stretch: 1.3, maxW: SW * 1.1 });
+        word(cut.text.toLowerCase(), SW / 2 + jit(3, 30), SH * 0.52, SH * 0.95, FG, { chrome: true, echo: 3, echoCol: C.pink, drips: cut.seed, stroke: C.ink, thick: 0.05, rot: cut.rot * 0.6, maxW: SW * 0.95 });
         scribble(cut.seed, 4, [C.ink, C.red], 1.3); break; }
       case 'word': { // liquid lyric word + gothic overlay + ticker
         liquid(cut.text, t, 16 + kick * 30, cut.bg % 2 ? '#fff' : C.ink, cut.bg % 2 ? C.ink : '#f2f2f2');
