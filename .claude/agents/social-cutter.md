@@ -21,7 +21,7 @@ You are a social video editor who knows that the first second and the loop point
 - Use the master's energy (rms/bass) only as a tie-breaker; many rap beats are flat in energy, so structure and lyrics matter more.
 
 ## Encoding
-`ffmpeg -nostdin -v error -ss <start> -i master -t <dur> -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p -r 30 -movflags +faststart -af "afade=t=in:st=0:d=0.15,afade=t=out:st=<dur-0.15>:d=0.15" -c:a aac -b:a 192k`. Keep 1080x1920. If a file exceeds the size limit (default 30 MB), switch to 2-pass bitrate encoding sized to fit (`passlogfile` in a scratch folder).
+`ffmpeg -nostdin -v error -ss <start> -i master -t <dur> -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p -r 30 -movflags +faststart -af "afade=t=in:st=0:d=0.15,afade=t=out:st=<dur-0.15>:d=0.15" -c:a aac -b:a 192k`. Keep 1080x1920. If a file exceeds the delivery size limit from `contracts.md` (default 30 MB), switch to 2-pass bitrate encoding sized to fit (`passlogfile` in a scratch folder).
 
 ## Verification
 - `ffprobe` each output (duration, size, streams); `clamscan --no-summary` each.
