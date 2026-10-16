@@ -33,6 +33,18 @@
     { const isCue = x => CUES.some(c => Math.abs(c[0] - x) < 0.01) || [2.4, 65.13, 69.17, 102.6].includes(x); const keep = [];
       for (const x of list) { const last = keep[keep.length - 1]; if (last === undefined || x - last > 0.18) keep.push(x); else if (isCue(x) && !isCue(last)) keep[keep.length - 1] = x; }
       list = keep; }
+    // v30: burst-then-hold rhythm (Cha Ching playbook): after a run of quick beat-cuts the next 1-3 bars are ONE longer shot
+    const HOLDS = new Set(), HOLD_COMP = new Map();
+    { const prot = x => CUES.some(c => Math.abs(c[0] - x) < 0.01) || [2.4, 65.13, 69.17, 102.6].includes(x) || x < 8.2 || (x > 65.13 && x < 69.17);
+      const lens = [1.62, 1.62, 2.43, 1.62, 3.24], bursts = [6, 7, 5, 8, 6], cyc = [101, 94, 92, 96, 99, 91, 97, 102, 95, 98, 100, 93];
+      const out = []; let burst = 0, hk = 0, holdEnd = -1;
+      for (const x of list) {
+        if (prot(x)) { out.push(x); holdEnd = -1; burst = 0; continue; }
+        if (holdEnd > 0 && x < holdEnd - 0.06) continue;           // swallowed by the hold
+        holdEnd = -1; out.push(x); burst++;
+        if (burst >= bursts[hk % bursts.length]) { holdEnd = x + lens[hk % lens.length]; HOLDS.add(x); if (hk % 2 === 0) HOLD_COMP.set(x, cyc[(hk / 2 | 0) % cyc.length]); hk++; burst = 0; }
+      }
+      list = out; }
     const r = rng(9090), pool = ['film', 'gothic', 'filmmirror', 'psyche', 'film', 'filmflash', 'chrome', 'filmxerox', 'artist', 'filmblue', 'stack', 'filmprism', 'emboss', 'film', 'filmtext', 'burst', 'smear', 'filmmirror', 'psyche', 'film'];
     let prev = '';
     CUTS = list.map((t0, i) => {
@@ -42,11 +54,12 @@
       else if (Math.abs(t0 - 65.13) < 0.01) type = 'drop'; else if (Math.abs(t0 - 102.6) < 0.01) type = 'end';
       else if (cue) { type = cue[1]; text = cue[2]; } else if (Math.abs(t0 - 69.17) < 0.01) type = 'filmtext';
       else { do { type = pool[Math.floor(r() * pool.length)]; } while (type === prev); }
+      if (HOLDS.has(t0)) type = 'film';   // held shots are always real footage / artist composites
       prev = type;
       const TEXTY = ['chrome', 'artist', 'adlib', 'word', 'japan', 'stack', 'smear', 'filmtext'], SAFE = ['none', 'bulge', 'wave', 'none', 'xerox'];
       const FILMFX = { film: ['none', 'wave', 'none', 'bulge'], filmmirror: ['mirror'], filmflash: ['none'], filmxerox: ['xerox'], filmblue: ['none', 'wave'], filmprism: ['none', 'bulge'] };
       const fx = FILMFX[type] ? FILMFX[type][Math.floor(r() * FILMFX[type].length)] : (type === 'end' || type === 'drop') ? 'none' : type === 'psyche' ? (r() > 0.6 ? 'bulge' : 'none') : TEXTY.includes(type) ? SAFE[Math.floor(r() * SAFE.length)] : FX[Math.floor(r() * FX.length)];
-      return { t0, t1, type, text, seed: Math.floor(r() * 1e6), bg: Math.floor(r() * 6), icon: Math.floor(r() * 8), k: r(), fx, rot: (r() - 0.5) * 0.5, clip: Math.floor(r() * 1000), clip2: Math.floor(r() * 1000), off: r() * 3 };
+      return { t0, t1, type, text, comp: HOLD_COMP.get(t0), seed: Math.floor(r() * 1e6), bg: Math.floor(r() * 6), icon: Math.floor(r() * 8), k: r(), fx, rot: (r() - 0.5) * 0.5, clip: Math.floor(r() * 1000), clip2: Math.floor(r() * 1000), off: r() * 3 };
     });
   }
   function cutAt(t) { let lo = 0, hi = CUTS.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (CUTS[m].t0 <= t) lo = m; else hi = m - 1; } return CUTS[lo]; }
@@ -141,7 +154,7 @@
   const PSY_FOOT_OFF = [10.551, 20.686, 24.74, 51.091, 70.551, 77.848, 86.361, 91.226, 95.28, 100.551];   // half the kaleidoscope cuts become footage (QA: kaleidoscope was overused)
   const PSY_FOOT = [8.118, 10.551, 12.172, 20.686, 21.902, 24.74, 41.361, 51.091, 62.442, 70.551, 73.388, 77.848, 81.902, 86.361, 87.578, 91.226, 94.469, 95.28, 96.496, 100.551];   // v26: kaleidoscope retired entirely (artist: 'doesn't fit the vibe') -> every psyche cut becomes a footage/composite shot
   const COMP = {"9.74": 94, "17.848": 92, "28.388": 96, "32.442": 99, "54.334": 91, "57.578": 97, "64.064": 102, "70.145": 95, "78.253": 98, "85.145": 100, "98.118": 93, "8.118": 101, "12.172": 94, "21.902": 92, "41.361": 96, "62.442": 99, "73.388": 91, "81.902": 97, "87.578": 102, "94.469": 95, "96.496": 98};   // cuts where the artist is composited into the 1960s scenes
-  const toFoot = cut => cut.t0 > 8.1 && (REMAP.has(cut.type) || (cut.type === 'psyche' && PSY_FOOT.some(x => Math.abs(x - cut.t0) < 0.002)));
+  const toFoot = cut => cut.t0 > 8.1 && (REMAP.has(cut.type) || cut.type === 'psyche');
   const IMGS = new Map();
   function loadFrame(ci, f) { const c = CLIPS[ci], idx = 1 + (((f % c.n) + c.n) % c.n), key = ci + ':' + idx; if (IMGS.has(key)) return IMGS.get(key);
     const pr = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = `${c.dir}/${String(idx).padStart(4, '0')}.jpg`; });
@@ -312,7 +325,7 @@
         scribble(cut.seed, 3, [C.red], 1.2); cut.fx = 'xerox'; break; }
       case 'ticker': { bgFlat(C.ink); for (let i = 0; i < 7; i++) ticker(i % 2 ? 'FVLGA FVLGA FVLGA' : 'CUFF NO DANCER', SH * (0.08 + i * 0.14), SH * 0.13, i % 3 === 0 ? C.acid : i % 3 === 1 ? '#fff' : C.pink, (i % 2 ? -1 : 1) * (300 + i * 60), t);
         sticker(cut.icon, SW / 2, SH / 2, SH * 0.36 * (1 + kick * 0.15), cut.rot, { ghost: C.acid }); break; }
-      case 'film': { const cc = COMP[(+cut.t0.toFixed(3)).toString()] ?? COMP[cut.t0.toFixed(3)]; const a = cc !== undefined ? cc : PEOPLE[cut.clip % PEOPLE.length], b = DREAMY[cut.clip2 % DREAMY.length]; await film(a, lt, 'dream', cut, cc === undefined && cut.k > 0.55 ? b : undefined);
+      case 'film': { const cc = COMP[(+cut.t0.toFixed(3)).toString()] ?? COMP[cut.t0.toFixed(3)] ?? cut.comp; const a = cc !== undefined ? cc : PEOPLE[cut.clip % PEOPLE.length], b = DREAMY[cut.clip2 % DREAMY.length]; await film(a, lt, 'dream', cut, cc === undefined && cut.k > 0.55 ? b : undefined);
         break; }
       case 'filmmirror': { await film(PEOPLE[(cut.clip + 11) % PEOPLE.length], lt, 'dream', cut); sigil(cut.bg % 4, SW / 2, SH / 2, SH * 0.3 * (1 + 0.1 * kick), t * 0.4, 'rgba(255,255,255,.9)');
         break; }
