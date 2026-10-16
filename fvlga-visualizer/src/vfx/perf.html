@@ -35,11 +35,11 @@ void main(){
     float ed = edge(cur, q);
     float gl = 0.0; for (int i = 0; i < 6; i++) { float a = float(i) * 1.047; gl += edge(cur, q + vec2(cos(a), sin(a) * 0.56) * 0.006); }
     vec3 nc = hsv(hb) * (ed * 1.4 + gl / 6.0 * 0.9);
-    nc += hsv(hb) * smoothstep(0.4, 0.05, luma(c)) * 0.32;                         // faint fill so the face reads
+    nc += hsv(hb) * smoothstep(0.45, 0.05, luma(c)) * 0.55;                         // faint fill so the face reads
     float sl = 0.06 + 0.1 * kick;
     nc += hsv(hb + 0.33) * edge(ech, q + vec2(sl, 0.0)) * 0.45 + hsv(hb + 0.66) * edge(ech, q - vec2(sl, 0.0)) * 0.45;
     float ex = 0.35 + 0.9 * kick + 0.25 * h(vec2(wt, 9.0));
-    ex *= 1.0 - 0.9 * step(0.93, h(vec2(wt, 11.0)));                               // random near-black dropouts
+    ex *= 1.0 - 0.5 * step(0.96, h(vec2(wt, 11.0))); ex = max(ex, 0.55);                               // random near-black dropouts
     col = nc * ex;
   } else if (mode < 0.5) {
     // FILM: echo trail, crushed blacks, warm highlights, cool shadows, halation, light leak
@@ -61,8 +61,8 @@ void main(){
     float lm = 0.0; for (int i = 0; i < 6; i++) { float a = float(i) * 1.047; lm += luma(tx(cur, q + vec2(cos(a), sin(a) * 0.56) * 0.05)); } lm /= 6.0;
     float ink = max(step(l, lm * 0.82 + 0.04 * h(vec2(floor(uv.y * res.y / 3.0), wt))), dots * 0.6);
     float ink2 = step(luma(tx(cur, q + vec2(0.012, 0.006) * (1.0 + 2.0 * kick))), 0.3);
-    vec3 paper = mix(vec3(0.22, 1.0, 0.08), vec3(1.0, 0.18, 0.62), alt);
-    vec3 ink2c = mix(vec3(1.0, 0.18, 0.62), vec3(0.22, 1.0, 0.08), alt);
+    vec3 paper = mix(vec3(0.33, 0.72, 0.74), vec3(0.96, 0.91, 0.66), alt);   // teal / cream (osamason palette)
+    vec3 ink2c = vec3(0.85, 0.12, 0.16);
     col = paper * (0.9 + 0.1 * h(uv * 300.0 + wt));
     col = mix(col, ink2c, ink2 * 0.55 * (1.0 - ink));
     col = mix(col, vec3(0.03), ink);

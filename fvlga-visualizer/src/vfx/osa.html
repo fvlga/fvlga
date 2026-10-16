@@ -31,10 +31,12 @@ function render(t) {
   const f = Math.min(A.frames - 1, Math.round(t * A.fps)), bass = A.bass[f];
   // lyric caption: tiny lowercase cream sans, bottom centre
   const cap = CAPS.find(c => t >= c[0] && t < c[1]);
-  if (cap) { ctx.font = '400 21px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillText(cap[2].toLowerCase(), W / 2 + 1, H - 27);
+  if (cap) { ctx.font = '400 21px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; const cw = ctx.measureText(cap[2].toLowerCase()).width;
+    ctx.fillStyle = 'rgba(8,14,18,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, H - 50, cw + 24, 31, 6); ctx.fill();   // QA: readable on bright frames
     ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, H - 28); }
   // book page (left third), every few bars
   if (on(1, Math.floor(b / 2), 0.45)) { const pg = PAGES[Math.floor(b / 2) % PAGES.length], x = 34, y = 70;
+    ctx.fillStyle = 'rgba(6,12,16,.42)'; ctx.fillRect(x - 14, y - 30, 330, 150);   // dark scrim behind the page
     ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(255,255,255,.93)'; ctx.font = '22px BookB'; ctx.fillText(pg[0], x, y);
     ctx.font = '12.5px Book'; const words = pg[1].split(' '); let line = '', yy = y + 26;
     for (const w of words) { const tl = line + w + ' '; if (ctx.measureText(tl).width > 300) { ctx.fillText(line, x, yy); line = w + ' '; yy += 16; } else line = tl; } ctx.fillText(line, x, yy); }
@@ -52,7 +54,7 @@ function render(t) {
       const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, cols[0]); g.addColorStop(0.5, cols[1]); g.addColorStop(1, cols[2]);
       ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x, y, 12, h, 6); ctx.fill(); } }
   // film strip of tiny red frames along the top or bottom
-  if (on(6, b, 0.4) && thumbs.length) { const y = (b % 2) ? 30 : H - 78, n = 9;
+  if (on(6, b, 0.4) && thumbs.length) { const y = ((b % 2) || cap) ? 30 : H - 78, n = 9;   // never over a caption
     ctx.fillStyle = 'rgba(20,0,0,.85)'; ctx.fillRect(W / 2 - n * 34, y - 6, n * 68, 50);
     for (let i = 0; i < n; i++) { const im = thumbs[(i + b) % thumbs.length]; ctx.drawImage(im, W / 2 - n * 34 + 4 + i * 68, y, 60, 38); }
     ctx.fillStyle = 'rgba(255,255,255,.7)'; for (let i = 0; i < n * 4; i++) ctx.fillRect(W / 2 - n * 34 + 6 + i * 17, y - 4, 7, 2); }
