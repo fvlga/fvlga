@@ -1,0 +1,101 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}</style></head><body>
+<canvas id="gl" width="1080" height="608" style="display:none"></canvas>
+<canvas id="out" width="1080" height="1920"></canvas>
+<script>
+// Pink starburst VFX: the Gemini starburst with rays that twirl around the logo, pink/purple colourway flips on the beat,
+// chrome glints on "Fvlga", neon pulse on "cuff no dancer", twinkling sparkles. Deterministic per time t.
+const VS = `#version 300 es
+in vec2 p; out vec2 uv; void main(){ uv = p * 0.5 + 0.5; uv.y = 1.0 - uv.y; gl_Position = vec4(p, 0.0, 1.0); }`;
+const FS = `#version 300 es
+precision highp float; in vec2 uv; out vec4 o;
+uniform sampler2D A, B; uniform float t, kick, bass, hit, mixAB, rot; uniform vec2 res;
+const float AR = 1024.0 / 572.0;
+const vec2 RC = vec2(0.459, 0.524);                                // where the rays converge
+const vec2 SC = vec2(0.244, 0.516);                                // sigil centre
+float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+vec2 asp(vec2 q){ return vec2(q.x * AR, q.y); }
+vec3 tex(vec2 q){ q = clamp(q, 0.001, 0.999); return mix(texture(A, q).rgb, texture(B, q).rgb, mixAB); }
+// 1 inside the logo + title (kept still), 0 out in the rays
+float fg(vec2 q){
+  float sig = 1.0 - smoothstep(0.40, 0.5, length(asp(q - SC)));
+  vec2 d = abs(q - vec2(0.725, 0.505)) - vec2(0.26, 0.075);
+  float txt = 1.0 - smoothstep(0.03, 0.16, max(d.x, d.y));
+  return max(sig, txt);
+}
+void main(){
+  float wt = floor(t * 24.0);
+  vec2 q = (uv - 0.5) / (1.0 + 0.035 * kick + 0.015 * bass) + 0.5;
+  q += (vec2(h(vec2(wt, 3.0)), h(vec2(wt, 4.0))) - 0.5) * 0.006 * kick;
+  // rays twirl: rotate around the ray centre, fading to zero over the logo/title so they bend around it
+  float m = fg(q);
+  vec2 c = asp(q - RC); float r = length(c);
+  float a = rot * (1.0 - m) * (0.6 + 0.4 * smoothstep(0.0, 0.8, r));
+  vec2 cr = mat2(cos(a), -sin(a), sin(a), cos(a)) * c;
+  vec2 qr = vec2(cr.x / AR, cr.y) + RC;
+  float ab = 0.002 + 0.008 * kick + 0.015 * hit;
+  vec3 col = vec3(tex(qr + vec2(ab, 0)).r, tex(qr).g, tex(qr - vec2(ab, 0)).b);
+  // brightness breathing on the rays with the bass
+  col *= mix(1.0, 0.9 + 0.2 * bass + 0.12 * kick, 1.0 - m);
+  // neon pulse on "cuff no dancer": boost the glow halo on kicks
+  vec2 d = abs(q - vec2(0.725, 0.505)) - vec2(0.24, 0.05);
+  float halo = exp(-max(max(d.x, d.y), 0.0) * 40.0);
+  vec3 bc = tex(q);
+  float neon = smoothstep(0.86, 0.97, min(bc.r, min(bc.g, bc.b))) * halo;
+  col += vec3(1.0, 0.35, 0.75) * neon * (0.25 + 0.9 * kick);
+  // chrome glint sweeping across "Fvlga" (inside the sigil ring)
+  float inS = 1.0 - smoothstep(0.17, 0.2, length(asp(q - SC)));
+  float sw = exp(-pow((q.x - q.y * 0.35 - (fract(t * 0.45) * 0.55 + 0.0)) * 26.0, 2.0));
+  float lum = dot(bc, vec3(0.33));
+  col += vec3(1.0, 0.92, 1.0) * sw * inS * smoothstep(0.55, 0.85, lum) * 0.9;
+  // twinkling four-point sparkles
+  for (int i = 0; i < 14; i++) {
+    vec2 sp = vec2(h(vec2(float(i), 1.0)), h(vec2(float(i), 2.0)));
+    float tw = pow(max(0.0, sin(t * (2.0 + 3.0 * h(vec2(float(i), 5.0))) + float(i) * 1.7)), 6.0) * (0.6 + 0.8 * kick);
+    vec2 dd = asp(q - sp) * 80.0; float s = max(0.0, 1.0 - abs(dd.x) * 8.0 - abs(dd.y)) + max(0.0, 1.0 - abs(dd.y) * 8.0 - abs(dd.x));
+    col += vec3(1.0) * s * tw;
+  }
+  // flash + slice tears on downbeat hits
+  float row = floor(uv.y * 40.0);
+  col = mix(col, col.gbr * 1.2, step(0.85, h(vec2(row, wt))) * hit);
+  col += vec3(1.0, 0.8, 0.95) * hit * 0.2;
+  // print finish
+  col += (h(uv * res + fract(t * 13.1) * 91.0) - 0.5) * 0.08;
+  col *= 0.93 + 0.07 * sin(uv.y * res.y * 1.5);
+  col *= 1.0 - 0.3 * pow(length((uv - 0.5) * vec2(1.1, 1.6)), 2.2);
+  o = vec4(clamp(col, 0.0, 1.0), 1.0);
+}`;
+let gl, U = {}, AN, out, octx;
+function init(analysis, ims) {
+  AN = analysis; const cv = document.getElementById('gl'); gl = cv.getContext('webgl2', { preserveDrawingBuffer: true });
+  const sh = (ty, s) => { const x = gl.createShader(ty); gl.shaderSource(x, s); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(x); return x; };
+  const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  ims.forEach((im, i) => { const tx = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, tx); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); });
+  for (const n of ['A', 'B', 't', 'kick', 'bass', 'hit', 'mixAB', 'rot', 'res']) U[n] = gl.getUniformLocation(prog, n);
+  gl.uniform1i(U.A, 0); gl.uniform1i(U.B, 1); gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(U.res, cv.width, cv.height);
+  out = document.getElementById('out'); octx = out.getContext('2d');
+}
+function render(t) {
+  const bp = 60 / AN.bpm, beat = Math.max(0, (t - AN.t0) / bp), ph = beat % 1, kick = Math.exp(-(ph * bp) * 9);
+  const f = Math.min(AN.frames - 1, Math.max(0, Math.round(t * AN.fps))), bass = AN.bass[f];
+  const hit = (Math.floor(beat) % 4 === 0 && ph < 0.12) ? 1 : 0;
+  // colourway flips each beat with a quick 3-frame dissolve
+  const cur = Math.floor(beat) % 2, mixAB = cur ? Math.min(1, ph * 8) : 1 - Math.min(1, ph * 8);
+  // rays turn steadily and lurch forward on every kick
+  const rot = 0.09 * Math.sin(t * 0.9) + 0.07 * (Math.floor(beat) % 2 ? 1 : -1) * Math.exp(-ph * 5);
+  gl.uniform1f(U.t, t); gl.uniform1f(U.kick, kick); gl.uniform1f(U.bass, bass); gl.uniform1f(U.hit, hit); gl.uniform1f(U.mixAB, mixAB); gl.uniform1f(U.rot, rot);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  octx.fillStyle = '#000'; octx.fillRect(0, 0, out.width, out.height);
+  const SH = 608, SY = Math.round((out.height - SH) / 2), z = 1 + 0.02 * kick;
+  octx.save(); octx.translate(out.width / 2, SY + SH / 2); octx.scale(z, z); octx.drawImage(gl.canvas, -540, -SH / 2); octx.restore();
+  octx.fillRect(0, 0, out.width, SY - 1); octx.fillRect(0, SY + SH + 1, out.width, out.height - SY - SH);
+}
+window.ready = false;
+const load = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+Promise.all([fetch('../analysis.json').then(r => r.json()), load('burst0.jpg'), load('burst1.jpg')])
+  .then(([a, i0, i1]) => { init(a, [i0, i1]); window.ready = true; }).catch(e => { window.err = String(e.stack || e); });
+window.renderBatch = (t0, n, fps, q) => { const r = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); r.push(out.toDataURL('image/jpeg', q).slice(23)); } return r; };
+</script></body></html>
