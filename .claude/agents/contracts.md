@@ -55,6 +55,7 @@ clip list).
 | `references/underground_playbook.md` | the artist | creative-direction playbook: 7 archetypes + cross-cutting rules; style.md turns it into binding rules |
 | `references/rage_transition_bible.md` | the artist | 20 transitions spec'd to the frame + deployment rules; presets in `src/transitions.py` |
 | `references/vfx_transitions_and_quality.md` | the artist | 12 VFX transitions + 10 quality principles + build order |
+| `references/chaching_playbook.md` | the artist | Cha Ching visual playbook: cut rhythm (measured), text-card templates, two grades, watermark; gaps list |
 | `references/<artist>_<title>.md` | reference-analyst | style recipe from a reference video |
 | `qa_report.md` | visualizer-qa | current QA report; see "QA tickets" |
 | `build_notes.md` | video-finisher | per version: what changed + which `Q-###` tickets were addressed or deferred |

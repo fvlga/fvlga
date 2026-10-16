@@ -20,6 +20,9 @@ rules. Binding rules for every song:
 4. Degrade, don't polish: grain, chroma split, scanlines, compression damage.
 5. One palette for the whole video (the grade is the brand).
 6. Edit on the drums: hard cuts on drops, type on snares, jitter on 808s.
+Cha Ching playbook with MEASURED cut rhythm (burst-then-hold), 13 text-card formats, two alternating grades,
+watermark layer: `fvlga-visualizer/references/chaching_playbook.md` (reference, not a rulebook; copy formats,
+never the wording — many source cards quote self-harm lines, write original text).
 Reference breakdowns (user-supplied, unverified by Claude): `fvlga-visualizer/references/cha_ching_breakdown.md`
 (persistent watermark system, split-screens, iMessage/ticker/questionnaire collage). Ideas only — don't add
 a permanent overlay unless the artist asks (they just removed always-on overlays).
