@@ -31,11 +31,16 @@ function render(t) {
   // lyric caption: tiny lowercase cream sans, bottom centre
   const cap = CAPS.find(c => t >= c[0] && t < c[1]);
   if (cap) { ctx.font = '400 21px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; const cw = ctx.measureText(cap[2].toLowerCase()).width;
-    ctx.fillStyle = 'rgba(8,14,18,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, H - 50, cw + 24, 31, 6); ctx.fill();   // QA: readable on bright frames
-    ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, H - 28); }
+    const cy = inDrop ? H - 120 : H - 28;   // lift the caption off the 'alone' lettering during the breakdown
+    ctx.fillStyle = 'rgba(8,14,18,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, cy - 22, cw + 24, 31, 6); ctx.fill();   // QA: readable on bright frames
+    ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, cy); }
   if (inDrop) return;
-  // book page (left third), every few bars
-  if (on(1, Math.floor(b / 2), 0.45)) { const pg = PAGES[Math.floor(b / 2) % PAGES.length], x = 34, y = 70;
+  let boxX = null;   // where the quote box is this bar (so other elements keep clear of it)
+  // book page: a different spot every time
+  if (on(1, Math.floor(b / 2), 0.45)) { const k = Math.floor(b / 2), pg = PAGES[k % PAGES.length];
+    // box origins (330x150): TL, TR (clear of the badge), ML, MR, BL, BR (clear of the caption + status list), top-centre
+    const SL = [[20, 40], [W - 470, 40], [20, 230], [W - 350, 230], [20, H - 215], [W - 600, H - 215], [W / 2 - 165, 40]];
+    const sl = SL[(k * 5 + 2) % SL.length], jr = rng(k * 977 + 5), x = sl[0] + 14 + Math.round((jr() - 0.5) * 24), _bx = (boxX = sl[0]), y = sl[1] + 30 + Math.round((jr() - 0.5) * 16);
     ctx.fillStyle = 'rgba(6,12,16,.42)'; ctx.fillRect(x - 14, y - 30, 330, 150);   // dark scrim behind the page
     ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(255,255,255,.93)'; ctx.font = '22px BookB'; ctx.fillText(pg[0], x, y);
     ctx.font = '12.5px Book'; const words = pg[1].split(' '); let line = '', yy = y + 26;
@@ -48,18 +53,10 @@ function render(t) {
   if (on(4, b, 0.3)) { ctx.textAlign = 'left'; ctx.font = '500 11px Cap'; ctx.fillStyle = CREAM; const x = W - 190, y = H - 110;
     ctx.fillText('relationship status:', x, y); ctx.font = '400 11px Cap';
     ['[ ] cuffed', '[ ] dancing', '[x] outside', '[x] gone'].forEach((s, i) => ctx.fillText(s, x + 8, y + 16 + i * 14)); }
-  // meter pills on the right edge (heights breathe with the bass)
-  if (on(5, b, 0.55)) { const cols = [['#ff7ab8', '#ffffff', '#5aa0ff'], ['#E4FF3F', '#8a5a2b', '#3a1f10']][b % 2];
-    for (let i = 0; i < 3; i++) { const h = 90 + 120 * (0.5 + 0.5 * Math.sin(t * 2 + i)) * (0.6 + bass), x = W - 46 - i * 20, y = H / 2 - h / 2;
-      const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, cols[0]); g.addColorStop(0.5, cols[1]); g.addColorStop(1, cols[2]);
-      ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x, y, 12, h, 6); ctx.fill(); } }
-  // film strip of tiny red frames along the top or bottom
-  if (on(6, b, 0.4) && thumbs.length) { const y = ((b % 2) || cap) ? 30 : H - 78, n = 9;   // never over a caption
-    ctx.fillStyle = 'rgba(20,0,0,.85)'; ctx.fillRect(W / 2 - n * 34, y - 6, n * 68, 50);
-    for (let i = 0; i < n; i++) { const im = thumbs[(i + b) % thumbs.length]; ctx.drawImage(im, W / 2 - n * 34 + 4 + i * 68, y, 60, 38); }
-    ctx.fillStyle = 'rgba(255,255,255,.7)'; for (let i = 0; i < n * 4; i++) ctx.fillRect(W / 2 - n * 34 + 6 + i * 17, y - 4, 7, 2); }
+  // (v27: the volume-meter pills on the right are retired)
+  // (v27: the red film strip is retired — artist didn't want it in every shot)
   // scanline / barcode bars on an edge
-  if (on(7, b, 0.45)) { const x0 = (b % 2) ? 0 : W - 120; ctx.fillStyle = 'rgba(255,255,255,.55)';
+  if (on(7, b, 0.45)) { const x0 = boxX !== null ? (boxX < W / 2 ? W - 120 : 0) : ((b % 2) ? 0 : W - 120); ctx.fillStyle = 'rgba(255,255,255,.55)';
     for (let i = 0; i < 26; i++) ctx.fillRect(x0, 200 + i * 7, 40 + ((i * 37 + b * 11) % 80), 2); }
   // green tracking squares stuck on the subject, jumping on kicks
   if (on(8, b, 0.6)) { const r = rng(b * 31 + Math.floor(beat)); ctx.strokeStyle = '#38ff6a'; ctx.lineWidth = 2;
