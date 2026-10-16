@@ -92,7 +92,7 @@ direct corrections (per-project notes) win.
   (sometimes two), clear of caption/badge/quote box — and its lettering changes FONT and COLOUR every time (pink oval stays).
   Artist (Oct 16): "popping every where... colour and font of the fvlga changes each time".
 - Opening (v33): artist likes the new opening but NOT the part where his cut-outs pop up — no cut-out pile in the intro
-- Opening lettering (v33): per-letter collage — each letter on its own paper tile in its own font (serif italic/roman, marker, mono, grotesk), cream/ink/yellow/pink/white/teal paper, never same font or paper twice in a row, slight tilt and tape; artist-made, not sloppy (legible, aligned baseline, controlled rotation).
+- Opening lettering (v37): ONE typeface only (Playfair italic black, cream) — artist rejected the multi-font per-letter collage. Word slams in with RGB ghosts then a pink marker underline draws under it. Artist gave creative control on the intro.
 - Tile-grid card (v34): a held shot split into a 3x2 grid of rounded tiles with black gaps (osamason banner look), used on only ~2 scenes. Masks src/grid_a.png/grid_b.png, overlay in src/build_v34c.py.
 - Sticker (v35): back to hopping to a new spot every bar, same lettering; its colour follows the scene (palette sampled per cut, src/vfx/scn_colors.json). Known issue: lands on faces — see references/fix_plan_v36.md.
 - v36 fixes (from references/fix_plan_v36.md): micro-text, status list, barcode bars, blue badge removed; sticker uses edge anchors + per-frame person keep-out (faces.json); off-teal windows re-graded; bars hard-matted black; giant words 86% width; grid B shortened. Not fixed: repeated shots, per-tile crop variety, quote placement inside tiles.
@@ -128,3 +128,4 @@ direct corrections (per-project notes) win.
 - Rejected (don't bring back): blackletter ad-lib slides; blocky condensed
   type (Anton) for name/title or ad-libs; swirl/emboss leftovers; FVLGA name
   cards mid-video; warm/orange grade on footage; heavy distortion on footage.
+- v37 notes: quotes never get a dark box/scrim (book page = cream paper, terminal = mint card, yellow highlighter caps replaced by red graffiti scrawl). Sticker only jumps on a new scene (colour distance + min 0.85 s; ~28% chance to jump on similar scenes). References: references/13_video_breakdowns.md (more tips coming from the artist).

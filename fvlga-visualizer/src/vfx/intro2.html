@@ -29,41 +29,22 @@ function giant(txt, age, color, maxW, maxH, dy) {   // fitted serif word, slams 
   ctx.save(); ctx.translate(W / 2, H / 2 + dy); ctx.scale(s, s); ctx.font = 'italic 900 ' + px + 'px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   ctx.lineWidth = px * 0.07; ctx.strokeStyle = '#0b0b0b'; ctx.strokeText(txt, 0, 0); ctx.fillStyle = color; ctx.fillText(txt, 0, 0); ctx.restore();
 }
-// ---- letter collage: every letter is its own hand-cut paper tile in its own font, composed on purpose ----
-// rules that keep it "artist, not sloppy": equal tile height (+-8%), tight even gaps, small tilts (+-3 deg), 6 paper colours,
-// never the same font or paper twice in a row, at most one pink tile per word, one piece of tape, jittered-but-clean cut edges.
-const LF = [(px) => 'italic 900 ' + px + 'px Ser', (px) => '900 ' + px + 'px Ser', (px) => px + 'px Mk', (px) => (px * 1.15) + 'px Mono', (px) => '800 ' + (px * 0.82) + 'px Cap', (px) => 'italic 400 ' + px + 'px Ser'];
-const LUP = [false, false, false, true, true, false];   // fonts that look right in capitals
-const PAP = [['#F5E9A8', '#14110d'], ['#14110d', '#E4FF3F'], ['#E4FF3F', '#14110d'], ['#ff2e7e', '#fff6c8'], ['#f4f4f2', '#14110d'], ['#1f6f86', '#F5E9A8']];
+// ---- opening type (v36): ONE typeface (Playfair italic black). A word slams in with an overshoot and RGB ghosts that settle,
+// then a hot-pink marker underline is drawn under it. Same font, same cream ink everywhere -> reads as one design, not a ransom note.
 function collageWord(txt, age, maxW, maxH, dy, seed) {
-  const r = rng(seed * 733 + 11), hs0 = Math.min(maxH, 300), items = []; let pf = -1, pp = -1, pinkUsed = false, taped = false;
-  const xh = LF.map((f, i) => { ctx.font = f(200); const m = ctx.measureText(LUP[i] ? 'X' : 'x'); return m.actualBoundingBoxAscent; });
-  [...txt].forEach(ch => {
-    if (ch === ' ') { items.push({ gap: hs0 * 0.3 }); return; }
-    let f; do { f = Math.floor(r() * 6); } while (f === pf); pf = f;
-    let p; do { p = Math.floor(r() * 6); } while (p === pp || (p === 3 && pinkUsed)); pp = p; if (p === 3) pinkUsed = true;
-    const g = LUP[f] ? ch.toUpperCase() : ch, hs = hs0 * (0.92 + r() * 0.16);
-    ctx.font = LF[f](200); const m = ctx.measureText(g), gw = m.actualBoundingBoxLeft + m.actualBoundingBoxRight, gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
-    let gs = (0.5 * hs) / xh[f]; if (gh * gs > 0.86 * hs) gs *= 0.86 * hs / (gh * gs);
-    const w = Math.max(gw * gs + 0.36 * hs, 0.55 * hs);
-    items.push({ ch: g, f, p, hs, gs, w, gw, gh, m, rot: (r() - 0.5) * 0.1, up: (r() - 0.5) * 0.1 * hs0, tape: !taped && r() > 0.7 && (taped = true), jit: [0, 1, 2, 3, 4, 5, 6, 7].map(() => (r() - 0.5) * 0.035) });
-  });
-  const total = items.reduce((a, it) => a + (it.gap || it.w) + hs0 * 0.04, 0), k = Math.min(1.25, maxW / total);
-  let x = -total * k / 2, li = 0; ctx.save(); ctx.translate(W / 2, H / 2 + dy);
-  for (const it of items) {
-    if (it.gap) { x += (it.gap + hs0 * 0.04) * k; continue; }
-    const a = age - li * 0.028; li++; if (a < 0) { x += (it.w + hs0 * 0.04) * k; continue; }
-    const e = ease(a / 0.13), sc = 1 + 1.7 * (1 - e), cx = x + it.w * k / 2, w = it.w * k, h = it.hs * k, pair = PAP[it.p];
-    ctx.save(); ctx.translate(cx, it.up * k); ctx.rotate(it.rot + (1 - e) * 0.5 * (li % 2 ? 1 : -1)); ctx.scale(sc, sc);
-    const pts = [[-w / 2, -h / 2], [0, -h / 2], [w / 2, -h / 2], [w / 2, 0], [w / 2, h / 2], [0, h / 2], [-w / 2, h / 2], [-w / 2, 0]].map((q, i) => [q[0] + it.jit[i] * w, q[1] + it.jit[(i + 3) % 8] * h]);
-    ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 12 * k; ctx.shadowOffsetY = 6 * k;
-    ctx.beginPath(); pts.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fillStyle = pair[0]; ctx.fill(); ctx.shadowColor = 'transparent';
-    ctx.lineWidth = Math.max(1, 2 * k); ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.stroke();
-    const fpx = 200 * it.gs * k; ctx.font = LF[it.f](fpx); ctx.fillStyle = pair[1]; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    ctx.fillText(it.ch, -(it.gw * it.gs * k) / 2 + it.m.actualBoundingBoxLeft * it.gs * k, (it.m.actualBoundingBoxAscent - it.gh / 2) * it.gs * k);
-    if (it.tape) { ctx.save(); ctx.translate(w * 0.12, -h / 2); ctx.rotate(-0.12); ctx.fillStyle = 'rgba(235,225,200,.78)'; ctx.fillRect(-w * 0.22, -h * 0.07, w * 0.44, h * 0.14); ctx.restore(); }
-    ctx.restore(); x += (it.w + hs0 * 0.04) * k;
-  }
+  if (age < 0) return;
+  const u = Math.min(1, age / 0.2), e = 1 - Math.pow(1 - u, 3), pop = u < 1 ? 1 + 0.45 * (1 - e) : 1 + 0.012 * Math.sin(age * 5);
+  const rr = (Math.sin(seed * 12.9898) * 43758.5453) % 1, rot = ((rr + 1) % 1 - 0.5) * 0.05;
+  ctx.save(); ctx.font = 'italic 900 100px Ser'; const m = ctx.measureText(txt), k0 = Math.min(maxH * 0.92 / 100, maxW / m.width), px = 100 * k0;
+  ctx.font = 'italic 900 ' + px + 'px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const w = ctx.measureText(txt).width;
+  ctx.translate(W / 2, H / 2 + dy); ctx.rotate(rot); ctx.scale(pop, pop); ctx.globalAlpha = Math.min(1, u * 3);
+  const off = 3 + 11 * (1 - e) + (age < 0.5 ? 2 * Math.sin(age * 90) : 0);
+  ctx.fillStyle = 'rgba(255,48,84,.85)'; ctx.fillText(txt, -off, 0); ctx.fillStyle = 'rgba(40,235,255,.85)'; ctx.fillText(txt, off, 0);
+  ctx.lineJoin = 'round'; ctx.lineWidth = px * 0.035; ctx.strokeStyle = 'rgba(8,16,20,.55)'; ctx.strokeText(txt, 0, 0);
+  ctx.fillStyle = '#f7edd3'; ctx.fillText(txt, 0, 0);
+  const pr = Math.max(0, Math.min(1, (age - 0.14) / 0.28)), pe = 1 - Math.pow(1 - pr, 3);
+  if (pr > 0) { ctx.strokeStyle = '#ff2e7e'; ctx.lineWidth = Math.max(5, px * 0.055); ctx.lineCap = 'round'; ctx.beginPath(); const y0 = px * 0.46, x0 = -w * 0.5, x1 = x0 + w * pe;
+    for (let x = x0; x <= x1; x += 6) { const yy = y0 + Math.sin(x * 0.045 + seed) * px * 0.012 + (x - x0) / w * px * -0.02; x === x0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy); } ctx.stroke(); }
   ctx.restore();
 }
 function sticker(cx, cy, sc, rot) {
