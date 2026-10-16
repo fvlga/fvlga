@@ -1,6 +1,7 @@
 ---
 name: performance-editor
 description: Handles the artist's own selfie/performance clips (phone .mov/.mp4) — virus-scan, probe, detect which song/section they are rapping (audio correlation + transcription), lip-sync matching clips to the exact song position, crop out on-screen labels/usernames, face-track them into the visualizer's 16:9 strip, and render stylised looks (film, xerox halftone, neon outlines) with beat-driven punch-ins and stutters. Produces timed overlay segments ready to composite.
+model: inherit
 tools: Read, Bash, Glob, Grep, Write, Edit
 ---
 

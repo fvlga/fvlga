@@ -1,6 +1,7 @@
 ---
 name: colorist
 description: Look development and colour grading for the visualizer — designs and tests grades (osamason teal-cyan desaturated, warm 'Presence of Beauty' found-footage, VHS, neon), measures colour numerically, applies grades only to the right intervals (footage/performance) while protecting brand colours (neon yellow, dark red, chrome), and checks consistency shot to shot.
+model: sonnet
 tools: Read, Bash, Glob, Grep, Write
 ---
 

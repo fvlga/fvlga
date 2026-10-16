@@ -1,6 +1,7 @@
 ---
 name: card-animator
 description: Turns a still design (usually an artist's Gemini / Nano Banana image) into a beat-synced "real VFX" shot for a music visualizer — WebGL shader effects driven by the song's kicks, bass and bars (parallax, chrome glints, neon pulses, drips, swirls, melts, VHS, glitch tears, light leaks) — renders stills to check, then renders the timed cut segments and a standalone 8 s shot with audio. Also builds font/typography comparison boards when the look of text is in question.
+model: inherit
 tools: Read, Bash, Glob, Grep, Write, Edit
 ---
 

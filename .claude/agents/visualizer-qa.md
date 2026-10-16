@@ -1,6 +1,7 @@
 ---
 name: visualizer-qa
 description: Strict frame-by-frame QA audit of a rendered music visualizer / music video. Use after every new render (or when the artist says "something looks off") to find letterbox leaks, black/blown/frozen frames, unreadable or garbled text, off-style leftovers, repeated shots, caption collisions, grade problems and brand-rule violations, with exact timestamps and concrete fixes. Read-only on the project; writes only a report.
+model: inherit
 tools: Read, Bash, Glob, Grep, Write
 ---
 

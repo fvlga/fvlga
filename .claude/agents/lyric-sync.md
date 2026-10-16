@@ -1,6 +1,7 @@
 ---
 name: lyric-sync
 description: Builds accurate, timed lyric captions and keyword hit-times for a song (for subtitles, kinetic type and cue cards) using local Whisper transcription across multiple passes plus any clean phone recordings of the artist. Only keeps phrases it is confident about — never invents lyrics. Also aligns phone clips of the artist rapping to the master by audio correlation (for lip-sync).
+model: sonnet
 tools: Read, Bash, Glob, Grep, Write
 ---
 

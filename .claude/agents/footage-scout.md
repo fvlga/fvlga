@@ -1,6 +1,7 @@
 ---
 name: footage-scout
 description: Finds, safely downloads, verifies and cuts public-domain vintage film footage (archive.org Prelinger and other public-domain/CC0 items) for music visualizers — e.g. "more shots like the boy in the red shirt": people outdoors, moving, faded 1950s–70s 16mm colour. Every download is hash-verified against archive.org's published md5 and virus-scanned before use. Produces ready-to-use frame-sequence clips, a manifest, a contact sheet and a provenance/licence file.
+model: sonnet
 tools: Read, Bash, Glob, Grep, Write
 ---
 

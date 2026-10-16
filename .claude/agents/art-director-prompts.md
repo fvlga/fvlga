@@ -1,6 +1,7 @@
 ---
 name: art-director-prompts
 description: Writes copy-paste prompt packs for Gemini (Nano Banana images, Veo video) and other generators so the artist can make cards, frames and clips that match the visualizer's established look. Knows the pitfalls (e.g. the word "card" makes Gemini draw a tarot card) and the artist's taste (sexy italic serif / script / liquid-chrome gothic, not blocky; dreamy 1960s found footage; fewer name/title mentions).
+model: sonnet
 tools: Read, Glob, Grep, Write
 ---
 

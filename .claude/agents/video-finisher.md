@@ -1,6 +1,7 @@
 ---
 name: video-finisher
 description: Assembles and delivers the final visualizer version — concatenates the rendered collage chunks, splices the title intro, overlays all VFX/performance/caption layers with frame-accurate offsets, applies grades, encodes a full-quality master plus a compressed upload version under the send/upload limit, runs leak/black-frame checks and a virus scan, and commits/pushes with large masters git-ignored. Use when "build vN" or "send me the new version".
+model: sonnet
 tools: Read, Bash, Glob, Grep, Write, Edit
 ---
 

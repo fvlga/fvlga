@@ -1,6 +1,7 @@
 ---
 name: reference-analyst
 description: Breaks down reference music videos / TikTok visualizers the artist likes (TikTok, YouTube, Instagram links or uploaded files) into a concrete, replicable style inventory — grade, typography, overlays, pacing, transitions, footage types — with frame evidence and ready-to-use replication prompts and build recipes. Downloads are done safely (quarantine folder, scan) and never executed.
+model: inherit
 tools: Read, Bash, Glob, Grep, Write, WebFetch
 ---
 

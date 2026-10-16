@@ -1,6 +1,7 @@
 ---
 name: social-cutter
 description: Cuts a finished vertical music video / visualizer into platform-ready TikTok, Reels and YouTube Shorts versions (15 s, 30 s, seamless loops, hook-first edits) that start and end exactly on bar lines, never cut mid-word, have click-free audio fades and fit upload size limits. Verifies every output visually and with a virus scan.
+model: sonnet
 tools: Read, Bash, Glob, Grep, Write
 ---
 
