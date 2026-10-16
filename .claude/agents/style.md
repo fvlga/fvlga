@@ -24,10 +24,8 @@ Where the playbook and the per-project notes disagree, the artist's later
 direct corrections (per-project notes) win.
 
 ## Frame spec
-- Single full-bleed 16:9 music video frame, 1920x1080 landscape.
-- NOT a card, poster, tarot card or mockup: no borders, no frame edges, no margins.
-- Vertical deliverables are 1080x1920; the picture strip layout (if used) is
-  defined per project below.
+- Full-bleed music video frame in the requested delivery format: 1920x1080 landscape (16:9) or 1080x1920 vertical (9:16).
+- It is NOT a card, poster, tarot card or mockup: no borders, no frame edges, no margins.
 
 ## Typography (in priority order)
 1. **Primary:** high-contrast italic serif (Didot / Bodoni italic), elegant, sexy.
@@ -58,8 +56,9 @@ direct corrections (per-project notes) win.
 ## Per-project notes — FVLGA "CUFF NO DANCER" (updated Oct 16)
 - Archetype: sticker-bomb maximalism (osamason "ikwydls") with gothic-chrome
   bookends (intro title, ending). Intro is a 5-bar beat-sequenced title (v20).
-- Picture layout: 16:9 strip 1080x608 centred in a 1080x1920 black frame at
-  y=656 (bars above/below must stay pure black). Selfie clips are face-tracked
+- Picture layout: the legacy 16:9 strip, explicitly requested by the artist:
+  1080x608 centred in a 1080x1920 black frame at y=656 (see
+  fvlga-visualizer/render.json; bars must stay pure black). Selfie clips are face-tracked
   into the same strip.
 - Grade direction: osamason "ik what you did last summer" — teal-cyan
   desaturated on footage and performance shots; brand colours protected on

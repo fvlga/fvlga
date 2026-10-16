@@ -7,7 +7,8 @@
 |---|---|
 | `style.md` | The single source of truth for the look: typography, palette, imagery rules, name/title discipline. When the artist corrects a direction, update THIS file — prompt packs and build scripts are dated outputs, this is the living record. |
 | `contracts.md` | Filenames, formats, units and limits agents share (analysis.json, captions.json, allcuts.json, QA ticket numbering, the 30 MB delivery limit, stage gates). The unversioned filename is always the current version; `_vN` files are history. |
-| `../../fvlga-visualizer/references/underground_playbook.md` | The artist's creative-direction playbook: 7 underground archetypes + cross-cutting rules. Pick one archetype per song (see style.md). |
+| `fvlga-visualizer/references/underground_playbook.md` | The artist's creative-direction playbook: 7 underground archetypes + cross-cutting rules. Pick one archetype per song (see style.md). |
+| `render.json` | The requested delivery format (16:9 or 9:16), fps, optional letterbox band and safe zones. Replaces the vague "format manifest" that v3 agents referred to but never defined. |
 | `voice.md` | Examples of the artist's real captions, for `release-manager` to match. |
 
 ## The team
@@ -22,7 +23,7 @@
 | `card-animator` | inherit | Gemini image → beat-synced VFX shot; font comparison boards |
 | `performance-editor` | inherit | Selfie clips: lip-sync, face-track, film/xerox/neon looks |
 | `colorist` | sonnet | Grade looks and where to apply them |
-| `video-finisher` | sonnet | Composites a version, compresses it under 30 MB, runs checks, scans, commits |
+| `video-finisher` | sonnet | Composites a version, compresses it under 30 MB, runs checks, scans, commits (pushes only when asked) |
 | `visualizer-qa` | inherit | Frame-by-frame audit with timestamps and fixes |
 | `social-cutter` | sonnet | Bar-aligned 15 s / 30 s cuts and loops |
 | `release-manager` | sonnet | Covers, captions, hashtags, platform spec checks and a posting plan (never posts) |
@@ -34,10 +35,34 @@
 2. **Gather material:** `art-director-prompts` (the artist makes images in Gemini) + `footage-scout` + `performance-editor` (if selfie clips were sent).
 3. **Make shots:** one `card-animator` per new image (up to 3 at a time) + `colorist` on test frames.
 4. **Build:** `video-finisher` (one at a time; it uses the whole CPU for rendering).
-5. **Check:** `visualizer-qa`, then loop back to 3 or 4 with its fix list.
+5. **Check:** `visualizer-qa`, then loop back to 3 or 4 with its fix list. Stop when no High and at most 3 Medium tickets are open, or after 3 loops, then ask the artist whether to ship (see contracts.md).
 6. **Ship:** `social-cutter` + `release-manager` + `mix-checker` on the exports.
 
 Why not 30 agents: rendering is CPU-bound (a few cores), so more than about 5 at once only makes everyone wait, and overlapping agents make it harder to pick the right one. For a big batch (for example 10 films to scout), launch several copies of the same agent on separate slices instead of inventing new agents.
+
+## Output-format contract
+- Default to native full-frame 16:9 landscape (1920x1080) for YouTube and native full-frame 9:16 vertical (1080x1920) for TikTok/Reels/Shorts.
+- When both are requested, recompose for each ratio and verify both; do not simply letterbox landscape footage into vertical.
+- Only use the legacy centred 16:9 strip (1080x608 at y=656 inside a 1080x1920 frame) when explicitly requested.
+- Keep important type and focal elements within the appropriate platform safe zones (vertical: bottom ~20% and right ~15% are covered by platform UI).
+
+## What changed in v4
+1. **`render.json` is now a real file.** v3's format contract pointed at "the manifest" in six agents, but `manifest.json` is the footage clip list. One file now defines format, fps, letterbox band, safe zones and delivery size.
+2. **Every agent now reads the shared files on its first line.** In v3 only 2 of 13 agents were told to read `style.md`, and the "standing rules" lived only in this README, which subagents never see. The rules moved into `contracts.md` and each agent file opens with a read-first line.
+3. **Blackletter contradiction removed.** `style.md` says blackletter is opt-in, but `art-director-prompts` and `card-animator` still said "gothic blackletter for titles". Both now defer to `style.md`.
+4. **footage-scout's 640x480 @ 15 fps working format is retired.** It was sized for the old 1080x608 strip. Clips now keep source resolution and frame rate, and the manifest records them so you know the effective pixels per format (a 9:16 window of 4:3 SD footage is only about 270x480).
+5. **Stage gates are machine-checkable.** `analysis.json` carries `bpm_confirmed`; `card-animator`, `social-cutter` and `video-finisher` stop if it isn't true. Caption clearing is defined (write back as `high`), and `video-finisher` refuses to render any non-`high` caption.
+6. **QA tickets can't drift.** Numbering continues from the highest existing ID, every report opens with a "Carried over" table, and QA verifies fixes on frames instead of trusting `build_notes.md`.
+7. **Version rule made unambiguous:** write `_v<N>` first, then copy over the unversioned file (beat-analyst and lyric-sync worded this differently).
+8. **video-finisher:** bitrate is computed from `delivery_mb` and duration instead of a hardcoded 1950k; it pushes only when asked and never to main; missing layers (collage, intro, caption/zine) are named as caller-owned build-script outputs and block the build instead of being guessed.
+9. **release-manager** treats an unfilled `voice.md` as missing and pauses only the copy step.
+10. **Stage 5 has an exit rule** (no High, at most 3 Medium, or 3 loops) so the QA loop can't run forever.
+
+Still yours to do: paste 5 to 10 real captions into `voice.md`. (Per-project notes for CUFF NO DANCER are filled in.)
+
+## What changed in v3 (merged with the ChatGPT pass)
+- **Output-format contract** (from the ChatGPT pass): native 16:9 or 9:16 full-frame by default; the old letterbox-strip default is gone from every agent; dual-format delivery means recomposing, not auto-cropping.
+- Everything from v2 is kept: `style.md`, `contracts.md`, `voice.md`, the stage-1 exit gate, the caption-confidence rule, QA ticket tracking.
 
 ## What changed in v2
 1. **New `style.md`** — the single source of truth for typography, palette, imagery rules and name/title discipline. Every agent reads it every run; corrections go here, not into scattered prompt packs. (This kills the blackletter-default bug that burned a full round of ad-lib slides.)
@@ -49,8 +74,4 @@ Why not 30 agents: rendering is CPU-bound (a few cores), so more than about 5 at
 7. Small fixes: footage-scout's 640x480@15fps working format is now a documented conscious choice; the 30 MB limit is read from `contracts.md` (not hardcoded in three agents); card-animator scaffolds new harnesses from a shared template.
 
 ## Standing rules for every agent
-- Read `style.md` and `contracts.md` at the start of every run. When the artist corrects a direction, update `style.md` — don't just fix the one output.
-- Anything downloaded is hash-verified against its published checksum (PyPI sha256, archive.org md5, or two independent mirrors), virus-scanned with `clamscan`, kept in its own quarantine folder and never executed. Anything over 1 GB needs the artist's OK.
-- The artist's originals (images, clips, master audio) are never overwritten; edits go to new files.
-- Typography, palette and name/title discipline come from `style.md` — never re-derive them from old prompt packs or guess them.
-- Large masters (`*_full.mp4`) stay out of git; deliverables respect the size limit in `contracts.md` and are scanned before sending.
+They live in `contracts.md` now. Every agent reads that file first, and each agent file says so in its opening line. This README is for humans; subagents never see it.
