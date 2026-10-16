@@ -42,8 +42,9 @@ function render(t) {
     ctx.fillStyle = 'rgba(8,14,18,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, cy - 22, cw + 24, 31, 6); ctx.fill();   // QA: readable on bright frames
     ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, cy); }
   if (inDrop) return;
-  // watermark system: small pink oval sticker, bottom-left, whole video (artist's Cha Ching reference)
-  { const bx = 108, by = H - 56, sc = 1 + 0.035 * kick; ctx.save(); ctx.translate(bx, by); ctx.rotate(-0.09); ctx.scale(sc, sc);
+  // watermark system: small pink oval sticker — OFF (artist, Oct 16: "no sticker")
+  const SHOW_STICKER = false;
+  if (SHOW_STICKER) { const bx = 108, by = H - 56, sc = 1 + 0.035 * kick; ctx.save(); ctx.translate(bx, by); ctx.rotate(-0.09); ctx.scale(sc, sc);
     ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(4, 5, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#ff2e7e'; ctx.beginPath(); ctx.ellipse(0, 0, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
     ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(0, 0, 77, 24, 0, 0, Math.PI * 2); ctx.stroke();
