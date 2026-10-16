@@ -229,7 +229,7 @@
   function giant(text, lt, len, col, fx) { // huge black-italic serif word, one word at a time (font option 3 over footage, 2 on blocks)
     const ws = text.toLowerCase().split(/\s+/), i = Math.min(ws.length - 1, Math.floor(lt / Math.max(0.1, len / ws.length)));
     s.save(); s.font = `${SH * 0.95}px ${FK}`; s.textAlign = 'center'; s.textBaseline = 'middle'; s.lineJoin = 'round';
-    const w = s.measureText(ws[i]).width, sx = Math.min(1.25, (SW * 0.97) / w); s.translate(SW / 2, SH * 0.5); s.scale(sx, sx > 1 ? 1 + (sx - 1) * 0.5 : sx);
+    const w = s.measureText(ws[i]).width, sx = Math.min(1.25, (SW * 0.86) / w); s.translate(SW / 2, SH * 0.5); s.scale(sx, sx > 1 ? 1 + (sx - 1) * 0.5 : sx);
     if (fx) { s.globalAlpha = 0.85; s.fillStyle = '#ff2a3a'; s.fillText(ws[i], 6, 2); s.fillStyle = '#25e7ff'; s.fillText(ws[i], -6, -2); s.globalAlpha = 1;
       s.lineWidth = SH * 0.012; s.strokeStyle = '#1a0a0a'; s.strokeText(ws[i], 0, 0); }
     s.fillStyle = col || '#E4FF3F'; s.fillText(ws[i], 0, 0); s.restore(); }

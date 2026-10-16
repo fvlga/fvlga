@@ -103,10 +103,12 @@ function render(t) {
     }
     ctx.restore(); }
   // "fvlga" sticker (v34: colour follows the scene): hops to a NEW spot every bar (clear of the caption, the badge and the quote box)
-  { const ANCH = [[110, 52], [340, 52], [760, 52], [90, 300], [W - 100, 330], [110, H - 56], [200, 430], [W - 120, 190]];
+  { const ANCH = [[110, 52], [W - 115, 52], [100, 300], [W - 105, 330], [115, H - 56], [W - 125, H - 56], [150, 190], [W - 120, 190]];   // edges only (v36: the centre belongs to the face)
     const raw = bb => Math.floor(rng(bb * 131 + 9)() * 8), idxOf = bb => raw(bb) === raw(bb - 1) ? (raw(bb) + 3) % 8 : raw(bb);
     const clash = i => boxC && Math.abs(ANCH[i][0] - boxC[0]) < 270 && Math.abs(ANCH[i][1] - boxC[1]) < 125;
-    let ci = idxOf(b), tries = 0; while (clash(ci) && tries++ < 8) ci = (ci + 2) % 8;
+    const fb = (() => { const f = window.FACES; if (!f) return []; const k = Math.floor((t - 0) * f.fps), r = []; for (let q = k - 1; q <= k + 1; q++) { const bx = f.boxes[q]; if (bx) r.push(bx); } return r; })();
+    const faceHit = (x, y) => fb.some(bx => x + 95 > bx[0] - 40 && x - 95 < bx[2] + 40 && y + 40 > bx[1] - 40 && y - 40 < bx[3] + 40);
+    let ci = idxOf(b), tries = 0; while ((clash(ci) || faceHit(ANCH[ci][0], ANCH[ci][1])) && tries++ < 8) ci = (ci + 1) % 8;
     const pi = idxOf(b - 1), age = Math.max(0, t - (A.t0 + b * 4 * bp)), u = Math.min(1, age / 0.2), e = 1 - Math.pow(1 - u, 3);
     const cur = ANCH[ci], prv = ANCH[pi], x = prv[0] + (cur[0] - prv[0]) * e, y = prv[1] + (cur[1] - prv[1]) * e - 30 * Math.sin(Math.PI * u);
     const pop = u < 1 ? 1 + 2.70158 * Math.pow(u - 1, 3) + 1.70158 * Math.pow(u - 1, 2) : 1, rot = -0.09 + (rng(b * 977 + 3)() - 0.5) * 0.34 + Math.sin(t * 2.1) * 0.025, sc = pop * (1 + 0.035 * kick);
@@ -117,29 +119,29 @@ function render(t) {
     ctx.fillStyle = SP[1]; ctx.font = 'italic 800 27px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('fvlga', 0, 1); ctx.restore(); ctx.textBaseline = 'alphabetic'; }
   // micro-text in the top corners
   ctx.font = '400 10px Cap'; ctx.fillStyle = 'rgba(245,233,168,.85)';
-  if (on(2, b, 0.6)) { ctx.textAlign = 'left'; ctx.fillText(MICRO[b % MICRO.length], 14, 18); }
-  if (on(3, b, 0.5)) { ctx.textAlign = 'right'; ctx.fillText(MICRO[(b + 3) % MICRO.length], W - 14, 18); }
+  if (false && on(2, b, 0.6)) { ctx.textAlign = 'left'; ctx.fillText(MICRO[b % MICRO.length], 14, 18); }
+  if (false && on(3, b, 0.5)) { ctx.textAlign = 'right'; ctx.fillText(MICRO[(b + 3) % MICRO.length], W - 14, 18); }
   // status list block
-  if (on(4, b, 0.3)) { ctx.textAlign = 'left'; ctx.font = '500 11px Cap'; ctx.fillStyle = CREAM; const x = W - 190, y = H - 110;
+  if (false && on(4, b, 0.3)) { ctx.textAlign = 'left'; ctx.font = '500 11px Cap'; ctx.fillStyle = CREAM; const x = W - 190, y = H - 110;
     ctx.fillText('relationship status:', x, y); ctx.font = '400 11px Cap';
     ['[ ] cuffed', '[ ] dancing', '[x] outside', '[x] gone'].forEach((s, i) => ctx.fillText(s, x + 8, y + 16 + i * 14)); }
   // (v27: the volume-meter pills on the right are retired)
   // (v27: the red film strip is retired — artist didn't want it in every shot)
   // scanline / barcode bars on an edge
-  if (on(7, b, 0.45)) { const x0 = boxX !== null ? (boxX < W / 2 ? W - 120 : 0) : ((b % 2) ? 0 : W - 120); ctx.fillStyle = 'rgba(255,255,255,.55)';
+  if (false && on(7, b, 0.45)) { const x0 = boxX !== null ? (boxX < W / 2 ? W - 120 : 0) : ((b % 2) ? 0 : W - 120); ctx.fillStyle = 'rgba(255,255,255,.55)';
     for (let i = 0; i < 26; i++) ctx.fillRect(x0, 200 + i * 7, 40 + ((i * 37 + b * 11) % 80), 2); }
   // green tracking squares stuck on the subject, jumping on kicks
   if (on(8, b, 0.6)) { const r = rng(b * 31 + Math.floor(beat)); ctx.strokeStyle = '#38ff6a'; ctx.lineWidth = 2;
     for (let i = 0; i < 3; i++) { const s = 22 + r() * 26; ctx.strokeRect(W * (0.35 + r() * 0.3), H * (0.25 + r() * 0.45), s, s); } }
   // circle badge, top right
-  if (on(9, b, 0.35)) { const x = W - 70, y = 72, rr = 40 * (1 + 0.06 * kick); ctx.fillStyle = '#2f6bff'; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
+  if (false && on(9, b, 0.35)) { const x = W - 70, y = 72, rr = 40 * (1 + 0.06 * kick); ctx.fillStyle = '#2f6bff'; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.font = '600 13px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(BADGE[b % BADGE.length], x, y); ctx.textBaseline = 'alphabetic'; }
 }
 window.ready = false;
 const load = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
 (async () => {
   try {
-    A = await fetch('../analysis.json').then(r => r.json()); ctx = document.getElementById('c').getContext('2d');
+    A = await fetch('../analysis.json').then(r => r.json()); try { window.FACES = await fetch('../faces.json').then(r => r.json()); } catch (e) { window.FACES = null; } ctx = document.getElementById('c').getContext('2d');
     await document.fonts.load('20px Cap'); await document.fonts.load('20px Mk'); await document.fonts.load('20px Mono'); await document.fonts.load('20px Scr'); await document.fonts.load('700 20px Ser'); await document.fonts.load('20px Book'); await document.fonts.load('20px BookB');
     const ims = await Promise.all([16, 17, 18, 20, 24, 25, 27, 41, 43, 49, 52, 55].map(i => load(`../foot/c${i}/0030.jpg`)));
     for (const im of ims.filter(Boolean)) { const c = document.createElement('canvas'); c.width = 120; c.height = 76; const x = c.getContext('2d');
