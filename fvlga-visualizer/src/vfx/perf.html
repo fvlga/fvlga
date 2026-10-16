@@ -104,7 +104,7 @@ async function render(job, i, fps, maxf) {
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, T[0]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, a);
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, T[1]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, e);
   gl.uniform1f(U.t, t); gl.uniform1f(U.kick, kick); gl.uniform1f(U.bass, bass); gl.uniform1f(U.hit, hit);
-  const md = job.cycle ? ['film', 'xerox', 'film', 'neon'][Math.floor(beat / 4) % 4] : job.mode;   // lip-sync shot: new look every bar
+  const md = job.cycle ? ['xerox', 'xerox', 'xerox', 'neon'][Math.floor(beat / 4) % 4] : job.mode;   // lip-sync shot: new look every bar
   gl.uniform1f(U.mode, md === 'neon' ? 2 : md === 'xerox' ? 1 : 0); gl.uniform1f(U.soft, job.sync ? 1 : 0); gl.uniform1f(U.flip, Math.floor(beat / 8) % 2); gl.uniform1f(U.alt, Math.floor(beat / 4) % 2);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }

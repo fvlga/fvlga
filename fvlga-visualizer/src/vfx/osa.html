@@ -14,8 +14,8 @@ function scnCol(t) { let lo = 0, hi = SCN.length - 1; while (lo < hi) { const m 
 // sticker jumps only when the scene changes (and sometimes stays put when the new scene is similar)
 const JUMPS = (() => { const J = [{ t: 0, a: 0 }]; let last = -9, a = 0; const hx = c => [1, 3, 5].map(q => parseInt(c.substr(q, 2), 16) / 255);
   for (let i = 1; i < SCN.length; i++) { const p = hx(SCN[i - 1][2]), q = hx(SCN[i][2]), d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]), r = ((Math.sin(i * 91.7) * 43758.5453) % 1 + 1) % 1;
-    if (SCN[i][0] - last < 0.85) continue;
-    if (d > 0.42 || r < 0.28) { a = (a + 1 + Math.floor(((Math.sin(i * 12.9) * 9301.3) % 1 + 1) % 1 * 6)) % 8; J.push({ t: SCN[i][0], a }); last = SCN[i][0]; } }
+    if (SCN[i][0] - last < 7) continue;   // v38: fixed spot for long stretches (>= 7 s)
+    if (d > 0.25 || SCN[i][0] - last > 11) { a = (a + 1 + Math.floor(((Math.sin(i * 12.9) * 9301.3) % 1 + 1) % 1 * 6)) % 8; J.push({ t: SCN[i][0], a }); last = SCN[i][0]; } }
   return J; })();
 // osamason-style zine layer (transparent, drawn over the 16:9 strip): tiny cream lowercase lyric captions,
 // torn book-page text, corner micro-text, status list, meter pills, film strip, scanline bars, green tracking

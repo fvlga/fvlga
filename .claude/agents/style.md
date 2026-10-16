@@ -129,3 +129,4 @@ direct corrections (per-project notes) win.
   type (Anton) for name/title or ad-libs; swirl/emboss leftovers; FVLGA name
   cards mid-video; warm/orange grade on footage; heavy distortion on footage.
 - v37 notes: quotes never get a dark box/scrim (book page = cream paper, terminal = mint card, yellow highlighter caps replaced by red graffiti scrawl). Sticker only jumps on a new scene (colour distance + min 0.85 s; ~28% chance to jump on similar scenes). References: references/13_video_breakdowns.md (more tips coming from the artist).
+- v38: artist loves the halftone/xerox face look — use it on every shot of his face (perf cutaways + lip-sync) EXCEPT the dark/black neon-edge ones, which stay as they are. Sticker holds a fixed spot for >= 7 s (jumps only on a clearly new scene after that); its COLOUR still follows the scene even while it stays put.
