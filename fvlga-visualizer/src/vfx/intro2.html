@@ -1,0 +1,98 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Ser;src:url(../Playfair.ttf);font-weight:100 900}
+@font-face{font-family:Mk;src:url(../PermanentMarker.ttf)}
+@font-face{font-family:Cap;src:url(../Inter.ttf)}
+html,body{margin:0;background:#000}</style></head><body><canvas id="c" width="1080" height="608"></canvas><script>
+// New opening (v32): built from the video's own language instead of the old chrome-gothic title.
+// 5 bars @148 BPM = 20 beats = 8.133 s. bar 1 burst (cuff / no / dancer / title), bar 2 hold (you in the scene + sticker),
+// bar 3 burst (bands up hands up), bar 4 you pile up as stickers, bar 5 held title -> white-out into the first cut.
+const W = 1080, H = 608, BP = 60 / 148, T0 = 0.01, YEL = '#E4FF3F', CREAM = '#F5E9A8', PINK = '#ff2e7e';
+const SC = [ // [first beat, beats, clip]
+  [0, 1, 16], [1, 1, 82], [2, 1, 85], [3, 1, 91], [4, 4, 95], [8, 1, 17], [9, 1, 61], [10, 1, 80], [11, 1, 65], [12, 4, 92], [16, 4, 97]];
+const WORDS = { 0: 'cuff', 1: 'no', 2: 'dancer', 8: 'bands', 9: 'up', 10: 'hands', 11: 'up' };
+const PILE = [[12, 'p07', 150, 590], [13, 'n03', 930, 590], [14, 'n01', 330, 600], [15, 'p04', 790, 600]];   // [beat, cut-out, x, feet-y]
+let ctx, man, FR = {}, CO = {};
+const ease = u => 1 - Math.pow(1 - Math.min(1, Math.max(0, u)), 3);
+const back = u => { u = Math.min(1, Math.max(0, u)); return 1 + 2.70158 * Math.pow(u - 1, 3) + 1.70158 * Math.pow(u - 1, 2); };
+const rng = s => () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+function footage(clip, t, zoom) {   // teal-graded 1960s frame, cover-fit into the strip
+  const n = man[clip].n, i = Math.floor(t * 15) % n + 1, im = FR[clip + '_' + i] || FR[clip + '_1'];
+  const s = Math.max(W / im.width, H / im.height) * zoom, w = im.width * s, h = im.height * s;
+  ctx.save(); ctx.filter = 'saturate(0.62) contrast(1.12) brightness(0.96)'; ctx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); ctx.restore();
+  ctx.save(); ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = 'rgba(20,135,165,0.62)'; ctx.fillRect(0, 0, W, H); ctx.restore();
+  ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = 'rgba(170,215,225,0.28)'; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+function giant(txt, age, color, maxW, maxH, dy) {   // fitted serif word, slams in (3x -> 1x) with a hard stop
+  let px = 320; ctx.font = 'italic 900 ' + px + 'px Ser'; const m = ctx.measureText(txt).width; px = Math.min(maxH, px * Math.min(1, maxW / m));
+  const s = 1 + 2.1 * (1 - ease(age / 0.13)) + (age < 0.2 ? 0 : 0);
+  ctx.save(); ctx.translate(W / 2, H / 2 + dy); ctx.scale(s, s); ctx.font = 'italic 900 ' + px + 'px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.lineWidth = px * 0.07; ctx.strokeStyle = '#0b0b0b'; ctx.strokeText(txt, 0, 0); ctx.fillStyle = color; ctx.fillText(txt, 0, 0); ctx.restore();
+}
+function sticker(cx, cy, sc, rot) {
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot); ctx.scale(sc, sc);
+  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(4, 5, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = PINK; ctx.beginPath(); ctx.ellipse(0, 0, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(0, 0, 77, 24, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = YEL; ctx.font = 'italic 800 27px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('fvlga', 0, 1); ctx.restore();
+}
+function cutout(name, x, feet, h, age, flip) {   // artist cut-out with a white sticker edge, pops with a bounce
+  const im = CO[name], s = h / im.height, w = im.width * s, p = back(age / 0.16), a = Math.min(1, age / 0.05);
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, feet); ctx.scale(p, p); ctx.rotate((flip ? -1 : 1) * 0.05 * (1 - ease(age / 0.3)));
+  ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
+  const tmp = document.createElement('canvas'); tmp.width = Math.ceil(w) + 24; tmp.height = Math.ceil(h) + 24; const t = tmp.getContext('2d');
+  for (const [dx, dy] of [[-4, 0], [4, 0], [0, -4], [0, 4], [-3, -3], [3, 3], [-3, 3], [3, -3]]) t.drawImage(im, 12 + dx, 12 + dy, w, h);
+  t.globalCompositeOperation = 'source-in'; t.fillStyle = '#eef3f7'; t.fillRect(0, 0, tmp.width, tmp.height); t.globalCompositeOperation = 'source-over'; t.drawImage(im, 12, 12, w, h);
+  ctx.drawImage(tmp, -tmp.width / 2, -tmp.height + 12); ctx.restore();
+}
+function note(txt, cx, cy, rot, age) {   // marker-on-sticky-note quote
+  const p = back(age / 0.16); ctx.save(); ctx.translate(cx, cy); ctx.scale(p, p); ctx.rotate(rot);
+  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-92, -56, 190, 120); ctx.fillStyle = YEL; ctx.fillRect(-98, -62, 190, 120);
+  ctx.fillStyle = 'rgba(235,225,200,.8)'; ctx.fillRect(-34, -72, 68, 20); ctx.fillStyle = '#16120d'; ctx.font = '25px Mk'; ctx.textAlign = 'left';
+  txt.split('|').forEach((ln, i) => ctx.fillText(ln, -84, -22 + i * 30)); ctx.restore();
+}
+function render(t) {
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  const bt = Math.max(0, (t - T0) / BP), bi = Math.min(19, Math.floor(bt)), age = (bt - bi) * BP;   // age = seconds since this beat
+  const sc = SC.find(s => bi >= s[0] && bi < s[0] + s[1]) || SC[SC.length - 1];
+  const local = (bt - sc[0]) * BP, kick = Math.exp(-age * 9);
+  const zoom = 1.04 + 0.05 * kick + (sc[1] > 1 ? 0.035 * (local / (sc[1] * BP)) : 0);
+  footage(sc[2], Math.max(0, local), zoom);
+  ctx.save(); ctx.globalCompositeOperation = 'source-over'; const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, W * 0.75); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore();
+  // words
+  if (WORDS[bi]) giant(WORDS[bi], age, bi % 2 ? CREAM : YEL, W * 0.9, 430, 0);
+  if (bi === 3) giant('cuff no dancer', age, YEL, W * 0.94, 300, -6);
+  if (bi >= 16) {   // bar 5: the title stacked, held
+    const a = (bt - 16) * BP, lines = [['cuff', -150, YEL], ['no', 0, CREAM], ['dancer', 150, YEL]];
+    lines.forEach(([w2, dy, col], i) => giant(w2, a - i * 0.2, col, W * 0.66, 190, dy));
+  }
+  // hold bar: you in the scene, sticker + a note pop in
+  if (bi >= 4 && bi < 8) {
+    const a = (bt - 4) * BP; sticker(W - 150, 62, back((a - 0.1) / 0.2) * (1 + 0.04 * kick), -0.09);
+    if (bi >= 6) note('stay|outside', 170, 190, -0.07, (bt - 6) * BP);
+  }
+  // bar 3: tiny quote tag keeps the zine feel
+  if (bi >= 8 && bi < 12) { const a = (bt - 8) * BP; sticker(110 + 36 * (bi - 8), H - 56, back((a % BP) / 0.14) * (1 + 0.04 * kick), -0.09 + 0.05 * (bi - 8)); }
+  // bar 4: the artist piles up as stickers on the beat
+  if (bi >= 12 && bi < 16) for (const [b0, nm, x, y] of PILE) if (bi >= b0) cutout(nm, x, y, 420, (bt - b0) * BP, b0 % 2);
+  if (bi >= 12 && bi < 16) sticker(W / 2, 54, 1 + 0.04 * kick, 0.06);
+  if (bi >= 16) sticker(W - 130, H - 56, back(((bt - 16) * BP - 0.5) / 0.2) * (1 + 0.04 * kick), -0.09);
+  // end: white-out into the first cut
+  const fl = Math.min(1, Math.max(0, (t - (8.133 - 0.2)) / 0.2)); if (fl > 0) { ctx.fillStyle = 'rgba(255,255,255,' + (fl * fl) + ')'; ctx.fillRect(0, 0, W, H); }
+  // beat flash on the downbeat of each bar
+  if (bi % 4 === 0 && age < 0.05) { ctx.fillStyle = 'rgba(255,255,255,' + 0.35 * (1 - age / 0.05) + ')'; ctx.fillRect(0, 0, W, H); }
+  // film grain
+  const r = rng(Math.floor(t * 30) * 7919 + 13); ctx.save(); ctx.globalAlpha = 0.09; for (let i = 0; i < 700; i++) { ctx.fillStyle = r() > 0.5 ? '#fff' : '#000'; ctx.fillRect(r() * W, r() * H, 2, 2); } ctx.restore();
+}
+const load = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+window.ready = false;
+(async () => {
+  try {
+    ctx = document.getElementById('c').getContext('2d'); man = await fetch('../foot/manifest.json').then(r => r.json());
+    await document.fonts.load('italic 900 40px Ser'); await document.fonts.load('20px Mk'); await document.fonts.load('20px Cap');
+    const jobs = []; for (const s of SC) for (let i = 1; i <= Math.min(man[s[2]].n, 30); i++) jobs.push(load(`../foot/c${s[2]}/${String(i).padStart(4, '0')}.jpg`).then(im => { if (im) FR[s[2] + '_' + i] = im; }));
+    for (const [, nm] of PILE) { const p = nm.startsWith('n') ? '../../stick/cut2/' : '../../stick/cut/'; jobs.push(load(p + nm + '.png').then(im => { CO[nm] = im; })); }
+    await Promise.all(jobs); window.ready = true;
+  } catch (e) { window.err = String(e.stack || e); }
+})();
+window.renderBatch = (t0, n, fps, q) => { const out = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); out.push(document.getElementById('c').toDataURL('image/jpeg', q).slice(23)); } return out; };
+</script></body></html>

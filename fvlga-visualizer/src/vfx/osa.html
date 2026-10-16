@@ -42,19 +42,13 @@ function render(t) {
     ctx.fillStyle = 'rgba(8,14,18,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, cy - 22, cw + 24, 31, 6); ctx.fill();   // QA: readable on bright frames
     ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, cy); }
   if (inDrop) return;
-  // watermark system: small pink oval sticker — OFF (artist, Oct 16: "no sticker")
-  const SHOW_STICKER = false;
-  if (SHOW_STICKER) { const bx = 108, by = H - 56, sc = 1 + 0.035 * kick; ctx.save(); ctx.translate(bx, by); ctx.rotate(-0.09); ctx.scale(sc, sc);
-    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(4, 5, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ff2e7e'; ctx.beginPath(); ctx.ellipse(0, 0, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(0, 0, 77, 24, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = '#E4FF3F'; ctx.font = 'italic 800 27px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('fvlga', 0, 1); ctx.restore(); ctx.textBaseline = 'alphabetic'; }
-  let boxX = null;   // where the quote box is this bar (so other elements keep clear of it)
+  let boxX = null, boxC = null;   // where the quote box is this bar (so other elements keep clear of it)
   // quotes: a different spot AND a different look every time (book page / receipt / sticky note / neon script / ransom cut-outs / terminal)
   if (on(1, Math.floor(b / 2), 0.45)) { const k = Math.floor(b / 2), pg = PAGES[k % PAGES.length], q = QUOTES[(k * 3 + 1) % QUOTES.length];
     const SL = [[20, 40], [W - 470, 40], [20, 230], [W - 350, 230], [20, H - 275], [W - 600, H - 230], [W / 2 - 165, 40]];   // 330x150 regions: TL, TR, ML, MR, BL, BR, top-centre
-    const sl = SL[(k * 5 + 2) % SL.length], jr = rng(k * 977 + 5); boxX = sl[0];
-    const sty = (k * 7 + 3) % 9, cx = Math.min(W - 195, Math.max(195, sl[0] + 165 + Math.round((jr() - 0.5) * 24))), cy = sl[1] + 75 + Math.round((jr() - 0.5) * 14);
+    const sl = SL[(k * 5 + 2) % SL.length], jr = rng(k * 977 + 5); boxX = sl[0]; boxC = null;
+    const sty = (k * 7 + 3) % 9, cx0 = 0, cx = Math.min(W - 195, Math.max(195, sl[0] + 165 + Math.round((jr() - 0.5) * 24))), cy = sl[1] + 75 + Math.round((jr() - 0.5) * 14);
+    boxC = [cx, cy];
     const age = Math.max(0, t - (A.t0 + k * 8 * bp)), u = Math.min(1, age / 0.16), pop = u < 1 ? 1 + 2.7 * Math.pow(u - 1, 3) + 1.7 * Math.pow(u - 1, 2) : 1;   // ease-out-back
     const wrap = (txt, maxW) => { const out = []; let line = ''; for (const w of txt.split(' ')) { const tl = line + w + ' '; if (ctx.measureText(tl).width > maxW && line) { out.push(line.trim()); line = w + ' '; } else line = tl; } out.push(line.trim()); return out; };
     ctx.save(); ctx.translate(cx, cy); ctx.scale(pop, pop); ctx.globalAlpha = Math.min(1, u * 2.5); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
@@ -106,6 +100,19 @@ function render(t) {
       bub(th[0], -140, -62, false); bub(th[1], 140, -16, true); ctx.font = '11px Cap'; ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.textAlign = 'right'; ctx.fillText('delivered', 140, 36);
     }
     ctx.restore(); }
+  // pink "fvlga" sticker: hops to a NEW spot every bar (clear of the caption, the badge and the quote box)
+  { const ANCH = [[110, 52], [340, 52], [760, 52], [90, 300], [W - 100, 330], [110, H - 56], [200, 430], [W - 120, 190]];
+    const raw = bb => Math.floor(rng(bb * 131 + 9)() * 8), idxOf = bb => raw(bb) === raw(bb - 1) ? (raw(bb) + 3) % 8 : raw(bb);
+    const clash = i => boxC && Math.abs(ANCH[i][0] - boxC[0]) < 270 && Math.abs(ANCH[i][1] - boxC[1]) < 125;
+    let ci = idxOf(b), tries = 0; while (clash(ci) && tries++ < 8) ci = (ci + 2) % 8;
+    const pi = idxOf(b - 1), age = Math.max(0, t - (A.t0 + b * 4 * bp)), u = Math.min(1, age / 0.2), e = 1 - Math.pow(1 - u, 3);
+    const cur = ANCH[ci], prv = ANCH[pi], x = prv[0] + (cur[0] - prv[0]) * e, y = prv[1] + (cur[1] - prv[1]) * e - 30 * Math.sin(Math.PI * u);
+    const pop = u < 1 ? 1 + 2.70158 * Math.pow(u - 1, 3) + 1.70158 * Math.pow(u - 1, 2) : 1, rot = -0.09 + (rng(b * 977 + 3)() - 0.5) * 0.34 + Math.sin(t * 2.1) * 0.025, sc = pop * (1 + 0.035 * kick);
+    ctx.save(); ctx.translate(x, y + Math.sin(t * 1.7) * 2.5); ctx.rotate(rot); ctx.scale(sc, sc);
+    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(4, 5, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ff2e7e'; ctx.beginPath(); ctx.ellipse(0, 0, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(0, 0, 77, 24, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#E4FF3F'; ctx.font = 'italic 800 27px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('fvlga', 0, 1); ctx.restore(); ctx.textBaseline = 'alphabetic'; }
   // micro-text in the top corners
   ctx.font = '400 10px Cap'; ctx.fillStyle = 'rgba(245,233,168,.85)';
   if (on(2, b, 0.6)) { ctx.textAlign = 'left'; ctx.fillText(MICRO[b % MICRO.length], 14, 18); }
