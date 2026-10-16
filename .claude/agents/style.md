@@ -93,6 +93,7 @@ direct corrections (per-project notes) win.
   Artist (Oct 16): "popping every where... colour and font of the fvlga changes each time".
 - Opening (v33): artist likes the new opening but NOT the part where his cut-outs pop up — no cut-out pile in the intro
 - Opening lettering (v33): per-letter collage — each letter on its own paper tile in its own font (serif italic/roman, marker, mono, grotesk), cream/ink/yellow/pink/white/teal paper, never same font or paper twice in a row, slight tilt and tape; artist-made, not sloppy (legible, aligned baseline, controlled rotation).
+- Tile-grid card (v34): a held shot split into a 3x2 grid of rounded tiles with black gaps (osamason banner look), used on only ~2 scenes. Masks src/grid_a.png/grid_b.png, overlay in src/build_v34c.py.
   (bar 4 is footage + words instead). Cut-outs stay for the 'alone' shot and the ending.
 - (history) Watermark (v32): the pink "fvlga" oval sticker is BACK (artist: "i like the sticker, the pink one") but it must MOVE:
   it hops to a new spot every bar, clear of caption/badge/quote box. (history: briefly removed in v31.) Original: small pink oval "fvlga" sticker bottom-left through the whole video (from the Cha Ching
