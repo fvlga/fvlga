@@ -1,24 +1,31 @@
 # The artist's voice — for captions written by agents
 
-`release-manager` matches this voice when writing platform captions. If this
-file is missing or thin, ask the caller for 3–5 real past captions instead of
-inventing a voice.
+`release-manager` matches this voice when writing platform captions.
 
-## How he writes
-- Short, lowercase, underground. No corporate tone, no hype-bro clichés.
-- _Paste 5–10 of his actual past captions below — real examples beat any
-  description._
+Status (Oct 16): the artist chose to let Claude draft the voice instead of
+pasting real captions. The examples below are DRAFTS the artist can edit or
+replace; treat them as the approved base until real ones replace them.
 
-## Examples (replace with real ones)
-1. _
-2. _
-3. _
-4. _
-5. _
+## How FVLGA writes
+- Short, lowercase, underground. Usually 1–6 words. No corporate tone, no
+  hype-bro clichés, no emoji spam (one at most).
+- Lines lifted straight from the song beat any description of it.
+- Deadpan > excited. Never explain the joke.
 
-## Hashtag lanes (scene tags he actually uses)
-- _e.g. undergroundrap, pluggnb, rage — edit to his real set._
+## Examples (drafts — edit freely)
+1. cuff no dancer
+2. bands up hands up
+3. dont play w me
+4. i dont know why i trust this hoe so damn much
+5. not alone anymore
+6. found this in a 1960s home movie
+7. who let me in the archive
+8. cuff no dancer out [date] — link in bio
+
+## Hashtag lanes
+- #fvlga #cuffnodancer #undergroundrap #rage #pluggnb #underground #newmusic
+- 3–6 tags per post; song + artist tag always first.
 
 ## Never
-- Never invent streaming links or release dates — leave placeholders.
+- Never invent streaming links or release dates — leave placeholders like [date] / [link].
 - Never write in a voice that sounds like a label intern.
