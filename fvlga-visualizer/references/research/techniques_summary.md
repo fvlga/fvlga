@@ -1,5 +1,5 @@
 # Techniques research — 30 underground videos (summary)
-Oct 16 2026. Three research agents (10 videos each). **Limits:** the page fetcher failed on most sites (DNS errors) and YouTube was unreachable, so nobody watched the videos or read articles in full; the agents used search-result text, Wikipedia, IMVDb, shots.net, press releases, FADER/XXL/Uproxx text. Per-artist detail with source URLs and VERIFIED/INFERRED tags is in techniques_A.md, techniques_B.md, techniques_C.md. Treat anything INFERRED as a hypothesis to check by eye.
+Oct 16 2026. Three research agents (10 videos each), then a second pass where each agent looked at 4 public still frames per video (120 frames; the videos themselves can't be downloaded from this server). **Limits:** the page fetcher failed on most sites (DNS errors) and YouTube was unreachable, so nobody watched the videos or read articles in full; the agents used search-result text, Wikipedia, IMVDb, shots.net, press releases, FADER/XXL/Uproxx text. Per-artist detail with source URLs and VERIFIED/INFERRED tags is in techniques_A.md, techniques_B.md, techniques_C.md. Treat anything INFERRED as a hypothesis to check by eye.
 
 ## Verified facts (a source says it explicitly)
 | Artist / video | Credit | What the source says |
@@ -41,3 +41,35 @@ osamason "ik what you did last summer" (no official video credit found — the f
 - Already matches: beat-locked hard cuts (80%), grain, one teal palette, layered cutouts, phone/archive footage.
 - Worth trying next: night-vision green flash cuts (Carti "Sky") as a spectacle moment; superimposed cutout collage on hook words (Lucki); one-colour-per-section grade shifts (Homixide Gang).
 - Unproven here: that less on-screen text is better — our type is a deliberate choice from the artist.
+
+
+## Second pass: what 120 frames actually show (FRAME-SEEN)
+Frames are 4 stills per video (thumbnail + 3 auto-frames). Stills show look, grade, framing, type and visible effects. They CANNOT show transitions or pacing, so those rows above stay unconfirmed. Full per-artist notes: the FRAME-SEEN blocks in techniques_A/B/C.md.
+
+### Patterns the three agents saw independently
+1. **One dominant colour per video** — a single saturated wash or a strict two-colour grade (green: Carti; cyan/magenta: Uzi; red on black: Homixide; teal vs warm amber: osamason-type, Destroy Lonely, kankan, Ken Carson; B&W + one accent: Lucki, Rich Amiri). 8 of 10 in group C, most of group B. **We already do this (teal).**
+2. **Blown-out light as the main "effect"** — flash, bloom, lens-flare streaks, white-hot lights (2hollis, Ken Carson, kankan, Xavier, septembersrich, summrs, Bladee). More common than clean digital glitch.
+3. **Motion blur, ghost trails, double exposure and zoom blur** instead of tidy RGB glitch (osamason-type, Xavier, Ken Carson, Autumn!, Bladee).
+4. **Cheap-camera texture on purpose** — soft, compressed, wide-angle handheld, grain, vignette (Xavier, 2hollis, kankan, Lucki, Homixide, Trippie).
+5. **Low-angle, wide-lens, centred single subject** close to the lens (smokingskul, summrs, glokk40spaz, Carti, Uzi; 9 of 10 in group C are centred single-subject).
+6. **Dark interiors lit by practicals** — tube lights, neon, bokeh city lights (7 of 10 in group B) and a single constant "world" per video (junkyard, staircase wall, red void, plastic-wrapped room).
+7. **Type is mixed** — deliberate graphic type in osamason-type, kankan (3D chrome logotype), the che upload; almost none in group B (only Yung Lean's Japanese caption); a brand bug on SoFaygo (Lyrical Lemonade) and a logo/date card on BKTHERULA.
+
+### Earlier guesses the frames contradicted
+- No RGB-split, scanline or datamosh frame in any of group A's 40 stills (the "glitch" feel was blur, bloom and flash). Note the osamason RGB-split finding in underground_playbook.md came from a separate frame-by-frame analysis of the real video, which these stills neither confirm nor refute.
+- Lucki "MORE THAN EVER": grain and B&W confirmed, but no magazine cut-outs in the stills (that came from a profile of the director, not this video).
+- Rich Amiri "Can't Die": B&W void + plastic-wrapped, blood-spattered room (the Dexter reference); no Matrix green.
+- summrs "FTW": moody night interior with a red neon wash, not airy. Ecco2k "Peroxide": pale desaturated seascape, cinematic, not lo-fi. Bladee: acid red/blue blow-out with ghosting. Autumn! "Grok!": crisp and bright with a sticker wall.
+- BKTHERULA: blue/orange dusk + teal LED, not pastel pink. Homixide: red on black only.
+
+### Upload problems (use as style evidence only, not exact-video proof)
+- The "osamason" upload's end card credits GK & Stan Smith (matches "HELLRAISER" by Che ft. OsamaSon), so it is probably not "ik what you did last summer".
+- nettspend upload: slow, cinematic frames (a face, a man smoking in a car), not party footage. che: a third-party dance video. jace: one static cover image. yeat: a green-screen fantasy composite, not tied to "Monëy So Big".
+- Yung Lean's max-res image was a grey placeholder (3 usable frames). One prettifun frame had an extraction-tool banner (ignored). One Uzi frame didn't match the rest (given no weight).
+
+### Ideas to try next for CUFF NO DANCER (all untested)
+- Blown-out flash/bloom bursts on the hook downbeats (we have white flashes; add a warm bloom flare).
+- Low-angle, wide-lens close-ups of the artist in the performance shots.
+- Motion-blur ghost trail / double exposure on the lip-sync clips (the bible's echo trail).
+- One "world" per section: e.g. verse = outdoor footage + teal, hook = performance + one accent colour.
+- Keep type as a deliberate graphic object (we already do; osamason-type and kankan show it works).

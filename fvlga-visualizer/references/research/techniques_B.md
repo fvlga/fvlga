@@ -96,3 +96,129 @@ Counts are mostly INFERRED, since only video 16's look is VERIFIED. Treat as a h
 | Slow dissolves / dreamy soft look | 4 | 14,18,19,20 |
 | Faux-surveillance / found-footage look | 1 | 16 (VERIFIED) |
 | Dance/loop-driven structure | 1 | 17 (VERIFIED) |
+
+---
+
+# FRAME-SEEN addendum (from 4 public still frames per video: maxres thumb + 3 auto-frames)
+Tag FRAME-SEEN = visible in the stills only. Stills cannot show pacing or transitions, so none are claimed here. The hq frames are 4:3 with black bars; bars ignored. Caveat: auto-frames can come from any moment, and a few look off-pattern (noted). Where a FRAME-SEEN item contradicts a guess above, the earlier INFERRED text for that video is superseded by this addendum.
+
+## 11. prettifun "Feel Like Uzi" - FRAME-SEEN
+- Shot scale/lens: close selfie, arm-length, wide phone front-camera lens with face filling a third of frame; one hq frame is a medium shot of him on a pavement beside a pink wall.
+- Angle: eye-level to slightly low, tilted/rotating handheld; motion blur on his raised hand.
+- Palette/grade: ungraded daylight. Overexposed whites/grey concrete, black beanie and tee, magenta/pink wall; washed-out phone look.
+- Text/typography: none burnt in. His shirt has big red band-tee lettering. One frame carries a magenta bar with a small white UI line ("New frames need analyzing...") - that is almost certainly an artefact of the frame-extraction tool, NOT video content; ignore it.
+- VFX/damage: a phone-app AR face filter (floating pink hearts above his head) in the car frame; low-res compression, no grain or glitch otherwise.
+- Set/props: parking garage with pillars; back seat of a car; city street. 1 person in every frame.
+- Look change over 4 frames: same outfit across garage, car and street = one-take vlog diary, location changes but treatment is constant (raw phone footage).
+- Verdict: confirms "handheld phone footage"; contradicts my guess of "saturated/tinted grade" and of "simple overlays" apart from the heart filter.
+
+## 12. septembersrich "Hellborn" - FRAME-SEEN
+- Shot scale/lens: tight close-up of face (B&W, shallow depth, very high key); medium-wide full-body in a smoky room; 3D scene wide.
+- Angle: eye-level, slight low angle on the close-up; static/centred.
+- Palette/grade: three distinct treatments - (1) pure B&W, blown-out white background; (2) cyan/teal monochrome with white neon tube lights and haze; (3) a 3D hell scene in saturated red/orange/yellow fire.
+- Text: none visible.
+- VFX: a CG-style render of a stone staircase to a gothic arch, with winged hooded reaper figures and embers, the artist as a tiny silhouette at the top (looks like composited game/3D assets). Rounded-corner frame with black border and a soft vignette on the hq frames (looks like a letterbox/film-gate overlay; possibly extractor padding, treat cautiously). Fog/haze and flare in the cyan room.
+- Set/props: empty concrete room with vertical tube lights; wet/dirty floor; a white backdrop; the CG hell. 1 person per frame (the artist) plus CG figures.
+- Look change: big swings between B&W portrait, cyan room, and CG hell scene - a "chapter" approach to look rather than one grade.
+- Verdict: contradicts my guess of "dark low-light, red or black-heavy, handheld phone" - it is stylised and composited, with a theme-matching CG background. Confirms strobe-like contrast (B&W blowout) possibility.
+
+## 13. smokingskul "Vlone" - FRAME-SEEN
+- Shot scale/lens: wide-angle, close, low camera; medium full-body of two people; one wide shot with a figure and a building.
+- Angle: strong LOW angle looking up at two masked performers, camera tilted (dutch-ish), flares from a street lamp in frame.
+- Palette/grade: night, crushed blacks, saturated orange-red corrugated wall against pale blue hoodie and cyan-ish white trim - complementary red vs cyan-blue; green-teal siding in another frame.
+- Text: no overlay text; props show lettering (a "Cookies" tee, a printed sign on the wall).
+- VFX: none obvious; natural lens flare, slight edge softness, moderate noise. 
+- Set/props: outdoor shed/trailer wall, roll-up door, rural lot at night; balaclavas/ski-mask style face coverings; hand gestures to camera. 2 people in two of the frames, 1 in others.
+- Look change: very consistent across frames - one grade, one night location.
+- Verdict: confirms "wide-angle, crushed-black night look", and corrects my "handheld street" guess to "low-angle, fisheye-ish lighting-led" shooting.
+
+## 14. summrs "FTW" - FRAME-SEEN
+- Shot scale/lens: medium close-up, shallow depth with defocused bokeh lights in the background, 16:9 letterbox (black bars top and bottom even in the maxres frame, so the video itself is widescreen cropped).
+- Angle: slightly low, eye-level, tilted frame; hand/finger in foreground (FG element).
+- Palette/grade: cool dark navy shadows against warm cream wall, skin warm; one frame fully bathed in red/pink neon (monochrome red wash); one frame neutral beige/blue.
+- Text: none, only a Nike logo on the hoodie; a neon sign glimpse (script) in the red frame.
+- VFX: bokeh city lights through window; neon flare; no glitch.
+- Set/props: interior apartment at night, window with city lights, neon sign. 1 person per frame.
+- Look change: neutral night -> red neon room -> daylit-looking interior, so 2-3 colour treatments (blue/cream, red, neutral).
+- Verdict: contradicts my "airy, hazy, bloom, pastel" guess - it is a moody cinematic-night look, anamorphic-ish letterbox, with a hard red colour wash for one section.
+
+## 15. glokk40spaz "Whatchu Sayin?!" - FRAME-SEEN
+- Shot scale/lens: medium shots to close; a tight crop in the heavy-grain frame (two people filling the frame, hands in foreground).
+- Angle: low and tilted, handheld; wide-lens distortion in the group frames.
+- Palette/grade: the maxres frame is heavily processed - high-contrast near-B&W with warm red-brown shadows, heavy film grain, and a rough torn/brush-edge mask where two images overlap; other frames: warm tungsten room, cool blue-white window, dark night city with bokeh lights.
+- Text: none.
+- VFX: strong grain, a paint/dry-brush "stroke reveal" or double-exposure mask edge, blotchy overlay in the thumbnail frame, vignette; the other frames are plain.
+- Set/props: small apartment party, kitchen/lounge, balcony at night above a city; graphic tees, one person holding a dark object toward camera; 2-6 people per frame; one person with a cup.
+- Look change: the thumbnail is heavily stylised while the other three frames are lightly graded documentary-party footage, so the look is likely a plain base with stylised accents/thumbnail.
+- Verdict: confirms "handheld, crew-in-room", adds "grain + brush/double-exposure mask edges" as a possible edit style; contradicts "high contrast clipped highlights" for the base footage (that applies only to the thumbnail).
+
+## 16. Playboi Carti "Sky" - FRAME-SEEN
+- Shot scale/lens: low-angle medium close-up looking up at his face; medium wide of him dancing in an aisle; close-up smoking; mid-shot leaning toward camera.
+- Angle: strongly low, looking up toward ceiling tube lights; some frames also high-ish.
+- Palette/grade: a single saturated green monochrome wash over EVERYTHING (skin, jacket, walls) in all 4 frames; only the fluorescent tubes shift toward cyan-white. Matches the verified green description.
+- Text: none.
+- VFX: motion blur, glow on tube lights; mild grain; no overlay graphics visible (no timestamp seen in these 4 frames).
+- Set/props: supermarket ceiling with fluorescent strips and a couple of dome security cameras overhead, shelves in the background, black leather jacket, chain, cigarette; 1 person visible per frame (a second blurred figure at frame edge in one).
+- Look change: none - green throughout; only the angle and subject distance vary.
+- Verdict: confirms the green grade and low angle; no faux-CCTV timestamp seen in the four stills, so "CCTV overlay" stays at the cut-between-looks level, not seen.
+
+## 17. Lil Uzi Vert "Just Wanna Rock" - FRAME-SEEN
+- Shot scale/lens: high-angle wide of a dense crowd looking down on the central figure; chest-up mid shot; tight two-shot hanging out of a vehicle roof at night.
+- Angle: high angle (crowd frame), eye-level and low (hero), handheld in the vehicle.
+- Palette/grade: the thumbnail is a full cyan-blue monochrome with white sunglasses and a white highlight; the club frame is magenta/purple/pink with orange stage lights; the night street frame has warm tungsten bokeh against dark.
+- Text: none; clothing graphics (Supreme lettering, band-style tees).
+- VFX: grain/noise on the blue frame; practical stage lights; crowd density as texture. No digital overlays seen.
+- Set/props: club/warehouse floor with packed crowd, fur ushanka hat, white futuristic sunglasses, a moving vehicle in the city at night. 20+ people in the crowd frame, 2 in the car frame, 1 +bystanders in the club frame.
+- Look change: each location gets its own colour (blue club / magenta club / warm city night), so grade is used to separate scenes.
+- Fourth frame (hq3) is a low-res, dimly lit indoor selfie-like frame of a young man in a green cap - it does not match the rest and may be a different clip or an auto-frame; I give it no weight.
+- Verdict: confirms "crowd-as-texture"; contradicts my "bright saturated NYC night" - it is mostly coloured-light monochrome washes.
+
+## 18. Bladee "Be Nice To Me" (drain gang channel) - FRAME-SEEN
+- Shot scale/lens: medium shot on a hooded figure (cap with lettering), centred right; a double-exposure of two people close together; a very dark wide cityscape.
+- Angle: eye-level, slightly dutch; the city shot looks from a high window.
+- Palette/grade: extreme, almost thermal/solarised colour - saturated red cap/hood, blue background, magenta and pure white blown-out glow filling the left half, deep black on the right; second frame is red-dominated with white skin tones; last frame is near-black with tiny city lights.
+- Text: none; cap lettering only.
+- VFX: heavy bloom/blow-out, colour inversion/solarisation or channel-swap, smeared double exposure/ghosting, edge blur; looks like a feedback/echo effect. 
+- Set/props: dark room, a dark skyline at night. 1-2 people; one ghosted second face with short blond hair.
+- Look change: from psychedelic red/blue/white to a calm near-black cityscape, so the edit contrasts hyper-saturated and almost empty frames.
+- Verdict: contradicts my "cold blues/whites, soft, dreamy low contrast" guess for this video; it is acid-coloured and over-exposed. Confirms "bloom".
+
+## 19. Ecco2k "Peroxide" (drain gang channel) - FRAME-SEEN
+- Shot scale/lens: wide establishing silhouette on an inflatable boat in front of offshore wind turbines (long lens/atmospheric haze); medium close-ups of the performer from the chest up in a wetsuit-style top with gloves and goggles pushed up on his head.
+- Angle: eye-level to slightly low, locked-off or gently moving, wide horizon.
+- Palette/grade: desaturated pale grey-white sky, steel-blue sea, a hint of orange-brown on the dark top; extremely low contrast, foggy, almost monochrome, lifted blacks.
+- Text: none.
+- VFX: no visible overlays, haze/mist natural or graded, soft backlight halo around the sun.
+- Set/props: open sea, turbines, inflatable dinghy with outboard; 1 person in all frames.
+- Look change: only subject distance changes (wide silhouette to medium), colour stays the same.
+- Verdict: contradicts my "homemade lo-fi digital cam, pastel kitsch" guess; this is a high-fidelity cinematic, desaturated, minimal-element seascape. Confirms "pastel/lifted blacks" in spirit (cool, pale).
+
+## 20. Yung Lean "Ginseng Strip 2002" - FRAME-SEEN
+- Shot scale/lens: one frame is a medium full-body of him sitting on glass-railed steps; another is a waist-up with hand gesture; another wide-ish group shot in a supermarket aisle. The maxres image returned as a grey placeholder with three dots (no usable picture), so only 3 frames were readable.
+- Angle: eye-level, static, camera at standing height.
+- Palette/grade: ungraded consumer-camcorder colour, slightly soft and washed; cool white fluorescent supermarket light; dark trousers, pale jackets, bucket hats.
+- Text: white thin sans-serif Japanese katakana/hiragana subtitle-style text laid across the lower-middle of the frame in the stairs frame, with no outline or shadow.
+- VFX: low-res compression and interlacing-like softness only; no glitch.
+- Set/props: office-atrium stairwell with plants, steel railing and lit steps; a supermarket with freezer chests and shelves; a small child with a trolley in the background; 1 person (stairs) and 4-5 people (supermarket).
+- Look change: indoor atrium to supermarket, same raw camcorder footage.
+- Verdict: confirms low-res nostalgic camcorder look and adds a verified-in-frame feature: Japanese-language overlay text. Contradicts "little or no text".
+
+---
+
+## Revised technique-count table (supersedes the earlier one where different)
+Counts now use FRAME-SEEN where available. Video numbers 11-20. "F" = confirmed in frames; "I" = still inferred.
+
+| technique | how many of 10 | which |
+|---|---|---|
+| Strong single-colour wash/monochrome grade (red, green, cyan, blue, magenta, B&W) | 8 F | 12,14,16,17,18 (hard cases), plus 15 (thumbnail grade), 13 (red/cyan split), 19 (near-mono grey) |
+| Handheld, low-fi or phone/camcorder-looking base footage | 6 F | 11,13,15,16,20 (+18 ghosted handheld) |
+| Low or tilted camera angle looking up | 5 F | 13,14,15,16,17(partly) |
+| No on-screen text in frames | 8 F | 11,12,13,14,15,16,17,18,19 (all but 20) |
+| Text overlay present | 1 F | 20 (Japanese caption); 11's bar is a tool artefact |
+| Heavy light/bloom/blow-out or neon practicals | 6 F | 12,14,16,17,18,19(soft halo) |
+| Grain/noise/double-exposure style damage | 3 F | 15,17(blue frame),18 |
+| CG / composited background or AR filter | 2 F | 12 (CG hell), 11 (heart filter) |
+| Night or dark interior location | 7 F | 12,13,14,15,16,17,18 |
+| Crowd or multi-person group shot | 3 F | 15,17,20 |
+| Faux-CCTV/timestamp overlay | 0 F | not visible in the 4 "Sky" stills (still only verified via text sources for cut between looks) |
+| Hard cuts on beat (pacing) | not visible in stills | remains INFERRED |
