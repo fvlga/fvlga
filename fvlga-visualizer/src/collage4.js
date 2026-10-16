@@ -35,14 +35,16 @@
       list = keep; }
     // v30: burst-then-hold rhythm (Cha Ching playbook): after a run of quick beat-cuts the next 1-3 bars are ONE longer shot
     const HOLDS = new Set(), HOLD_COMP = new Map();
-    { const prot = x => CUES.some(c => Math.abs(c[0] - x) < 0.01) || [2.4, 65.13, 69.17, 102.6].includes(x) || x < 8.2 || (x > 65.13 && x < 69.17);
+    // v42: 0:38-0:50 felt rushed -> only a few lyric cards stay pinned there, the rest follows the slower burst/hold rule
+    const SLOW = x => x > 38.4 && x < 50.6, KEEP = [42.83, 46.31];
+    { const prot = x => (SLOW(x) ? KEEP.some(k => Math.abs(k - x) < 0.01) : CUES.some(c => Math.abs(c[0] - x) < 0.01)) || [2.4, 65.13, 69.17, 102.6].includes(x) || x < 8.2 || (x > 65.13 && x < 69.17);
       const lens = [1.62, 1.62, 2.43, 1.62, 3.24], bursts = [6, 7, 5, 8, 6], cyc = [101, 94, 92, 96, 99, 91, 97, 102, 95, 98, 100, 93];
       const out = []; let burst = 0, hk = 0, holdEnd = -1;
       for (const x of list) {
         if (prot(x)) { out.push(x); holdEnd = -1; burst = 0; continue; }
         if (holdEnd > 0 && x < holdEnd - 0.06) continue;           // swallowed by the hold
         holdEnd = -1; out.push(x); burst++;
-        if (burst >= bursts[hk % bursts.length]) { holdEnd = x + lens[hk % lens.length]; HOLDS.add(x); if (hk % 2 === 0) HOLD_COMP.set(x, cyc[(hk / 2 | 0) % cyc.length]); hk++; burst = 0; }
+        if (burst >= (SLOW(x) ? 2 : bursts[hk % bursts.length])) { holdEnd = x + lens[hk % lens.length]; HOLDS.add(x); /* v45: artist name composites off mid-video (name discipline) */ hk++; burst = 0; }
       }
       list = out; }
     const r = rng(9090), pool = ['film', 'gothic', 'filmmirror', 'psyche', 'film', 'filmflash', 'chrome', 'filmxerox', 'artist', 'filmblue', 'stack', 'filmprism', 'emboss', 'film', 'filmtext', 'burst', 'smear', 'filmmirror', 'psyche', 'film'];
@@ -160,7 +162,10 @@
     const pr = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = `${c.dir}/${String(idx).padStart(4, '0')}.jpg`; });
     IMGS.set(key, pr); if (IMGS.size > 120) IMGS.delete(IMGS.keys().next().value); return pr; }
   function cover(img, alpha, comp, filter) { const sc = Math.max(SW / img.width, SH / img.height), w = img.width * sc, h = img.height * sc; s.save(); s.globalAlpha = alpha === undefined ? 1 : alpha; if (comp) s.globalCompositeOperation = comp; if (filter) s.filter = filter; s.drawImage(img, (SW - w) / 2, (SH - h) / 2, w, h); s.restore(); }
+  // v43: the same source clip must not come back within ~20 s: shift it inside its own pool by the cut's time bucket
+  function remapClip(ci, cut) { if (!cut || cut.t0 < 8.1 || cut.t0 > 102) return ci; const pools = [PEOPLE, DREAMY, CITY]; for (const p of pools) { const k = p.indexOf(ci); if (k >= 0) return p[(k + Math.floor(cut.t0 / 3.2) * 5) % p.length]; } return ci; }
   async function film(ci, time, mode, cut, ci2) {
+    ci = remapClip(ci, cut);
     const f = Math.floor((time + (cut.off || 0)) * 15), img = await loadFrame(ci, f);
     if (mode === 'dream') { cover(img, 1, null, 'saturate(2.7) contrast(1.22) brightness(1.28)');
       lo.setTransform(1, 0, 0, 1, 0, 0); lo.filter = 'blur(2px) saturate(2)'; lo.drawImage(S, 0, 0, LO.width, LO.height); lo.filter = 'none';
