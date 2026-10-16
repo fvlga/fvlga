@@ -20,6 +20,12 @@ rules. Binding rules for every song:
 4. Degrade, don't polish: grain, chroma split, scanlines, compression damage.
 5. One palette for the whole video (the grade is the brand).
 6. Edit on the drums: hard cuts on drops, type on snares, jitter on 808s.
+Transitions: follow `fvlga-visualizer/references/rage_transition_bible.md`,
+deployment rules first — 70% hard cuts / 20% ONE workhorse / 10% spectacle,
+impact frame ON the transient, never the same transition on adjacent cuts,
+render each transition as its own clip then assemble. Reusable presets:
+`fvlga-visualizer/src/transitions.py` (shake_rgb, zoom_punch, camera_drop,
+vhs_tracking, flash); planner example: `src/plan22.py`.
 Where the playbook and the per-project notes disagree, the artist's later
 direct corrections (per-project notes) win.
 
@@ -56,6 +62,11 @@ direct corrections (per-project notes) win.
 ## Per-project notes — FVLGA "CUFF NO DANCER" (updated Oct 16)
 - Archetype: sticker-bomb maximalism (osamason "ikwydls") with gothic-chrome
   bookends (intro title, ending). Intro is a 5-bar beat-sequenced title (v20).
+- Transitions (v22): workhorse = shake + RGB split burst on snare cuts; spectacle =
+  camera drop into verse (27.2) and pre-chorus (69.27), VHS tear on the tag (64.9),
+  white flash into hook 2 (79.47), zoom punches on hook 4-bar marks; constant 3px
+  RGB hum after the intro. No spin / light-leak burn (wrong vibe for this track).
+- Alone shot (65.13–69.25): the artist's cut-outs pop up as stickers on the beat (v21).
 - Picture layout: the legacy 16:9 strip, explicitly requested by the artist:
   1080x608 centred in a 1080x1920 black frame at y=656 (see
   fvlga-visualizer/render.json; bars must stay pure black). Selfie clips are face-tracked
