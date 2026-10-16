@@ -9,9 +9,7 @@ html,body{margin:0;background:transparent}</style></head><body>
 // torn book-page text, corner micro-text, status list, meter pills, film strip, scanline bars, green tracking
 // squares, a circle badge. Everything pops on/off with hard cuts on bar boundaries. Deterministic per time t.
 const W = 1080, H = 608, CREAM = '#F5E9A8', YEL = '#E4FF3F';
-const CAPS = [[20.1, 22.4, 'go and get yo bands up'], [23.2, 25.6, 'make him put his hands up'], [44.6, 46.2, 'in love with the bands'],
-  [46.3, 48.8, 'spinning this block, head top like a fan'], [49.1, 50.9, 'my younger got his advance'], [50.9, 53.4, 'took the trips to japan'],
-  [61.8, 64.9, "you can't come up in my crib"], [90.2, 92.2, 'make him put his hands up']];
+const CAPS = [[13.25, 15.9, "i don't know why i trust this hoe so damn much"], [16.6, 19.1, "i know i can not cuff no dancer"], [19.5, 22.3, "young nigga run go get your bands up"], [22.35, 23.15, "(your bands up)"], [23.2, 25.55, "i put the stick out make him put his hands up"], [25.6, 26.5, "(his hands up)"], [26.5, 27.25, "hands up (yeah)"], [27.3, 30.5, "exotic in my wood i'm blowing cancer"], [31.6, 33.6, "my young slide with an ak 4-7"], [33.6, 35.6, "and pull up inside your block go blam sum"], [35.7, 37.6, "(my young slide with an ak 4-7)"], [37.6, 39.5, "(pull up inside your block go blam sum)"], [39.56, 41.0, "my young nigga blam sum"], [41.03, 42.8, "my young nigga blam shit"], [43.05, 44.6, "i'm in that amg truck (huh)"], [44.65, 46.25, "in love with the bens (nigga)"], [46.3, 48.8, "spinning his block, nigga head top look like a fan (huh)"], [49.1, 51.6, "my young nigga got his advance nigga"], [51.6, 52.6, "he took a trip to japan"], [52.65, 53.65, "japan, japan"], [53.7, 57.55, "my opps so broke they riding around in sedan"], [57.6, 58.75, "(around in sedan)"], [58.8, 61.7, "my favourite eater darkskin came from south sudan"], [61.75, 64.65, "you can't come up in my damn crib you got contraband"], [64.7, 66.6, "don't fucking play with me bitch"], [67.7, 69.4, "i don't know why i trust this hoe so damn much"], [69.5, 71.5, "yeah yeah yeah"], [79.6, 82.4, "i don't know why i trust this hoe so damn much"], [83.1, 85.5, "i know i can not cuff no dancer"], [86.3, 89.4, "young nigga run go get your bands up"], [89.5, 92.0, "i put the stick out make him put his hands up"], [92.3, 93.1, "(his hands up)"], [93.15, 94.3, "hands up (yeah)"]];   // official lyrics (from the artist), aligned to the song
 const PAGES = [
   ['Instructions', 'Leave before the song ends. Do not look back at the window. If somebody asks where you went, tell them the river, tell them anything. The light is only gold for a minute and then it is gone, and you will spend the rest of the summer trying to describe it.'],
   ['On Staying', 'Some people stay for the slow ones. Some people never learned the steps. There is no shame in standing at the wall with your hands in your pockets, watching the room spin, waiting for the beat to come back around.'],
@@ -26,7 +24,8 @@ function bar(t) { return Math.floor(Math.max(0, (t - A.t0) / (60 / A.bpm)) / 4);
 function on(id, b, p) { return rng(b * 7919 + id * 104729 + 13)() < p; }               // does element `id` show in bar `b`?
 function render(t) {
   ctx.clearRect(0, 0, W, H);
-  if (t < 8.134 || t >= 102.6 || (t > 65.13 && t < 69.17)) return;
+  const inDrop = t > 65.13 && t < 69.17;   // over the 'alone' breakdown only the caption shows
+  if (t < 8.134 || t >= 102.6) return;
   const bp = 60 / A.bpm, beat = (t - A.t0) / bp, b = bar(t), kick = Math.exp(-((beat % 1) * bp) * 9);
   const f = Math.min(A.frames - 1, Math.round(t * A.fps)), bass = A.bass[f];
   // lyric caption: tiny lowercase cream sans, bottom centre
@@ -34,6 +33,7 @@ function render(t) {
   if (cap) { ctx.font = '400 21px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; const cw = ctx.measureText(cap[2].toLowerCase()).width;
     ctx.fillStyle = 'rgba(8,14,18,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, H - 50, cw + 24, 31, 6); ctx.fill();   // QA: readable on bright frames
     ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, H - 28); }
+  if (inDrop) return;
   // book page (left third), every few bars
   if (on(1, Math.floor(b / 2), 0.45)) { const pg = PAGES[Math.floor(b / 2) % PAGES.length], x = 34, y = 70;
     ctx.fillStyle = 'rgba(6,12,16,.42)'; ctx.fillRect(x - 14, y - 30, 330, 150);   // dark scrim behind the page
