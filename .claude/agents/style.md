@@ -88,7 +88,12 @@ direct corrections (per-project notes) win.
 - Zine layer (v28): NO red film strip and NO volume-meter pills (artist, Oct 16). Quote boxes
   must change spot AND look every time (book page / receipt / sticky note / neon script /
   ransom cut-outs / terminal) — artist wants variety, even whole new art styles.
-- Watermark (v32): the pink "fvlga" oval sticker is BACK (artist: "i like the sticker, the pink one") but it must MOVE:
+- Watermark (v33): the pink "fvlga" sticker POPS everywhere like the quote cards — a new random spot every half bar
+  (sometimes two), clear of caption/badge/quote box — and its lettering changes FONT and COLOUR every time (pink oval stays).
+  Artist (Oct 16): "popping every where... colour and font of the fvlga changes each time".
+- Opening (v33): artist likes the new opening but NOT the part where his cut-outs pop up — no cut-out pile in the intro
+  (bar 4 is footage + words instead). Cut-outs stay for the 'alone' shot and the ending.
+- (history) Watermark (v32): the pink "fvlga" oval sticker is BACK (artist: "i like the sticker, the pink one") but it must MOVE:
   it hops to a new spot every bar, clear of caption/badge/quote box. (history: briefly removed in v31.) Original: small pink oval "fvlga" sticker bottom-left through the whole video (from the Cha Ching
   reference), hidden on the alone shot and the ending. Artist can veto with "no sticker". The green
   banknote block / right-edge bars from the reference are NOT used (artist removed right-edge bars).
