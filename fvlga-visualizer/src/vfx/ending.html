@@ -3,7 +3,7 @@
 <canvas id="out" width="1080" height="1920"></canvas>
 <script>
 // Ending VFX: drifting purple smoke, breathing chrome bloom, glint across "Fvlga", a light chasing around the
-// circular text, twinkling sparkles, slow push-in, fade to black at the end of the song.
+// circular text, floating tags and chrome droplets, twinkling sparkles, slow push-in, fade to black at the end of the song.
 const VS = `#version 300 es
 in vec2 p; out vec2 uv; void main(){ uv = p * 0.5 + 0.5; uv.y = 1.0 - uv.y; gl_Position = vec4(p, 0.0, 1.0); }`;
 const FS = `#version 300 es
@@ -19,11 +19,18 @@ void main(){
   // rot = time since the outro starts; mixAB = fade-out (0..1)
   float z = 1.0 + 0.035 * rot / 3.3 + 0.012 * kick;
   vec2 q = (uv - C) / z + C;
+  // tags + chrome droplets outside the ring float and bob (each region on its own phase)
+  vec2 dq = (q - C) * vec2(AR, 1.0); float rq = length(dq);
+  float outer = smoothstep(1.0, 1.1, rq);
+  q += outer * vec2(0.004 * sin(t * 1.3 + q.y * 9.0), 0.012 * sin(t * 1.9 + q.x * 7.0) + 0.006 * kick);
   vec3 b0 = tex(q); float lum = dot(b0, vec3(0.33));
   // purple smoke drifts: domain-warp only the dark background haze
   float bgm = 1.0 - smoothstep(0.18, 0.32, lum);
   vec2 w = vec2(n2(q * 4.0 + vec2(t * 0.25, 0.0)), n2(q * 4.0 + vec2(5.0, t * 0.2))) - 0.5;
-  vec3 col = mix(b0, tex(q + w * 0.05), bgm);
+  vec3 bw = tex(q + w * 0.03);
+  float mx = 0.0; for (int i = 0; i < 6; i++) { float a = float(i) * 1.047; mx = max(mx, dot(tex(q + vec2(cos(a) / AR, sin(a)) * 0.03), vec3(0.33))); }
+  bgm *= (1.0 - smoothstep(0.16, 0.26, dot(bw, vec3(0.33)))) * (1.0 - smoothstep(0.2, 0.3, mx));   // only warp pure haze, never near letters
+  vec3 col = mix(b0, bw, bgm);
   col += bgm * vec3(0.35, 0.12, 0.45) * pow(n2(q * 3.0 - vec2(t * 0.15, t * 0.1)), 3.0) * 0.35;
   // glow on the chrome: soft bloom that breathes with the beat
   vec3 bl = vec3(0.0); for (int i = 0; i < 12; i++) { float a = float(i) * 0.5236; bl += max(tex(q + vec2(cos(a) / AR, sin(a)) * 0.018) - 0.55, 0.0); }
@@ -79,7 +86,7 @@ function render(t) {
 }
 window.ready = false;
 const load = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
-Promise.all([fetch('../analysis.json').then(r => r.json()), load('ending.jpg'), load('ending.jpg')])
+Promise.all([fetch('../analysis.json').then(r => r.json()), load('ending2.jpg'), load('ending2.jpg')])
   .then(([a, i0, i1]) => { init(a, [i0, i1]); window.ready = true; }).catch(e => { window.err = String(e.stack || e); });
 window.renderBatch = (t0, n, fps, q) => { const r = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); r.push(out.toDataURL('image/jpeg', q).slice(23)); } return r; };
 </script></body></html>
