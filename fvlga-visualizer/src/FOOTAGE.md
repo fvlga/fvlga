@@ -10,3 +10,4 @@ Frame folders are not committed; regenerate with the clip list in footage_manife
 
 ## People footage added for v16
 Clips listed in `footage_people.txt` (source, start second, duration, tag) are cut from the same two public-domain Prelinger films already documented above ("Journey through a Day", 1967 — the boy outdoors; "No Time for Ugliness" Part I — people walking). No new downloads were needed.
+- `Inter.ttf` — Inter (variable), SIL Open Font License, github.com/google/fonts `ofl/inter`. SHA-256 29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031 (matched raw.githubusercontent.com and jsDelivr; ClamAV clean). Used for the osamason-style lyric captions (v18).

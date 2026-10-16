@@ -1,0 +1,82 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Cap;src:url(../Inter.ttf)}
+@font-face{font-family:Book;src:url(file:///usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf)}
+@font-face{font-family:BookB;src:url(file:///usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf)}
+html,body{margin:0;background:transparent}</style></head><body>
+<canvas id="c" width="1080" height="608"></canvas>
+<script>
+// osamason-style zine layer (transparent, drawn over the 16:9 strip): tiny cream lowercase lyric captions,
+// torn book-page text, corner micro-text, status list, meter pills, film strip, scanline bars, green tracking
+// squares, a circle badge. Everything pops on/off with hard cuts on bar boundaries. Deterministic per time t.
+const W = 1080, H = 608, CREAM = '#F5E9A8', YEL = '#E4FF3F';
+const CAPS = [[20.1, 22.4, 'go and get yo bands up'], [23.2, 25.6, 'make him put his hands up'], [44.6, 46.2, 'in love with the bands'],
+  [46.3, 48.8, 'spinning this block, head top like a fan'], [49.1, 50.9, 'my younger got his advance'], [50.9, 53.4, 'took the trips to japan'],
+  [61.8, 64.9, "you can't come up in my crib"], [90.2, 92.2, 'make him put his hands up']];
+const PAGES = [
+  ['Instructions', 'Leave before the song ends. Do not look back at the window. If somebody asks where you went, tell them the river, tell them anything. The light is only gold for a minute and then it is gone, and you will spend the rest of the summer trying to describe it.'],
+  ['On Staying', 'Some people stay for the slow ones. Some people never learned the steps. There is no shame in standing at the wall with your hands in your pockets, watching the room spin, waiting for the beat to come back around.'],
+  ['The Weather', 'It rained the whole week and nobody called. The grass grew past our knees. We kept the radio on in the kitchen so the house would not sound so empty, and every song was about somebody leaving.'],
+  ['A Small Promise', 'I will not dance tonight. I will keep my jacket on and my eyes open. I will count the money twice and the friends once. When the lights come up I will already be outside, already gone.'],
+  ['Notes', 'Bring water. Bring nothing you would miss. The road out of town is longer at night. Remember the name of the field, remember the color of the shirt, forget the rest.']];
+const MICRO = ['you were never late, the world was early', 'keep the receipts', 'do not text back tonight', 'everything is temporary except the weather', 'stay outside longer', 'the river does not care', 'protect your peace', 'summer ends on a tuesday'];
+const BADGE = ['side a', 'bands up', 'no flash', 'tape 03'];
+let A, ctx, thumbs = [];
+const rng = s => () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+function bar(t) { return Math.floor(Math.max(0, (t - A.t0) / (60 / A.bpm)) / 4); }
+function on(id, b, p) { return rng(b * 7919 + id * 104729 + 13)() < p; }               // does element `id` show in bar `b`?
+function render(t) {
+  ctx.clearRect(0, 0, W, H);
+  if (t < 8.134 || t >= 102.6 || (t > 65.13 && t < 69.17)) return;
+  const bp = 60 / A.bpm, beat = (t - A.t0) / bp, b = bar(t), kick = Math.exp(-((beat % 1) * bp) * 9);
+  const f = Math.min(A.frames - 1, Math.round(t * A.fps)), bass = A.bass[f];
+  // lyric caption: tiny lowercase cream sans, bottom centre
+  const cap = CAPS.find(c => t >= c[0] && t < c[1]);
+  if (cap) { ctx.font = '400 21px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillText(cap[2].toLowerCase(), W / 2 + 1, H - 27);
+    ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, H - 28); }
+  // book page (left third), every few bars
+  if (on(1, Math.floor(b / 2), 0.45)) { const pg = PAGES[Math.floor(b / 2) % PAGES.length], x = 34, y = 70;
+    ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(255,255,255,.93)'; ctx.font = '22px BookB'; ctx.fillText(pg[0], x, y);
+    ctx.font = '12.5px Book'; const words = pg[1].split(' '); let line = '', yy = y + 26;
+    for (const w of words) { const tl = line + w + ' '; if (ctx.measureText(tl).width > 300) { ctx.fillText(line, x, yy); line = w + ' '; yy += 16; } else line = tl; } ctx.fillText(line, x, yy); }
+  // micro-text in the top corners
+  ctx.font = '400 10px Cap'; ctx.fillStyle = 'rgba(245,233,168,.85)';
+  if (on(2, b, 0.6)) { ctx.textAlign = 'left'; ctx.fillText(MICRO[b % MICRO.length], 14, 18); }
+  if (on(3, b, 0.5)) { ctx.textAlign = 'right'; ctx.fillText(MICRO[(b + 3) % MICRO.length], W - 14, 18); }
+  // status list block
+  if (on(4, b, 0.3)) { ctx.textAlign = 'left'; ctx.font = '500 11px Cap'; ctx.fillStyle = CREAM; const x = W - 190, y = H - 110;
+    ctx.fillText('relationship status:', x, y); ctx.font = '400 11px Cap';
+    ['[ ] cuffed', '[ ] dancing', '[x] outside', '[x] gone'].forEach((s, i) => ctx.fillText(s, x + 8, y + 16 + i * 14)); }
+  // meter pills on the right edge (heights breathe with the bass)
+  if (on(5, b, 0.55)) { const cols = [['#ff7ab8', '#ffffff', '#5aa0ff'], ['#E4FF3F', '#8a5a2b', '#3a1f10']][b % 2];
+    for (let i = 0; i < 3; i++) { const h = 90 + 120 * (0.5 + 0.5 * Math.sin(t * 2 + i)) * (0.6 + bass), x = W - 46 - i * 20, y = H / 2 - h / 2;
+      const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, cols[0]); g.addColorStop(0.5, cols[1]); g.addColorStop(1, cols[2]);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x, y, 12, h, 6); ctx.fill(); } }
+  // film strip of tiny red frames along the top or bottom
+  if (on(6, b, 0.4) && thumbs.length) { const y = (b % 2) ? 30 : H - 78, n = 9;
+    ctx.fillStyle = 'rgba(20,0,0,.85)'; ctx.fillRect(W / 2 - n * 34, y - 6, n * 68, 50);
+    for (let i = 0; i < n; i++) { const im = thumbs[(i + b) % thumbs.length]; ctx.drawImage(im, W / 2 - n * 34 + 4 + i * 68, y, 60, 38); }
+    ctx.fillStyle = 'rgba(255,255,255,.7)'; for (let i = 0; i < n * 4; i++) ctx.fillRect(W / 2 - n * 34 + 6 + i * 17, y - 4, 7, 2); }
+  // scanline / barcode bars on an edge
+  if (on(7, b, 0.45)) { const x0 = (b % 2) ? 0 : W - 120; ctx.fillStyle = 'rgba(255,255,255,.55)';
+    for (let i = 0; i < 26; i++) ctx.fillRect(x0, 200 + i * 7, 40 + ((i * 37 + b * 11) % 80), 2); }
+  // green tracking squares stuck on the subject, jumping on kicks
+  if (on(8, b, 0.6)) { const r = rng(b * 31 + Math.floor(beat)); ctx.strokeStyle = '#38ff6a'; ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) { const s = 22 + r() * 26; ctx.strokeRect(W * (0.35 + r() * 0.3), H * (0.25 + r() * 0.45), s, s); } }
+  // circle badge, top right
+  if (on(9, b, 0.35)) { const x = W - 70, y = 72, rr = 40 * (1 + 0.06 * kick); ctx.fillStyle = '#2f6bff'; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = '600 13px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(BADGE[b % BADGE.length], x, y); ctx.textBaseline = 'alphabetic'; }
+}
+window.ready = false;
+const load = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+(async () => {
+  try {
+    A = await fetch('../analysis.json').then(r => r.json()); ctx = document.getElementById('c').getContext('2d');
+    await document.fonts.load('20px Cap'); await document.fonts.load('20px Book'); await document.fonts.load('20px BookB');
+    const ims = await Promise.all([16, 17, 18, 20, 24, 25, 27, 41, 43, 49, 52, 55].map(i => load(`../foot/c${i}/0030.jpg`)));
+    for (const im of ims.filter(Boolean)) { const c = document.createElement('canvas'); c.width = 120; c.height = 76; const x = c.getContext('2d');
+      x.drawImage(im, 0, 0, 120, 76); x.globalCompositeOperation = 'multiply'; x.fillStyle = '#ff3b4a'; x.fillRect(0, 0, 120, 76); thumbs.push(c); }
+    window.ready = true;
+  } catch (e) { window.err = String(e.stack || e); }
+})();
+window.renderBatch = (t0, n, fps) => { const r = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); r.push(document.getElementById('c').toDataURL('image/png').slice(22)); } return r; };
+</script></body></html>

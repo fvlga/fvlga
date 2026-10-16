@@ -208,6 +208,11 @@
     const w = tctx.measureText(text).width; tctx.save(); tctx.translate(SW / 2, SH / 2 + SH * 0.05); tctx.scale(Math.min((SW * 0.98) / w, 1.5), 1.2);
     tctx.lineWidth = SH * 0.05; tctx.strokeStyle = fg === '#fff' ? '#000' : '#fff'; tctx.strokeText(text, 0, 0); tctx.fillStyle = fg; tctx.fillText(text, 0, 0); tctx.restore();
     const sl = 6; for (let x = 0; x < SW; x += sl) { const dy = Math.sin(x * 0.012 + t * 7) * amp + Math.sin(x * 0.031 - t * 5) * amp * 0.4; s.drawImage(tmp, x, 0, sl, SH, x, dy, sl, SH); } }
+  // osamason-style kinetic type: enormous condensed neon-yellow words, cropped by the frame, one word at a time
+  function giant(text, lt, len, col) { const ws = text.toUpperCase().split(/\s+/), i = Math.min(ws.length - 1, Math.floor(lt / Math.max(0.1, len / ws.length)));
+    s.save(); s.font = `${SH * 1.25}px ${FD}`; s.textAlign = 'center'; s.textBaseline = 'middle'; s.fillStyle = col || '#E4FF3F';
+    const w = s.measureText(ws[i]).width, sx = (SW * 1.03) / w, sy = Math.min(1, Math.max(0.55, sx * 1.6)); s.translate(SW / 2, SH * 0.54); s.scale(sx, sy); s.fillText(ws[i], 0, 0); s.restore(); }
+  function grunge(seed, t) { const r = rng(seed * 31 + Math.floor(t * 8)); for (let k = 0; k < 260; k++) { s.fillStyle = `rgba(${r() < 0.5 ? '0,0,0' : '120,20,20'},${0.08 + r() * 0.2})`; s.fillRect(r() * SW, r() * SH, 2 + r() * 40, 1 + r() * 6); } }
   function caption(text) { s.save(); s.font = `${Math.round(SH * 0.085)}px ${FS}`; s.textAlign = 'center'; s.textBaseline = 'middle'; s.lineJoin = 'round'; s.letterSpacing = '1px';
     s.shadowColor = 'rgba(255,60,170,.8)'; s.shadowBlur = 14; s.lineWidth = 5; s.strokeStyle = C.ink; s.strokeText(text, SW / 2, SH * 0.88); s.fillStyle = '#fff'; s.fillText(text, SW / 2, SH * 0.88); s.restore(); }
   function ticker(text, y, size, col, speed, t) { s.save(); s.font = `${size}px ${FS}`; s.letterSpacing = '3px'; s.fillStyle = col; s.textBaseline = 'middle'; const w = s.measureText(text + '   ').width, off = -((t * speed) % w);
@@ -215,10 +220,10 @@
 
   // ---------- pixel distortion + grade (post) ----------
   function post(cut, t, kick, lt) {
-    const img = s.getImageData(0, 0, SW, SH), d = img.data, src = new Uint8ClampedArray(d), fx = ((cut.t0 > 8.1 && REMAP.has(cut.type)) || /^film(?!xerox)/.test(cut.type)) ? ['none', 'none', 'bulge', 'wave'][cut.seed % 4] : cut.fx, cx = SW / 2, cy = SH / 2;
+    const img = s.getImageData(0, 0, SW, SH), d = img.data, src = new Uint8ClampedArray(d), fx = ((cut.t0 > 8.1 && REMAP.has(cut.type)) || /^film(?!xerox)/.test(cut.type) || ['word', 'adlib', 'japan'].includes(cut.type)) ? ['none', 'none', 'bulge', 'wave'][cut.seed % 4] : cut.fx, cx = SW / 2, cy = SH / 2;
     const shift = Math.round(4 + kick * 20 + (lt < 0.07 ? 26 : 0)), r = rng(Math.floor(t * 30) * 13 + 1);
     const strength = 0.6 + 0.8 * kick, tw = (cut.k - 0.5) * 3.2 * strength, rad = SH * 0.75;
-    const isFilm = cut.type.startsWith('film') || cut.type === 'drop' || cut.type === 'end' || (cut.t0 > 8.1 && REMAP.has(cut.type)); const xerox = fx === 'xerox', inv = !isFilm && (cut.k > 0.86 || (lt < 0.05 && cut.k > 0.55)), post4 = !isFilm && cut.k < 0.3;
+    const isFilm = cut.type.startsWith('film') || cut.type === 'drop' || cut.type === 'end' || (cut.t0 > 8.1 && REMAP.has(cut.type)) || ['word', 'adlib', 'japan'].includes(cut.type); const xerox = fx === 'xerox', inv = !isFilm && (cut.k > 0.86 || (lt < 0.05 && cut.k > 0.55)), post4 = !isFilm && cut.k < 0.3;
     const sample = (sx, sy) => { sx = clamp(sx | 0, 0, SW - 1); sy = clamp(sy | 0, 0, SH - 1); return (sy * SW + sx) * 4; };
     for (let y = 0; y < SH; y++) { const tear = r() < 0.003 + kick * 0.02 ? (r() - 0.5) * 90 : 0, scan = y % 3 === 0 ? 0.82 : 1;
       for (let x = 0; x < SW; x++) { let sx = x + tear, sy = y;
@@ -257,18 +262,12 @@
         for (let i = 3; i >= 0; i--) if (i < 3) word('Fvlga', SW / 2 + i * 22 * Math.sin(t * 2 + i), SH * 0.42 - i * 10, SH * 0.6 * (1 + i * 0.06), FS, { outline: i > 0, stroke: i ? [C.pink, C.acid][i - 1] : C.ink, thick: i ? 0.012 : 0.025, fill: '#fff', rot: -0.05 });
         word('cuff no dancer', SW * 0.64, SH * 0.84, SH * 0.22, FP, { fill: '#fff', rot: -0.06, stroke: '#ff3fb8', thick: 0.09 });
         sigil(2, SW * 0.5, SH * 0.5, SH * 0.48, -t * 0.3, 'rgba(255,255,255,.55)'); break; }
-      case 'adlib': { // huge, cropped off the frame, burst behind, echoes
-        bgBurst(t * 2, cut.bg % 2 ? C.acid : C.yellow, cut.bg % 2 ? '#0a3a00' : C.pink, SW * (0.3 + cut.k * 0.4), SH * 0.5);
-        word(cut.text.toLowerCase(), SW / 2 + jit(3, 30), SH * 0.52, SH * 0.95, FG, { chrome: true, echo: 3, echoCol: C.pink, drips: cut.seed, stroke: C.ink, thick: 0.05, rot: cut.rot * 0.6, maxW: SW * 0.95 });
-        scribble(cut.seed, 4, [C.ink, C.red], 1.3); break; }
-      case 'word': { // liquid lyric word + gothic overlay + ticker
-        liquid(cut.text, t, 16 + kick * 30, cut.bg % 2 ? '#fff' : C.ink, cut.bg % 2 ? C.ink : '#f2f2f2');
-        ticker(cut.text.toLowerCase() + ' * ', SH * 0.08, SH * 0.07, cut.bg % 2 ? C.acid : C.red, 400, t);
-        word(cut.text.toLowerCase(), SW * 0.72, SH * 0.82, SH * 0.2, FG, { fill: cut.bg % 2 ? C.pink : C.red, rot: -0.15, stroke: cut.bg % 2 ? C.ink : '#fff', thick: 0.05 }); break; }
-      case 'japan': { bgBurst(t, C.red, '#fff');
-        word('Japan', SW / 2, SH / 2, SH * 0.62, FK, { fill: '#fff', extrude: 5, echo: 3, echoCol: C.red, rot: cut.rot * 0.6, maxW: SW * 0.85, stretch: 1.6 });
-        word('tokyo', SW * 0.82, SH * 0.2, SH * 0.2, FG, { fill: C.ink, stroke: '#fff', thick: 0.1 });
-        sigil(3, SW * 0.12, SH * 0.78, SH * 0.14, t, '#fff'); break; }
+      case 'adlib': { // flat acid-yellow colour block + giant dark-red ad-lib
+        bgFlat('#E4FF3F'); grunge(cut.seed, t); giant(cut.text, lt, cut.t1 - cut.t0, '#6b0f12'); break; }
+      case 'word': { // footage + giant neon-yellow word flash (osamason)
+        await film(PEOPLE[(cut.clip + 5) % PEOPLE.length], lt, 'dream', cut); giant(cut.text, lt, cut.t1 - cut.t0); break; }
+      case 'japan': { // dark red grunge block + giant yellow word
+        bgFlat('#4a0709'); grunge(cut.seed, t); giant('japan', lt, cut.t1 - cut.t0); break; }
       case 'collage': { // cut-out collage: 5-6 overlapping stickers, off-centre hero icon, scribbles, gothic stamp
         bgFlat(BG[cut.bg]); if (cut.k > 0.5) bgHalftone(pick([C.pink, C.blue, C.ink]), 1, t);
         for (let i = 0; i < 5; i++) sticker(Math.floor(r() * 8), r() * SW, r() * SH, SH * (0.1 + r() * 0.14), r() * 6, { ghost: r() > 0.5 ? pick(MARKERS) : null, flip: r() > 0.5 });
@@ -345,7 +344,7 @@
         const rad = SH * 0.3 * ease(lt / 0.6); [...txt].forEach((ch, i) => { s.save(); s.rotate(i * TAU / txt.length); s.translate(0, -rad); s.fillText(ch, 0, 0); s.restore(); }); s.restore();
         s.globalAlpha = ease((lt - 0.8) / 0.6); word('fvlga', SW / 2, SH / 2, SH * 0.24, FG, { chrome: true, stroke: C.ink, thick: 0.05 }); s.globalAlpha = 1; break; }
     }
-    const cap = CAPTIONS.find(c => t >= c[0] && t <= c[1]); if (cap && cut.type !== 'word' && cut.type !== 'adlib') caption(cap[2]);
+    const cap = CAPTIONS.find(c => t >= c[0] && t <= c[1]); /* captions now drawn by the osamason overlay layer */
     if (cut.type !== 'end') post(cut, t, kick, lt);
     finish(cut, t, kick, lt);
     const z = 1 + 0.14 * (1 - ease(lt / 0.16)) + 0.03 * kick, jr = rng(Math.floor(t * 30)), jx = (jr() - 0.5) * 12 * kick, jy = (jr() - 0.5) * 10 * kick, rz = (cut.type === 'adlib' ? cut.rot * 0.15 : 0) + jit(5, 0.01);
