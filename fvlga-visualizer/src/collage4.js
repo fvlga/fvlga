@@ -135,7 +135,7 @@
 
   // ---------- footage (public-domain Prelinger films, pre-extracted at 15 fps) ----------
   let CLIPS = [], DREAMY = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], CITY = [12, 13, 14, 15],
-    PEOPLE = [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 37, 38, 39];   // the boy outdoors + people walking (Prelinger)
+    PEOPLE = [16, 41, 17, 42, 18, 43, 19, 44, 20, 45, 21, 49, 22, 50, 23, 51, 24, 52, 25, 53, 27, 55, 28, 56, 29, 57, 30, 31, 32, 37, 38, 39];   // the boy outdoors + people walking (Prelinger)
   // after the intro, name/title cards become people footage (less FVLGA / CUFF NO DANCER on screen)
   const REMAP = new Set(['chrome', 'gothic', 'artist', 'stack', 'smear', 'burst', 'filmtext', 'ticker']);
   const IMGS = new Map();
@@ -215,7 +215,7 @@
 
   // ---------- pixel distortion + grade (post) ----------
   function post(cut, t, kick, lt) {
-    const img = s.getImageData(0, 0, SW, SH), d = img.data, src = new Uint8ClampedArray(d), fx = (cut.t0 > 8.1 && REMAP.has(cut.type)) ? ['none', 'bulge', 'wave'][cut.seed % 3] : cut.fx, cx = SW / 2, cy = SH / 2;
+    const img = s.getImageData(0, 0, SW, SH), d = img.data, src = new Uint8ClampedArray(d), fx = ((cut.t0 > 8.1 && REMAP.has(cut.type)) || /^film(?!xerox)/.test(cut.type)) ? ['none', 'none', 'bulge', 'wave'][cut.seed % 4] : cut.fx, cx = SW / 2, cy = SH / 2;
     const shift = Math.round(4 + kick * 20 + (lt < 0.07 ? 26 : 0)), r = rng(Math.floor(t * 30) * 13 + 1);
     const strength = 0.6 + 0.8 * kick, tw = (cut.k - 0.5) * 3.2 * strength, rad = SH * 0.75;
     const isFilm = cut.type.startsWith('film') || cut.type === 'drop' || cut.type === 'end' || (cut.t0 > 8.1 && REMAP.has(cut.type)); const xerox = fx === 'xerox', inv = !isFilm && (cut.k > 0.86 || (lt < 0.05 && cut.k > 0.55)), post4 = !isFilm && cut.k < 0.3;
@@ -307,14 +307,14 @@
         sticker(cut.icon, SW / 2, SH / 2, SH * 0.36 * (1 + kick * 0.15), cut.rot, { ghost: C.acid }); break; }
       case 'film': { const a = PEOPLE[cut.clip % PEOPLE.length], b = DREAMY[cut.clip2 % DREAMY.length]; await film(a, lt, 'dream', cut, cut.k > 0.55 ? b : undefined);
         break; }
-      case 'filmmirror': { await film(DREAMY[cut.clip % DREAMY.length], lt, 'dream', cut); sigil(cut.bg % 4, SW / 2, SH / 2, SH * 0.3 * (1 + 0.1 * kick), t * 0.4, 'rgba(255,255,255,.9)');
+      case 'filmmirror': { await film(PEOPLE[(cut.clip + 11) % PEOPLE.length], lt, 'dream', cut); sigil(cut.bg % 4, SW / 2, SH / 2, SH * 0.3 * (1 + 0.1 * kick), t * 0.4, 'rgba(255,255,255,.9)');
         break; }
       case 'filmflash': { await film(PEOPLE[cut.clip % PEOPLE.length], lt, 'flash', cut); if (lt < 0.07) { s.fillStyle = '#fff'; s.fillRect(0, 0, SW, SH); } break; }
       case 'filmxerox': { await film((cut.k > 0.5 ? CITY : DREAMY)[cut.clip % (cut.k > 0.5 ? CITY.length : DREAMY.length)], lt, 'xerox', cut);
         scribble(cut.seed, 1, [C.ink], 1.4); s.save(); s.strokeStyle = C.ink; s.lineWidth = 9; s.lineCap = 'round'; const x = SW * (0.3 + cut.k * 0.4), y = SH * 0.35;
         s.beginPath(); s.moveTo(x - 40 + jit(1, 6), y - 50); s.lineTo(x + 40, y + 50 + jit(2, 6)); s.moveTo(x + 45, y - 45); s.lineTo(x - 45 + jit(3, 6), y + 45); s.stroke(); s.restore();
         word('Fvlga', SW * 0.88, SH * 0.1, SH * 0.12, FP, { fill: C.ink, stroke: '#fff', thick: 0.05 }); break; }
-      case 'filmblue': { await film(cut.k > 0.5 ? PEOPLE[(cut.clip + 3) % PEOPLE.length] : [12, 13, 14, 15, 7, 8, 5, 3][cut.clip % 8], lt, 'blue', cut); break; }
+      case 'filmblue': { await film(PEOPLE[(cut.clip + 3) % PEOPLE.length], lt, 'blue', cut); break; }
       case 'filmprism': { await film(PEOPLE[(cut.clip + 7) % PEOPLE.length], lt, 'dream', cut); prism(t, 0.6 + 0.3 * kick); prism(t + 2.3, 0.4);
         break; }
       case 'filmtext': { await film(cut.t0 < 1 ? 0 : DREAMY[cut.clip % DREAMY.length], lt, 'dream', cut); s.fillStyle = 'rgba(0,0,0,.25)'; s.fillRect(0, 0, SW, SH);
