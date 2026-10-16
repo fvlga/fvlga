@@ -1,5 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}</style></head><body>
-<canvas id="gl" width="1080" height="1920"></canvas>
+<canvas id="gl" width="1080" height="1920" style="display:none"></canvas>
+<canvas id="out" width="1080" height="1920"></canvas>
 <script>
 // Performance cutaways: the artist's selfie footage, full-frame 9:16, graded + beat-driven. Deterministic per (t, frame).
 const VS = `#version 300 es
@@ -98,7 +99,7 @@ async function render(job, i, fps, maxf) {
   const hit = i < 2 || (job.cycle && (beat % 4) < 0.12) ? 1 : 0;                                                                   // hard flash on the cut in
   // stutter: in the back half of every other beat, hold/repeat frames (classic edit stutter)
   let sf = i; if (!job.sync && Math.floor(beat) % 2 === 1 && ph > 0.5) sf = i - Math.floor((ph - 0.5) * bp * fps) % 3;
-  const f = Math.min(maxf - 1, Math.max(0, job.f0 + sf)), fe = Math.max(0, f - 4);
+  const f = Math.min(maxf - 1, Math.max(0, job.f0 + sf)), fe = Math.max(0, f - 4); LASTF = f;
   const [a, e] = await Promise.all([img(job.clip, f), img(job.clip, fe)]);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, T[0]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, a);
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, T[1]); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, e);
@@ -108,6 +109,12 @@ async function render(job, i, fps, maxf) {
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 window.ready = false;
-fetch('../analysis.json').then(r => r.json()).then(a => { init(a); window.ready = true; }).catch(e => { window.err = String(e.stack || e); });
-window.renderBatch = async (job, i0, n, fps, q, maxf) => { const r = []; for (let i = i0; i < i0 + n; i++) { await render(job, i, fps, maxf); r.push(gl.canvas.toDataURL('image/jpeg', q).slice(23)); } return r; };
+let LASTF = 0, TRACK = {};
+Promise.all([fetch('../analysis.json').then(r => r.json()), fetch('../../clips/facetrack.json').then(r => r.json())]).then(([a, tk]) => { TRACK = tk; init(a); window.ready = true; }).catch(e => { window.err = String(e.stack || e); });
+// strip mode: cut a 16:9 band out of the vertical render, following the tracked face, into the letterbox like every other card
+function strip(job) { const out = document.getElementById('out'), o = out.getContext('2d'); o.fillStyle = '#000'; o.fillRect(0, 0, 1080, 1920);
+  const tr = TRACK[job.clip] || [], fy = tr.length ? tr[Math.min(tr.length - 1, LASTF)] : 540;
+  const Y = Math.max(0, Math.min(1920 - 608, 960 + (fy * 1.5 - 960) * 1.13 - 608 * 0.5));
+  o.drawImage(gl.canvas, 0, Y, 1080, 608, 0, 656, 1080, 608); return out; }
+window.renderBatch = async (job, i0, n, fps, q, maxf) => { const r = []; for (let i = i0; i < i0 + n; i++) { await render(job, i, fps, maxf); r.push((job.full ? gl.canvas : strip(job)).toDataURL('image/jpeg', q).slice(23)); } return r; };
 </script></body></html>
