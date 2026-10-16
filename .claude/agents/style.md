@@ -20,6 +20,9 @@ rules. Binding rules for every song:
 4. Degrade, don't polish: grain, chroma split, scanlines, compression damage.
 5. One palette for the whole video (the grade is the brand).
 6. Edit on the drums: hard cuts on drops, type on snares, jitter on 808s.
+Reference breakdowns (user-supplied, unverified by Claude): `fvlga-visualizer/references/cha_ching_breakdown.md`
+(persistent watermark system, split-screens, iMessage/ticker/questionnaire collage). Ideas only — don't add
+a permanent overlay unless the artist asks (they just removed always-on overlays).
 Transitions: follow `fvlga-visualizer/references/rage_transition_bible.md`,
 deployment rules first — 70% hard cuts / 20% ONE workhorse / 10% spectacle,
 impact frame ON the transient, never the same transition on adjacent cuts,
