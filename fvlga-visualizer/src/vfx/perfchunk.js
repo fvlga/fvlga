@@ -1,6 +1,6 @@
 // node perfchunk.js jobs.json outdir [stills]  -> outdir/perf_<k>.mp4 per job (or one still per job)
 const { chromium } = require(process.env.PW); const { spawn } = require('child_process'); const path = require('path'), fs = require('fs');
-const jobs = JSON.parse(fs.readFileSync(process.argv[2])), od = process.argv[3], stills = process.argv[4] === 'stills', FPS = 30, MAXF = { A: 294, B: 383 };
+const jobs = JSON.parse(fs.readFileSync(process.argv[2])), od = process.argv[3], stills = process.argv[4] === 'stills', FPS = 30, MAXF = { A: 294, B: 383, D: 302, E: 451, F: 311, G: 355, H: 386, I: 450, L: 440 };
 (async () => {
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--allow-file-access-from-files', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
