@@ -7,6 +7,7 @@
 |---|---|
 | `style.md` | The single source of truth for the look: typography, palette, imagery rules, name/title discipline. When the artist corrects a direction, update THIS file — prompt packs and build scripts are dated outputs, this is the living record. |
 | `contracts.md` | Filenames, formats, units and limits agents share (analysis.json, captions.json, allcuts.json, QA ticket numbering, the 30 MB delivery limit, stage gates). The unversioned filename is always the current version; `_vN` files are history. |
+| `../../fvlga-visualizer/references/underground_playbook.md` | The artist's creative-direction playbook: 7 underground archetypes + cross-cutting rules. Pick one archetype per song (see style.md). |
 | `voice.md` | Examples of the artist's real captions, for `release-manager` to match. |
 
 ## The team

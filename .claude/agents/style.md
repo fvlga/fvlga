@@ -6,6 +6,23 @@ intro"), update THIS file — not just the prompt pack or the build script.
 Prompt packs, grades and QA reports are dated outputs; this file is the
 living record of what "on-brand" means.
 
+## Creative direction (read first)
+The artist's playbook is `fvlga-visualizer/references/underground_playbook.md`:
+7 archetypes (manufactured DIY, sticker-bomb maximalism, Y2K chrome, opium
+red/black, yeat dreamscape, jerk documentary, gothic horror) and 7 cross-cutting
+rules. Binding rules for every song:
+1. Pick ONE archetype per song before building anything; record it in the
+   per-project notes below. Don't stack weak ideas from several archetypes.
+2. The artist's own face/body is the anchor: their clips or cut-outs appear in
+   every section of the song.
+3. Text is a main character (typography pass > background pass); never bake
+   text into AI images, always composite it after.
+4. Degrade, don't polish: grain, chroma split, scanlines, compression damage.
+5. One palette for the whole video (the grade is the brand).
+6. Edit on the drums: hard cuts on drops, type on snares, jitter on 808s.
+Where the playbook and the per-project notes disagree, the artist's later
+direct corrections (per-project notes) win.
+
 ## Frame spec
 - Single full-bleed 16:9 music video frame, 1920x1080 landscape.
 - NOT a card, poster, tarot card or mockup: no borders, no frame edges, no margins.
@@ -39,6 +56,8 @@ living record of what "on-brand" means.
   asks otherwise.
 
 ## Per-project notes — FVLGA "CUFF NO DANCER" (updated Oct 16)
+- Archetype: sticker-bomb maximalism (osamason "ikwydls") with gothic-chrome
+  bookends (intro title, ending). Intro is a 5-bar beat-sequenced title (v20).
 - Picture layout: 16:9 strip 1080x608 centred in a 1080x1920 black frame at
   y=656 (bars above/below must stay pure black). Selfie clips are face-tracked
   into the same strip.
