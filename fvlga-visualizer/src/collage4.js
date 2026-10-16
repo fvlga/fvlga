@@ -101,7 +101,7 @@
     ICONS[i](r, 'white'); ICONS[i](r, 'ink'); ICONS[i](r, 'fill'); s.restore(); }
 
   // marker scribbles that boil at 12 fps
-  function scribble(seed, n, cols, wMul) { const r = rng(seed); for (let k = 0; k < n; k++) { const col = cols[Math.floor(r() * cols.length)], x0 = r() * SW, y0 = r() * SH, kind = Math.floor(r() * 4);
+  function scribble(seed, n, cols, wMul) { if (CURCUT && !NAMEOK()) return; const r = rng(seed); for (let k = 0; k < n; k++) { const col = cols[Math.floor(r() * cols.length)], x0 = r() * SW, y0 = r() * SH, kind = Math.floor(r() * 4);
       s.save(); s.strokeStyle = col; s.lineWidth = (6 + r() * 10) * (wMul || 1); s.lineCap = 'round'; s.lineJoin = 'round'; s.beginPath();
       if (kind === 0) { for (let i = 0; i < 14; i++) { const a = i * 0.9; s.lineTo(x0 + Math.cos(a) * (30 + i * 4) + jit(seed + k * 50 + i, 10), y0 + Math.sin(a) * (24 + i * 3) + jit(seed + k * 50 + i + 99, 10)); } }
       else if (kind === 1) { for (let i = 0; i < 8; i++) s.lineTo(x0 + i * 26 + jit(seed + k * 40 + i, 8), y0 + (i % 2 ? -26 : 26) + jit(seed + k * 40 + i + 77, 8)); }
@@ -112,14 +112,15 @@
       s.save(); s.translate(x, y); s.rotate(BOIL * 0.3 + i); s.fillStyle = col || '#fff'; s.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, rr = k % 2 ? sz * 0.18 : sz; s.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } s.fill(); s.restore(); } }
 
   // thin line-art sigils (tribal sun, peace, barbed ring, spiky star), glowing
-  function sigil(kind, x, y, r, rot, col) { s.save(); s.translate(x, y); s.rotate(rot); s.strokeStyle = col || 'rgba(230,230,230,.9)'; s.lineWidth = 3; s.shadowColor = col || '#fff'; s.shadowBlur = 10; s.lineCap = 'round';
+  function sigil(kind, x, y, r, rot, col) { if (CURCUT && !NAMEOK()) return; s.save(); s.translate(x, y); s.rotate(rot); s.strokeStyle = col || 'rgba(230,230,230,.9)'; s.lineWidth = 3; s.shadowColor = col || '#fff'; s.shadowBlur = 10; s.lineCap = 'round';
     s.beginPath();
     if (kind === 0) { s.arc(0, 0, r * 0.4, 0, TAU); for (let i = 0; i < 12; i++) { const a = i * TAU / 12, a2 = a + 0.13; s.moveTo(Math.cos(a) * r * 0.45, Math.sin(a) * r * 0.45); s.quadraticCurveTo(Math.cos(a + 0.2) * r * 0.8, Math.sin(a + 0.2) * r * 0.8, Math.cos(a2) * r * (1 + jit(i, 0.08)), Math.sin(a2) * r * (1 + jit(i, 0.08))); } }
     else if (kind === 1) { s.arc(0, 0, r * 0.6, 0, TAU); s.moveTo(0, -r * 0.6); s.lineTo(0, r * 0.6); s.moveTo(0, 0); s.lineTo(-r * 0.42, r * 0.42); s.moveTo(0, 0); s.lineTo(r * 0.42, r * 0.42); }
     else if (kind === 2) { s.arc(0, 0, r * 0.8, 0, TAU); for (let i = 0; i < 18; i++) { const a = i * TAU / 18; s.moveTo(Math.cos(a) * r * 0.7, Math.sin(a) * r * 0.7); s.lineTo(Math.cos(a + 0.12) * r * 0.92, Math.sin(a + 0.12) * r * 0.92); s.moveTo(Math.cos(a) * r * 0.9, Math.sin(a) * r * 0.9); s.lineTo(Math.cos(a + 0.12) * r * 0.68, Math.sin(a + 0.12) * r * 0.68); } }
     else { for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8, rr = i % 2 ? r * 0.25 : r * (i % 4 ? 0.7 : 1.05); s.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } s.closePath(); s.moveTo(r * 0.12, 0); s.arc(0, 0, r * 0.12, 0, TAU); }
     s.stroke(); s.restore(); }
-  function graffiti(text, x, y, size, col, rot) { s.save(); s.translate(x + jit(91, 4), y + jit(92, 4)); s.rotate(rot); s.font = `${size}px ${FM}`; s.textAlign = 'center'; s.textBaseline = 'middle';
+  let CURCUT = null; const NAMEOK = () => !CURCUT || CURCUT.t0 < 8.2 || CURCUT.t0 >= 102.4 || CURCUT.type === 'drop';
+  function graffiti(text, x, y, size, col, rot) { if (/fvlga/i.test(text) && !NAMEOK()) return; s.save(); s.translate(x + jit(91, 4), y + jit(92, 4)); s.rotate(rot); s.font = `${size}px ${FM}`; s.textAlign = 'center'; s.textBaseline = 'middle';
     s.shadowColor = col; s.shadowBlur = 24; s.fillStyle = col; s.fillText(text, 0, 0); s.shadowBlur = 0; s.globalAlpha = 0.6; s.fillStyle = '#fff'; s.fillText(text, -2, -2); s.restore(); }
   function flame(x, y, h, col) { s.fillStyle = col; s.beginPath(); s.moveTo(x - h * 0.25, y); s.bezierCurveTo(x - h * 0.35, y - h * 0.5, x - h * 0.05, y - h * 0.6, x + jit(Math.round(x), h * 0.1), y - h); s.bezierCurveTo(x + h * 0.15, y - h * 0.55, x + h * 0.4, y - h * 0.45, x + h * 0.25, y); s.closePath(); s.fill(); }
   function psycheTexture(t, seed, pal) { // dense skull + flame wallpaper, drawn into the strip
@@ -156,6 +157,7 @@
   const PSY_FOOT_OFF = [10.551, 20.686, 24.74, 51.091, 70.551, 77.848, 86.361, 91.226, 95.28, 100.551];   // half the kaleidoscope cuts become footage (QA: kaleidoscope was overused)
   const PSY_FOOT = [8.118, 10.551, 12.172, 20.686, 21.902, 24.74, 41.361, 51.091, 62.442, 70.551, 73.388, 77.848, 81.902, 86.361, 87.578, 91.226, 94.469, 95.28, 96.496, 100.551];   // v26: kaleidoscope retired entirely (artist: 'doesn't fit the vibe') -> every psyche cut becomes a footage/composite shot
   const COMP = {"9.74": 94, "17.848": 92, "28.388": 96, "32.442": 99, "54.334": 91, "57.578": 97, "64.064": 102, "70.145": 95, "78.253": 98, "85.145": 100, "98.118": 93, "8.118": 101, "12.172": 94, "21.902": 92, "41.361": 96, "62.442": 99, "73.388": 91, "81.902": 97, "87.578": 102, "94.469": 95, "96.496": 98};   // cuts where the artist is composited into the 1960s scenes
+  for (const k in COMP) delete COMP[k];   // v46: no artist-name composites mid-video
   const toFoot = cut => cut.t0 > 8.1 && (REMAP.has(cut.type) || cut.type === 'psyche');
   const IMGS = new Map();
   function loadFrame(ci, f) { const c = CLIPS[ci], idx = 1 + (((f % c.n) + c.n) % c.n), key = ci + ':' + idx; if (IMGS.has(key)) return IMGS.get(key);
@@ -167,14 +169,14 @@
   async function film(ci, time, mode, cut, ci2) {
     ci = remapClip(ci, cut);
     const f = Math.floor((time + (cut.off || 0)) * 15), img = await loadFrame(ci, f);
-    if (mode === 'dream') { cover(img, 1, null, 'saturate(2.7) contrast(1.22) brightness(1.28)');
+    if (mode === 'dream') { cover(img, 1, null, 'saturate(2.7) contrast(1.22) brightness(1.1)');
       lo.setTransform(1, 0, 0, 1, 0, 0); lo.filter = 'blur(2px) saturate(2)'; lo.drawImage(S, 0, 0, LO.width, LO.height); lo.filter = 'none';
       s.save(); s.globalCompositeOperation = 'screen'; s.globalAlpha = 0.55; s.drawImage(LO, 0, 0, SW, SH); s.restore();
       if (ci2 !== undefined) { const img2 = await loadFrame(ci2, f + 20); cover(img2, 0.42, 'screen', 'saturate(1.8)'); }
       const g = s.createLinearGradient(0, 0, SW, SH); g.addColorStop(0, 'rgba(255,80,160,.6)'); g.addColorStop(0.5, 'rgba(255,190,60,.45)'); g.addColorStop(1, 'rgba(110,70,255,.55)');
       s.save(); s.globalCompositeOperation = 'overlay'; s.fillStyle = g; s.fillRect(0, 0, SW, SH); s.restore(); }
-    else if (mode === 'flash') { cover(img, 1, null, 'grayscale(1) contrast(2.6) brightness(1.55)'); }
-    else if (mode === 'xerox') { cover(img, 1, null, 'grayscale(1) contrast(1.8)'); }
+    else if (mode === 'flash') { cover(img, 1, null, 'grayscale(1) contrast(2.2) brightness(1.15)'); }
+    else if (mode === 'xerox') { cover(img, 1, null, 'grayscale(1) brightness(1.55) contrast(1.6)'); }
     else if (mode === 'blue') { cover(img, 1, null, 'grayscale(1) contrast(1.4) brightness(1.1)');
       s.save(); s.globalCompositeOperation = 'multiply'; const g = s.createLinearGradient(0, 0, 0, SH); g.addColorStop(0, '#5a6bff'); g.addColorStop(1, '#b45cff'); s.fillStyle = g; s.fillRect(0, 0, SW, SH);
       s.globalCompositeOperation = 'screen'; s.fillStyle = 'rgba(40,20,120,.35)'; s.fillRect(0, 0, SW, SH); s.restore();
@@ -215,7 +217,7 @@
 
   // ---------- type ----------
   function chromeGrad(y0, y1) { const g = s.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#ffffff'); g.addColorStop(0.38, '#d8dde6'); g.addColorStop(0.5, '#3a3f4a'); g.addColorStop(0.56, '#9aa2b4'); g.addColorStop(0.8, '#ffffff'); g.addColorStop(1, '#6d7486'); return g; }
-  function word(text, x, y, size, font, opt) { opt = opt || {}; s.save(); s.font = `${size}px ${font}`; s.textAlign = 'center'; s.textBaseline = 'middle';
+  function word(text, x, y, size, font, opt) { if (/fvlga/i.test(text) && !NAMEOK()) return; opt = opt || {}; s.save(); s.font = `${size}px ${font}`; s.textAlign = 'center'; s.textBaseline = 'middle';
     const w = s.measureText(text).width, sx = opt.maxW ? Math.min(opt.maxW / w, opt.stretch || 1.8) : (opt.stretch || 1);
     s.translate(x, y); s.rotate(opt.rot || 0); s.transform(1, 0, opt.skew || 0, 1, 0, 0); s.scale(sx, opt.sy || 1); s.lineJoin = 'round';
     if (opt.echo) for (let i = opt.echo; i > 0; i--) { s.save(); s.scale(1 + i * 0.07, 1 + i * 0.07); s.lineWidth = size * 0.035; s.strokeStyle = opt.echoCol || '#fff'; s.globalAlpha = 0.7 - i * 0.12; s.strokeText(text, 0, 0); s.restore(); }
@@ -241,7 +243,7 @@
   function grunge(seed, t) { const r = rng(seed * 31 + Math.floor(t * 8)); for (let k = 0; k < 260; k++) { s.fillStyle = `rgba(${r() < 0.5 ? '0,0,0' : '120,20,20'},${0.08 + r() * 0.2})`; s.fillRect(r() * SW, r() * SH, 2 + r() * 40, 1 + r() * 6); } }
   function caption(text) { s.save(); s.font = `${Math.round(SH * 0.085)}px ${FS}`; s.textAlign = 'center'; s.textBaseline = 'middle'; s.lineJoin = 'round'; s.letterSpacing = '1px';
     s.shadowColor = 'rgba(255,60,170,.8)'; s.shadowBlur = 14; s.lineWidth = 5; s.strokeStyle = C.ink; s.strokeText(text, SW / 2, SH * 0.88); s.fillStyle = '#fff'; s.fillText(text, SW / 2, SH * 0.88); s.restore(); }
-  function ticker(text, y, size, col, speed, t) { s.save(); s.font = `${size}px ${FS}`; s.letterSpacing = '3px'; s.fillStyle = col; s.textBaseline = 'middle'; const w = s.measureText(text + '   ').width, off = -((t * speed) % w);
+  function ticker(text, y, size, col, speed, t) { if (/fvlga/i.test(text) && !NAMEOK()) return; s.save(); s.font = `${size}px ${FS}`; s.letterSpacing = '3px'; s.fillStyle = col; s.textBaseline = 'middle'; const w = s.measureText(text + '   ').width, off = -((t * speed) % w);
     for (let x = off; x < SW; x += w) s.fillText(text + '   ', x, y); s.restore(); }
 
   // ---------- pixel distortion + grade (post) ----------
@@ -275,6 +277,7 @@
     o.setTransform(1, 0, 0, 1, 0, 0); o.fillStyle = C.ink; o.fillRect(0, 0, W, H);
     s.setTransform(1, 0, 0, 1, 0, 0); s.globalAlpha = 1; s.globalCompositeOperation = 'source-over';
     const BG = [C.acid, C.sage, C.purple, C.pink, C.ink, C.blue], pick = a => a[Math.floor(r() * a.length)];
+    CURCUT = cut;
     switch (toFoot(cut) ? 'film' : cut.type) {
       case 'chrome': { // liquid-chrome gothic title over stripes, echoes, drips, scribbles
         if (cut.t0 < 1) bgFlat(C.sage); else bgStripes(C.ink, '#1d1d1d', t);

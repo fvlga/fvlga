@@ -77,11 +77,9 @@ function cutout(name, x, feet, h, age, flip) {   // artist cut-out with a white 
   t.globalCompositeOperation = 'source-in'; t.fillStyle = '#eef3f7'; t.fillRect(0, 0, tmp.width, tmp.height); t.globalCompositeOperation = 'source-over'; t.drawImage(im, 12, 12, w, h);
   ctx.drawImage(tmp, -tmp.width / 2, -tmp.height + 12); ctx.restore();
 }
-function note(txt, cx, cy, rot, age) {   // marker-on-sticky-note quote
-  const p = back(age / 0.16); ctx.save(); ctx.translate(cx, cy); ctx.scale(p, p); ctx.rotate(rot);
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-92, -56, 190, 120); ctx.fillStyle = YEL; ctx.fillRect(-98, -62, 190, 120);
-  ctx.fillStyle = 'rgba(235,225,200,.8)'; ctx.fillRect(-34, -72, 68, 20); ctx.fillStyle = '#16120d'; ctx.font = '25px Mk'; ctx.textAlign = 'left';
-  txt.split('|').forEach((ln, i) => ctx.fillText(ln, -84, -22 + i * 30)); ctx.restore();
+function note(txt, cx, cy, rot, age) {   // v46: plain marker lettering, no card (artist: no backgrounds)
+  const u = Math.min(1, age / 0.3), al = u * u * (3 - 2 * u); ctx.save(); ctx.translate(cx + 40, cy + 120); ctx.rotate(rot); ctx.globalAlpha = al; ctx.font = '34px Mk'; ctx.textAlign = 'left'; ctx.lineJoin = 'round';
+  txt.split('|').forEach((ln, i) => { ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(8,16,20,.7)'; ctx.strokeText(ln, 0, i * 36); ctx.fillStyle = '#f7edd3'; ctx.fillText(ln, 0, i * 36); }); ctx.restore();
 }
 function render(t) {
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
