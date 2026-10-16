@@ -66,6 +66,9 @@ direct corrections (per-project notes) win.
   camera drop into verse (27.2) and pre-chorus (69.27), VHS tear on the tag (64.9),
   white flash into hook 2 (79.47), zoom punches on hook 4-bar marks; constant 3px
   RGB hum after the intro. No spin / light-leak burn (wrong vibe for this track).
+- Kaleidoscope bubble (v24): the neon smiley is retired (artist: "doesn't fit any more");
+  the bubble now holds the artist's face, blue-cyan duotone + neon silhouette
+  (src/crystal_ball_face.py). Don't bring the smiley back.
 - Alone shot (65.13–69.25): the artist's cut-outs pop up as stickers on the beat (v21).
 - Picture layout: the legacy 16:9 strip, explicitly requested by the artist:
   1080x608 centred in a 1080x1920 black frame at y=656 (see
