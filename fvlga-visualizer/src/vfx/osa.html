@@ -22,6 +22,8 @@ const PAGES = [
   ['Notes', 'Bring water. Bring nothing you would miss. The road out of town is longer at night. Remember the name of the field, remember the color of the shirt, forget the rest.']];
 const MICRO = ['you were never late, the world was early', 'keep the receipts', 'do not text back tonight', 'everything is temporary except the weather', 'stay outside longer', 'the river does not care', 'protect your peace', 'summer ends on a tuesday'];
 const QUOTES = ['dont wait for the song to end', 'i left before the lights came up', 'count the money twice and the friends once', 'everything is temporary except the weather', 'tell them you went to the river', 'stay outside', 'the light is only gold for a minute', 'no flash no photos just leave'];
+const TICK = ['stay outside', 'no flash', 'bands up', 'still outside', 'keep the receipts'];
+const CHAT = [['where are you', 'outside'], ['you coming back', 'no'], ['dont wait up', 'ok'], ['did you eat', 'later']];
 const BADGE = ['side a', 'bands up', 'no flash', 'tape 03'];
 let A, ctx, thumbs = [];
 const rng = s => () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
@@ -40,12 +42,18 @@ function render(t) {
     ctx.fillStyle = 'rgba(8,14,18,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, cy - 22, cw + 24, 31, 6); ctx.fill();   // QA: readable on bright frames
     ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, cy); }
   if (inDrop) return;
+  // watermark system: small pink oval sticker, bottom-left, whole video (artist's Cha Ching reference)
+  { const bx = 108, by = H - 56, sc = 1 + 0.035 * kick; ctx.save(); ctx.translate(bx, by); ctx.rotate(-0.09); ctx.scale(sc, sc);
+    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(4, 5, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ff2e7e'; ctx.beginPath(); ctx.ellipse(0, 0, 82, 29, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(0, 0, 77, 24, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#E4FF3F'; ctx.font = 'italic 800 27px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('fvlga', 0, 1); ctx.restore(); ctx.textBaseline = 'alphabetic'; }
   let boxX = null;   // where the quote box is this bar (so other elements keep clear of it)
   // quotes: a different spot AND a different look every time (book page / receipt / sticky note / neon script / ransom cut-outs / terminal)
   if (on(1, Math.floor(b / 2), 0.45)) { const k = Math.floor(b / 2), pg = PAGES[k % PAGES.length], q = QUOTES[(k * 3 + 1) % QUOTES.length];
-    const SL = [[20, 40], [W - 470, 40], [20, 230], [W - 350, 230], [20, H - 230], [W - 600, H - 230], [W / 2 - 165, 40]];   // 330x150 regions: TL, TR, ML, MR, BL, BR, top-centre
+    const SL = [[20, 40], [W - 470, 40], [20, 230], [W - 350, 230], [20, H - 275], [W - 600, H - 230], [W / 2 - 165, 40]];   // 330x150 regions: TL, TR, ML, MR, BL, BR, top-centre
     const sl = SL[(k * 5 + 2) % SL.length], jr = rng(k * 977 + 5); boxX = sl[0];
-    const sty = (k * 7 + 3) % 6, cx = Math.min(W - 195, Math.max(195, sl[0] + 165 + Math.round((jr() - 0.5) * 24))), cy = sl[1] + 75 + Math.round((jr() - 0.5) * 14);
+    const sty = (k * 7 + 3) % 9, cx = Math.min(W - 195, Math.max(195, sl[0] + 165 + Math.round((jr() - 0.5) * 24))), cy = sl[1] + 75 + Math.round((jr() - 0.5) * 14);
     const age = Math.max(0, t - (A.t0 + k * 8 * bp)), u = Math.min(1, age / 0.16), pop = u < 1 ? 1 + 2.7 * Math.pow(u - 1, 3) + 1.7 * Math.pow(u - 1, 2) : 1;   // ease-out-back
     const wrap = (txt, maxW) => { const out = []; let line = ''; for (const w of txt.split(' ')) { const tl = line + w + ' '; if (ctx.measureText(tl).width > maxW && line) { out.push(line.trim()); line = w + ' '; } else line = tl; } out.push(line.trim()); return out; };
     ctx.save(); ctx.translate(cx, cy); ctx.scale(pop, pop); ctx.globalAlpha = Math.min(1, u * 2.5); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
@@ -73,12 +81,28 @@ function render(t) {
       const r = rng(k * 131 + 7); let x = -170, y = -34; const rows = [];
       for (const w of q.split(' ')) { const f = FN[Math.floor(r() * FN.length)], bg = BG[Math.floor(r() * BG.length)]; ctx.font = f; const ww = ctx.measureText(w).width + 14; if (x + ww > 170) { x = -170; y += 40; } rows.push([w, f, bg, x, y, ww, (r() - 0.5) * 0.12]); x += ww + 5; }
       for (const [w, f, bg, px, py, ww, rt] of rows) { ctx.save(); ctx.translate(px + ww / 2, py); ctx.rotate(rt); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-ww / 2 + 3, -17 + 4, ww, 33); ctx.fillStyle = bg[0]; ctx.fillRect(-ww / 2, -17, ww, 33); ctx.fillStyle = bg[1]; ctx.font = f; ctx.textAlign = 'center'; ctx.fillText(w, 0, 6); ctx.restore(); }
-    } else {                // green terminal window with blinking cursor
+    } else if (sty === 5) { // green terminal window with blinking cursor
       ctx.font = '23px Mono'; const w = 320, lines = wrap('> ' + q, w - 30), h = 40 + lines.length * 24;
       ctx.fillStyle = 'rgba(0,10,4,.8)'; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.strokeStyle = '#38ff6a'; ctx.lineWidth = 2; ctx.strokeRect(-w / 2, -h / 2, w, h);
       ctx.fillStyle = '#38ff6a'; ctx.fillRect(-w / 2, -h / 2, w, 16); ctx.fillStyle = '#031'; ctx.font = '14px Mono'; ctx.fillText('note.txt', -w / 2 + 8, -h / 2 + 12);
       ctx.fillStyle = '#38ff6a'; ctx.font = '23px Mono'; let yy = -h / 2 + 42; lines.forEach((ln, i) => { ctx.fillText(ln + (i === lines.length - 1 && Math.floor(t * 3) % 2 ? '_' : ''), -w / 2 + 15, yy); yy += 24; });
       ctx.fillStyle = 'rgba(56,255,106,.07)'; for (let yy2 = -h / 2 + 16; yy2 < h / 2; yy2 += 4) ctx.fillRect(-w / 2, yy2, w, 1);
+    } else if (sty === 6) { // highlighter-bar caps: yellow caps, thick dark stroke, a yellow marker bar underneath
+      ctx.font = '800 30px Cap'; const lines = wrap(q.toUpperCase(), 340); ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+      lines.forEach((ln, i) => { const y = -((lines.length - 1) * 38) / 2 + i * 38 + 8, tw = ctx.measureText(ln).width;
+        ctx.fillStyle = 'rgba(228,255,63,.92)'; ctx.fillRect(-tw / 2 - 6, y + 8, tw + 12, 11);
+        ctx.lineWidth = 7; ctx.strokeStyle = '#0b0b0b'; ctx.strokeText(ln, 0, y); ctx.fillStyle = '#E4FF3F'; ctx.fillText(ln, 0, y); });
+    } else if (sty === 7) { // wall of repeating words on a translucent band, rows drifting in opposite directions
+      const word = TICK[k % TICK.length] + '   ', rowsN = 3, bw = 430, bh = 112; ctx.font = 'italic 800 30px Ser';
+      ctx.fillStyle = 'rgba(235,228,214,.78)'; ctx.fillRect(-bw / 2, -bh / 2, bw, bh); ctx.save(); ctx.beginPath(); ctx.rect(-bw / 2, -bh / 2, bw, bh); ctx.clip();
+      const ww = ctx.measureText(word).width; ctx.fillStyle = '#1b1612';
+      for (let r2 = 0; r2 < rowsN; r2++) { const off = ((t * (r2 % 2 ? -46 : 46)) % ww + ww) % ww; for (let x2 = -ww; x2 < bw + ww; x2 += ww) ctx.fillText(word, -bw / 2 + x2 - off, -bh / 2 + 32 + r2 * 36); }
+      ctx.restore();
+    } else {                // chat thread: grey bubble in, blue bubble out, "delivered" under it
+      const th = CHAT[k % CHAT.length]; ctx.font = '19px Cap'; ctx.textAlign = 'left';
+      const bub = (txt, x, y, mine) => { const w2 = ctx.measureText(txt).width + 26; const bx = mine ? x - w2 : x; ctx.fillStyle = mine ? '#2f78ff' : '#e5e5ea'; ctx.beginPath(); ctx.roundRect(bx, y, w2, 34, 17); ctx.fill();
+        ctx.fillStyle = mine ? '#fff' : '#111'; ctx.fillText(txt, bx + 13, y + 23); };
+      bub(th[0], -140, -62, false); bub(th[1], 140, -16, true); ctx.font = '11px Cap'; ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.textAlign = 'right'; ctx.fillText('delivered', 140, 36);
     }
     ctx.restore(); }
   // micro-text in the top corners

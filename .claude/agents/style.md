@@ -85,6 +85,10 @@ direct corrections (per-project notes) win.
 - Zine layer (v28): NO red film strip and NO volume-meter pills (artist, Oct 16). Quote boxes
   must change spot AND look every time (book page / receipt / sticky note / neon script /
   ransom cut-outs / terminal) — artist wants variety, even whole new art styles.
+- Watermark (v29): small pink oval "fvlga" sticker bottom-left through the whole video (from the Cha Ching
+  reference), hidden on the alone shot and the ending. Artist can veto with "no sticker". The green
+  banknote block / right-edge bars from the reference are NOT used (artist removed right-edge bars).
+  Quote styles are now 9 (adds highlight-bar caps, repeating-word wall, chat thread).
 - Intro (v28): first bar is a flash-montage of title variants with squiggly neon lines; the
   rest eases in (soft-attack beat envelope, no hard strobe).
 - Alone shot (65.13–69.25): the artist's cut-outs pop up as stickers on the beat (v21).
