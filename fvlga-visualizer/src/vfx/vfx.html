@@ -8,7 +8,7 @@ const VS = `#version 300 es
 in vec2 p; out vec2 uv; void main(){ uv = p * 0.5 + 0.5; uv.y = 1.0 - uv.y; gl_Position = vec4(p, 0.0, 1.0); }`;
 const FS = `#version 300 es
 precision highp float; in vec2 uv; out vec4 o;
-uniform sampler2D img; uniform float t, kick, bass, bar, hit, intro, outro; uniform vec2 res;
+uniform sampler2D img; uniform float t, kick, bass, bar, hit, intro, outro, seg, bt; uniform vec2 res;
 float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float n2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
@@ -17,69 +17,102 @@ float textMask(vec2 q){ vec3 c = tex(q); float mx = max(c.r, max(c.g, c.b)), mn 
   float chrome = smoothstep(0.38, 0.62, mx) * (1.0 - smoothstep(0.25, 0.55, mx - mn));        // bright, low-saturation metal
   float pinkMetal = smoothstep(0.35, 0.6, mx) * smoothstep(0.15, 0.35, (c.r + c.b) * 0.5 - c.g); // pink-lit chrome faces
   return clamp(max(chrome, pinkMetal * 0.9), 0.0, 1.0); }
-void main(){
-  vec2 q = uv;
-  // gate weave + handheld drift + kick shake
-  float wt = floor(t * 24.0);
-  vec2 weave = vec2(h(vec2(wt, 1.0)) - 0.5, h(vec2(wt, 2.0)) - 0.5) * 0.0012;
-  vec2 drift = vec2(sin(t * 0.37) * 0.006 + sin(t * 0.91) * 0.002, cos(t * 0.29) * 0.004);
-  vec2 shake = (vec2(h(vec2(wt, 3.0)), h(vec2(wt, 4.0))) - 0.5) * 0.012 * kick;
-  // camera: slow push-in + kick punch, slight roll
-  float zoom = 1.0 + 0.10 * smoothstep(0.0, 9.0, t) + 0.025 * kick + 0.25 * (1.0 - smoothstep(0.0, 0.9, t)) * intro;
-  float roll = sin(t * 0.21) * 0.012;
-  vec2 c = q - 0.5; c = mat2(cos(roll), -sin(roll), sin(roll), cos(roll)) * c; c /= zoom; q = c + 0.5 + drift + weave + shake;
-  // parallax: the chrome lettering sits nearer the lens than the room
-  float m0 = textMask(q);
-  vec2 par = vec2(sin(t * 0.37), cos(t * 0.29)) * 0.0022;
-  vec2 qt = q + par * 0.9, qb = q - par * 0.35;
-  float m = textMask(qt);
-  // heat haze in the room, liquid ripple down the drips
-  vec2 haze = vec2(n2(qb * 18.0 + vec2(0.0, t * 1.6)) - 0.5, n2(qb * 18.0 + vec2(9.0, t * 1.3)) - 0.5) * 0.004;
-  float dripZone = smoothstep(0.5, 0.62, qt.y);
-  qt.x += sin(qt.y * 140.0 - t * 7.0) * 0.0016 * dripZone;
-  qt.y += sin(qt.y * 60.0 - t * 4.0) * 0.0012 * dripZone;
-  // glitch tears on downbeat hits
-  float row = floor(q.y * 70.0), g = step(0.82, h(vec2(row, floor(t * 20.0)))) * hit;
-  float tear = g * (h(vec2(row, t)) - 0.5) * 0.08;
-  qt.x += tear; qb.x += tear;
-  // RGB split (stronger on kicks)
-  float ab = 0.0006 + 0.0045 * kick + 0.02 * g;
-  vec3 bg = vec3(tex(qb + haze + vec2(ab, 0)).r, tex(qb + haze).g, tex(qb + haze - vec2(ab, 0)).b);
-  vec3 fg = vec3(tex(qt + vec2(ab, 0)).r, tex(qt).g, tex(qt - vec2(ab, 0)).b);
-  vec3 col = mix(bg, fg, m);
-  // neon: green echo flickers on the beat, pink light breathes with the bass
-  vec3 src = tex(qb);
+// one chrome-title "look" at a sample point: RGB split, neon green flicker, pink bass light, chrome sweep
+vec3 look(vec2 q, float ab){
+  float m = textMask(q);
+  vec3 col = vec3(tex(q + vec2(ab, 0)).r, tex(q).g, tex(q - vec2(ab, 0)).b);
+  vec3 src = tex(q);
   float green = smoothstep(0.06, 0.22, src.g - max(src.r, src.b));
   float flick = 0.75 + 0.25 * n2(vec2(t * 18.0, 0.0)) + 0.9 * kick - 0.7 * step(0.965, h(vec2(floor(t * 12.0), 7.0)));
   col += green * col * (flick - 1.0) * 1.2;
   float pink = smoothstep(0.08, 0.25, (src.r + src.b) * 0.5 - src.g);
   col += pink * col * (0.25 + 1.1 * bass);
-  // chrome specular sweep every 2 bars
   float sw = fract(t / (bar * 2.0)) * 1.8 - 0.4;
-  float band = exp(-pow((qt.x + (qt.y - 0.5) * 0.45 - sw) * 16.0, 2.0));
-  col += vec3(1.0, 0.95, 1.0) * band * m * 0.9;
-  // bloom: cheap 12-tap glow from bright areas
+  col += vec3(1.0, 0.95, 1.0) * exp(-pow((q.x + (q.y - 0.5) * 0.45 - sw) * 16.0, 2.0)) * m * 0.9;
+  return col;
+}
+vec2 rot(vec2 p, float a){ return mat2(cos(a), -sin(a), sin(a), cos(a)) * p; }
+void main(){
+  // beat clock: seg = bar index (0..4), bt = beat within the bar (0..4), bi = beat index, bf = phase within the beat
+  float bi = floor(bt), bf = fract(bt), beatLen = bar / 4.0;
+  float pk = exp(-bf * beatLen * 7.0);                       // per-beat punch envelope
+  float wt = floor(t * 24.0);
+  vec2 weave = vec2(h(vec2(wt, 1.0)) - 0.5, h(vec2(wt, 2.0)) - 0.5) * 0.0012;
+  vec2 shake = (vec2(h(vec2(wt, 3.0)), h(vec2(wt, 4.0))) - 0.5) * 0.014 * kick;
+  vec2 c = uv - 0.5;
+  float ab = 0.0008 + 0.005 * kick;
+  vec3 col;
+  if (seg < 0.5) {
+    // BAR 1: dark room, the words slam in one per beat (cuff / no / dancer / whole frame), light beam scanning
+    vec2 q = c / (1.04 + 0.06 * pk) + 0.5 + weave + shake;
+    float edge = bi < 0.5 ? 0.335 : (bi < 1.5 ? 0.505 : 2.0);
+    float m = textMask(q) * step(q.x, edge);
+    vec3 l = look(q, ab + 0.012 * pk);
+    float beam = exp(-pow((q.x - (bt / 4.0) * 1.2 + 0.1) * 9.0, 2.0));
+    float room = bi > 2.5 ? 0.25 + 0.75 * pk : 0.05 + 0.08 * beam;
+    col = l * room + l * m * (0.55 + 1.6 * pk + 0.8 * beam);
+    col += vec3(1.0, 0.9, 1.0) * m * pk * 0.35;
+  } else if (seg < 1.5) {
+    // BAR 2: slam zoom from 2.6x on every beat, shockwave ring, alternating tilt, invert hit on beat 3
+    float z = 1.0 + 1.6 * pk * pk;
+    vec2 p = rot(c, (mod(bi, 2.0) * 2.0 - 1.0) * 0.07 * pk) / z;
+    float r = length(p * vec2(1.78, 1.0)), ring = bf * 1.3;
+    p += normalize(p + 1e-4) * exp(-pow((r - ring) * 14.0, 2.0)) * 0.035 * (1.0 - bf);
+    vec2 q = p + 0.5 + weave + shake;
+    col = look(q, ab + 0.02 * pk);
+    col += vec3(1.0, 0.6, 0.9) * exp(-pow((r - ring) * 30.0, 2.0)) * 0.6 * (1.0 - bf);
+    col = mix(col, vec3(1.0), pk * pk * 0.55);
+    if (bi > 1.5 && bi < 2.5 && bf < 0.18) col = vec3(1.0) - col;
+  } else if (seg < 2.5) {
+    // BAR 3: slice-shift glitch, pink / green duotone that flips every beat, 16th-note stutter
+    float st = floor(bt * 4.0);
+    float rows = 9.0 + 6.0 * mod(bi, 2.0), row = floor(uv.y * rows);
+    float off = (h(vec2(row, st)) - 0.5) * (0.06 + 0.32 * pk);
+    vec2 q = c / (1.08 + 0.05 * kick) + 0.5 + vec2(off, 0.0) + weave;
+    vec3 l = look(q, 0.004 + 0.03 * pk);
+    float y = dot(l, vec3(0.3, 0.55, 0.15));
+    vec3 duo = mod(bi, 2.0) < 0.5 ? mix(vec3(0.03, 0.0, 0.03), vec3(1.0, 0.25, 0.75), y * 1.3) : mix(vec3(0.0, 0.03, 0.01), vec3(0.45, 1.0, 0.35), y * 1.3);
+    col = mix(l, duo, 0.55 + 0.35 * pk);
+    col += step(0.93, h(vec2(row, st + 3.0))) * 0.25 * pk;
+  } else if (seg < 3.5) {
+    // BAR 4: a new trick each beat: mirror, 3x3 grid, drip stretch, swirl
+    vec2 p = c / (1.03 + 0.04 * kick);
+    if (bi < 0.5) { p.x = -abs(p.x) + 0.2 * (1.0 - pk); }
+    else if (bi < 1.5) { float n = 3.0; vec2 g = (p + 0.5) * n; vec2 id = floor(g); p = fract(g) - 0.5; p *= 1.0 + 0.4 * pk; if (mod(id.x + id.y, 2.0) > 0.5) p.x = -p.x; }
+    else if (bi < 2.5) { float top = -0.08; if (p.y > top) p.y = top + (p.y - top) / (1.0 + 3.5 * pk + 0.8 * (1.0 - bf)); }
+    else { float r = length(p * vec2(1.78, 1.0)); p = rot(p, (1.0 - smoothstep(0.0, 0.55, r)) * (3.2 * pk + 1.2 * bf)); }
+    vec2 q = p + 0.5 + weave + shake;
+    col = look(q, ab + 0.01 * pk);
+    col *= 1.0 + 0.5 * pk;
+  } else {
+    // BAR 5: rush into the title, zoom blur, strobing last beat, white-out into the first cut
+    float pr = clamp(bt / 4.0, 0.0, 1.0);
+    float z = 1.0 + 2.4 * pr * pr * pr + 0.06 * kick;
+    vec2 ctr = vec2(0.0, -0.08) * pr;
+    vec2 p = (c - ctr) / z + ctr;
+    vec2 q = p + 0.5 + weave + shake * 1.5;
+    col = look(q, ab + 0.01 * pr);
+    vec3 bl = vec3(0.0); float k = 0.03 + 0.12 * pr;
+    for (int i = 1; i <= 8; i++) bl += tex(0.5 + p * (1.0 - k * float(i) / 8.0));
+    col = mix(col, bl / 8.0 * 1.3, 0.35 + 0.5 * pr);
+    if (bi > 2.5) col *= mod(floor(bf * 8.0), 2.0) < 0.5 ? 1.5 : 0.35;
+    col = mix(col, vec3(1.0), smoothstep(0.82, 1.0, pr));
+  }
+  // bloom from bright areas
   vec3 glow = vec3(0.0);
-  for (int i = 0; i < 12; i++) { float a = float(i) * 0.5236; vec2 d = vec2(cos(a), sin(a)) * (0.003 + 0.002 * float(i % 3));
-    vec3 s = tex(qb + d); glow += max(s - 0.45, 0.0); }
-  col += glow / 12.0 * (1.1 + 1.4 * kick) * vec3(1.0, 0.85, 1.05);
-  // floating dust motes in the light
-  for (int L = 0; L < 3; L++) { float sc = 18.0 + float(L) * 14.0; vec2 pp = uv * vec2(sc * res.x / res.y, sc) + vec2(t * 0.25 * (1.0 + float(L)), -t * (0.6 + 0.3 * float(L)));
-    vec2 id = floor(pp), f = fract(pp) - 0.5; float r = h(id + float(L) * 13.0);
-    if (r > 0.9) { vec2 o2 = vec2(h(id + 1.7), h(id + 3.1)) - 0.5; float d = length(f - o2 * 0.6); col += vec3(1.0, 0.8, 0.95) * smoothstep(0.06, 0.0, d) * (0.35 + 0.4 * kick) * (1.0 - float(L) * 0.25); } }
-  // light leak drifting across
-  float lk = smoothstep(0.7, 0.0, length((uv - vec2(0.15 + 0.7 * fract(t * 0.06), 0.2)) * vec2(1.4, 2.2)));
-  col += vec3(1.0, 0.35, 0.55) * lk * 0.22;
-  // film: grain, dust, scratches, flicker, vignette
+  for (int i = 0; i < 12; i++) { float a = float(i) * 0.5236; vec2 d = vec2(cos(a), sin(a)) * (0.003 + 0.002 * float(i % 3)); glow += max(tex(uv + d) - 0.45, 0.0); }
+  col += glow / 12.0 * (0.5 + 1.2 * kick) * vec3(1.0, 0.85, 1.05) * (seg < 0.5 ? 0.3 : 1.0);
+  // downbeat glitch tears
+  float row = floor(uv.y * 70.0), g = step(0.82, h(vec2(row, floor(t * 20.0)))) * hit;
+  col = mix(col, col.gbr * 1.2, g * 0.6);
+  // film: grain, dust, scratches, flicker, vignette, scanlines
   col += (h(uv * res + fract(t * 13.1) * 91.0) - 0.5) * 0.11;
   float dust = step(0.9993, h(floor(uv * res / 3.0) + floor(t * 24.0) * 7.0)); col = mix(col, vec3(0.9), dust * 0.8);
   float sx = h(vec2(floor(t * 24.0), 11.0)); col += step(0.75, h(vec2(floor(t * 6.0), 5.0))) * smoothstep(0.0015, 0.0, abs(uv.x - sx)) * 0.35;
   col *= 0.94 + 0.06 * h(vec2(floor(t * 24.0), 9.0));
   col *= 1.0 - 0.45 * pow(length((uv - 0.5) * vec2(1.1, 1.6)), 2.2);
   col *= 0.88 + 0.12 * sin(uv.y * res.y * 1.6);
-  // in/out: flash from white at the start, crush to black + glitch at the end
-  col = mix(col, vec3(1.0), (1.0 - smoothstep(0.0, 0.35, t)) * intro);
-  col *= 1.0 - outro;
+  col = mix(col, vec3(0.0), (1.0 - smoothstep(0.0, 0.12, t)) * intro);
   o = vec4(clamp(col, 0.0, 1.0), 1.0);
 }`;
 let gl, prog, U = {}, A, out, octx;
@@ -92,7 +125,7 @@ function init(analysis, image) {
   const tx = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tx); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  for (const n of ['t', 'kick', 'bass', 'bar', 'hit', 'intro', 'outro', 'res']) U[n] = gl.getUniformLocation(prog, n);
+  for (const n of ['t', 'kick', 'bass', 'bar', 'hit', 'intro', 'outro', 'res', 'seg', 'bt']) U[n] = gl.getUniformLocation(prog, n);
   gl.viewport(0, 0, c.width, c.height); gl.uniform2f(U.res, c.width, c.height);
   out = document.getElementById('out'); octx = out.getContext('2d');
 }
@@ -103,7 +136,7 @@ function render(t, len) {
   const hit = (Math.floor(beat) % 4 === 0 && (beat % 1) < 0.25) ? 1 : 0;
   const outro = Math.min(1, Math.max(0, (t - (len - 0.25)) / 0.25));
   gl.uniform1f(U.t, t); gl.uniform1f(U.kick, kick); gl.uniform1f(U.bass, bass); gl.uniform1f(U.bar, bp * 4); gl.uniform1f(U.hit, hit + (t > len - 0.5 ? 1 : 0));
-  gl.uniform1f(U.intro, 1); gl.uniform1f(U.outro, outro * 0.0);
+  gl.uniform1f(U.intro, 1); const bb = Math.max(0, (t - A.t0) / bp), sg = Math.floor(bb / 4); gl.uniform1f(U.seg, Math.min(sg, 4)); gl.uniform1f(U.bt, sg > 4 ? 3.999 : bb - sg * 4); gl.uniform1f(U.outro, outro * 0.0);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   octx.fillStyle = '#000'; octx.fillRect(0, 0, out.width, out.height);
   const SH = 608, SY = Math.round((out.height - SH) / 2), z = 1 + 0.02 * kick;
