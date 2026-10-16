@@ -8,7 +8,7 @@ const VS = `#version 300 es
 in vec2 p; out vec2 uv; void main(){ uv = p * 0.5 + 0.5; uv.y = 1.0 - uv.y; gl_Position = vec4(p, 0.0, 1.0); }`;
 const FS = `#version 300 es
 precision highp float; in vec2 uv; out vec4 o;
-uniform sampler2D img; uniform float t, kick, bass, bar, hit, intro, outro, seg, bt; uniform vec2 res;
+uniform sampler2D img; uniform float t, kick, bass, bar, hit, intro, outro, seg, bt, vari; uniform vec2 res;
 float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float n2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
@@ -31,11 +31,16 @@ vec3 look(vec2 q, float ab){
   col += vec3(1.0, 0.95, 1.0) * exp(-pow((q.x + (q.y - 0.5) * 0.45 - sw) * 16.0, 2.0)) * m * 0.9;
   return col;
 }
+vec3 hueRot(vec3 c, float a){ float ca = cos(a), sa = sin(a); const vec3 k = vec3(0.57735);
+  return c * ca + cross(k, c) * sa + k * dot(k, c) * (1.0 - ca); }
+vec2 squig(vec2 q, float amp, float freq, float sp){ q.x += sin(q.y * freq + t * sp) * amp; q.y += cos(q.x * freq * 0.8 + t * sp * 1.3) * amp * 0.7; return q; }
+float wavyLines(vec2 p, float k){ float w = sin((p.y * 70.0 + sin(p.x * 13.0 + t * 9.0 + k) * 2.4 + sin(p.x * 31.0 - t * 5.0) * 0.8 + k) * 1.0);
+  return smoothstep(0.55, 1.0, w); }
 vec2 rot(vec2 p, float a){ return mat2(cos(a), -sin(a), sin(a), cos(a)) * p; }
 void main(){
   // beat clock: seg = bar index (0..4), bt = beat within the bar (0..4), bi = beat index, bf = phase within the beat
   float bi = floor(bt), bf = fract(bt), beatLen = bar / 4.0;
-  float pk = exp(-bf * beatLen * 7.0);                       // per-beat punch envelope
+  float pk = smoothstep(0.0, 0.10, bf) * exp(-bf * beatLen * 3.4);   // v28: soft attack + long tail instead of a hard spike
   float wt = floor(t * 24.0);
   vec2 weave = vec2(h(vec2(wt, 1.0)) - 0.5, h(vec2(wt, 2.0)) - 0.5) * 0.0012;
   vec2 shake = (vec2(h(vec2(wt, 3.0)), h(vec2(wt, 4.0))) - 0.5) * 0.014 * kick;
@@ -43,33 +48,47 @@ void main(){
   float ab = 0.0008 + 0.005 * kick;
   vec3 col;
   if (seg < 0.5) {
-    // BAR 1: dark room, the words slam in one per beat (cuff / no / dancer / whole frame), light beam scanning
-    vec2 q = c / (1.04 + 0.06 * pk) + 0.5 + weave + shake;
-    float edge = bi < 0.5 ? 0.335 : (bi < 1.5 ? 0.505 : 2.0);
-    float m = textMask(q) * step(q.x, edge);
-    vec3 l = look(q, ab + 0.012 * pk);
-    float beam = exp(-pow((q.x - (bt / 4.0) * 1.2 + 0.1) * 9.0, 2.0));
-    float room = bi > 2.5 ? 0.25 + 0.75 * pk : 0.05 + 0.08 * beam;
-    col = l * room + l * m * (0.55 + 1.6 * pk + 0.8 * beam);
-    col += vec3(1.0, 0.9, 1.0) * m * pk * 0.35;
+    // BAR 1 (v28): rapid flashes of different versions of the title scene, squiggly neon lines crawling through them
+    float vv = floor(mod(vari, 8.0));
+    vec2 q = c / (1.03 + 0.04 * pk) + 0.5 + weave;
+    float k = vari * 1.7;
+    if (vv < 0.5)      { q = squig(q, 0.002, 30.0, 4.0); }
+    else if (vv < 1.5) { q = squig(q, 0.012, 38.0, 7.0); }
+    else if (vv < 2.5) { q = squig(q, 0.006, 26.0, 6.0); }
+    else if (vv < 3.5) { q.x = 0.5 - abs(q.x - 0.5); q = squig(q, 0.010, 34.0, 6.0); }
+    else if (vv < 4.5) { q = (q - 0.5) / 1.7 + 0.5; q = squig(q, 0.004, 20.0, 5.0); }
+    else if (vv < 5.5) { q = squig(q, 0.016, 55.0, 8.0); }
+    else if (vv < 6.5) { q = fract(q * 2.0); q = squig(q, 0.004, 40.0, 5.0); }
+    else               { q = squig(q, 0.030, 22.0, 9.0); }
+    float sp = vv > 3.5 && vv < 4.5 ? 0.02 : 0.004 + 0.006 * vv / 7.0;
+    col = look(q, sp);
+    if (vv > 0.5 && vv < 1.5) col = hueRot(col, 2.1);
+    if (vv > 1.5 && vv < 2.5) col = vec3(1.0) - col * 0.9;
+    if (vv > 2.5 && vv < 3.5) col = hueRot(col, 4.2) * vec3(0.8, 1.1, 1.2);
+    if (vv > 4.5 && vv < 5.5) { float y = dot(col, vec3(0.3, 0.55, 0.15)); col = mix(vec3(0.25, 0.0, 0.05), vec3(1.0, 0.95, 0.2), clamp(y * 1.6, 0.0, 1.0)); }
+    if (vv > 5.5 && vv < 6.5) col = hueRot(col, 1.0) * 1.2;
+    if (vv > 6.5)             col = col * vec3(1.3, 0.55, 0.9) + vec3(0.08, 0.0, 0.1);
+    float ln = wavyLines(uv, k) * (vv < 0.5 ? 0.0 : 1.0);
+    vec3 lc = vv < 2.5 ? vec3(0.2, 1.0, 0.7) : (vv < 5.5 ? vec3(1.0, 0.35, 0.8) : vec3(0.3, 0.8, 1.0));
+    col += lc * ln * 0.42;
+    col = mix(col, vec3(1.0), 0.28 * step(0.5, fract(vari * 0.5)) * (vv > 1.5 ? 1.0 : 0.0));   // every other flash blooms
   } else if (seg < 1.5) {
     // BAR 2: slam zoom from 2.6x on every beat, shockwave ring, alternating tilt, invert hit on beat 3
-    float z = 1.0 + 1.6 * pk * pk;
-    vec2 p = rot(c, (mod(bi, 2.0) * 2.0 - 1.0) * 0.07 * pk) / z;
+    float z = 1.0 + 0.55 * pk;
+    vec2 p = rot(c, (mod(bi, 2.0) * 2.0 - 1.0) * 0.03 * pk) / z;
     float r = length(p * vec2(1.78, 1.0)), ring = bf * 1.3;
     p += normalize(p + 1e-4) * exp(-pow((r - ring) * 14.0, 2.0)) * 0.035 * (1.0 - bf);
-    vec2 q = p + 0.5 + weave + shake;
-    col = look(q, ab + 0.02 * pk);
+    vec2 q = squig(p + 0.5 + weave + shake, 0.012 * (1.0 - bt / 4.0), 34.0, 6.0);
+    col = look(q, ab + 0.01 * pk);
     col += vec3(1.0, 0.6, 0.9) * exp(-pow((r - ring) * 30.0, 2.0)) * 0.6 * (1.0 - bf);
-    col = mix(col, vec3(1.0), pk * pk * 0.55);
-    if (bi > 1.5 && bi < 2.5 && bf < 0.18) col = vec3(1.0) - col;
+    col = mix(col, vec3(1.0), pk * pk * 0.25);
   } else if (seg < 2.5) {
     // BAR 3: slice-shift glitch, pink / green duotone that flips every beat, 16th-note stutter
-    float st = floor(bt * 4.0);
+    float st = floor(bt * 2.0);
     float rows = 9.0 + 6.0 * mod(bi, 2.0), row = floor(uv.y * rows);
-    float off = (h(vec2(row, st)) - 0.5) * (0.06 + 0.32 * pk);
+    float off = (h(vec2(row, st)) - 0.5) * (0.03 + 0.12 * pk);
     vec2 q = c / (1.08 + 0.05 * kick) + 0.5 + vec2(off, 0.0) + weave;
-    vec3 l = look(q, 0.004 + 0.03 * pk);
+    vec3 l = look(q, 0.004 + 0.012 * pk);
     float y = dot(l, vec3(0.3, 0.55, 0.15));
     vec3 duo = mod(bi, 2.0) < 0.5 ? mix(vec3(0.03, 0.0, 0.03), vec3(1.0, 0.25, 0.75), y * 1.3) : mix(vec3(0.0, 0.03, 0.01), vec3(0.45, 1.0, 0.35), y * 1.3);
     col = mix(l, duo, 0.55 + 0.35 * pk);
@@ -78,16 +97,16 @@ void main(){
     // BAR 4: a new trick each beat: mirror, 3x3 grid, drip stretch, swirl
     vec2 p = c / (1.03 + 0.04 * kick);
     if (bi < 0.5) { p.x = -abs(p.x) + 0.2 * (1.0 - pk); }
-    else if (bi < 1.5) { float n = 3.0; vec2 g = (p + 0.5) * n; vec2 id = floor(g); p = fract(g) - 0.5; p *= 1.0 + 0.4 * pk; if (mod(id.x + id.y, 2.0) > 0.5) p.x = -p.x; }
-    else if (bi < 2.5) { float top = -0.08; if (p.y > top) p.y = top + (p.y - top) / (1.0 + 3.5 * pk + 0.8 * (1.0 - bf)); }
-    else { float r = length(p * vec2(1.78, 1.0)); p = rot(p, (1.0 - smoothstep(0.0, 0.55, r)) * (3.2 * pk + 1.2 * bf)); }
+    else if (bi < 1.5) { float n = 3.0; vec2 g = (p + 0.5) * n; vec2 id = floor(g); p = fract(g) - 0.5; p *= 1.0 + 0.2 * pk; if (mod(id.x + id.y, 2.0) > 0.5) p.x = -p.x; }
+    else if (bi < 2.5) { float top = -0.08; if (p.y > top) p.y = top + (p.y - top) / (1.0 + 1.8 * pk + 0.4 * (1.0 - bf)); }
+    else { float r = length(p * vec2(1.78, 1.0)); p = rot(p, (1.0 - smoothstep(0.0, 0.55, r)) * (1.5 * pk + 0.8 * bf)); }
     vec2 q = p + 0.5 + weave + shake;
     col = look(q, ab + 0.01 * pk);
     col *= 1.0 + 0.5 * pk;
   } else {
     // BAR 5: rush into the title, zoom blur, strobing last beat, white-out into the first cut
     float pr = clamp(bt / 4.0, 0.0, 1.0);
-    float z = 1.0 + 2.4 * pr * pr * pr + 0.06 * kick;
+    float z = 1.0 + 1.5 * pr * pr + 0.03 * kick;
     vec2 ctr = vec2(0.0, -0.08) * pr;
     vec2 p = (c - ctr) / z + ctr;
     vec2 q = p + 0.5 + weave + shake * 1.5;
@@ -95,8 +114,7 @@ void main(){
     vec3 bl = vec3(0.0); float k = 0.03 + 0.12 * pr;
     for (int i = 1; i <= 8; i++) bl += tex(0.5 + p * (1.0 - k * float(i) / 8.0));
     col = mix(col, bl / 8.0 * 1.3, 0.35 + 0.5 * pr);
-    if (bi > 2.5) col *= mod(floor(bf * 8.0), 2.0) < 0.5 ? 1.5 : 0.35;
-    col = mix(col, vec3(1.0), smoothstep(0.82, 1.0, pr));
+    col = mix(col, vec3(1.0), smoothstep(0.78, 1.0, pr));
   }
   // bloom from bright areas
   vec3 glow = vec3(0.0);
@@ -125,7 +143,7 @@ function init(analysis, image) {
   const tx = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tx); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  for (const n of ['t', 'kick', 'bass', 'bar', 'hit', 'intro', 'outro', 'res', 'seg', 'bt']) U[n] = gl.getUniformLocation(prog, n);
+  for (const n of ['t', 'kick', 'bass', 'bar', 'hit', 'intro', 'outro', 'res', 'seg', 'bt', 'vari']) U[n] = gl.getUniformLocation(prog, n);
   gl.viewport(0, 0, c.width, c.height); gl.uniform2f(U.res, c.width, c.height);
   out = document.getElementById('out'); octx = out.getContext('2d');
 }
@@ -136,7 +154,9 @@ function render(t, len) {
   const hit = (Math.floor(beat) % 4 === 0 && (beat % 1) < 0.25) ? 1 : 0;
   const outro = Math.min(1, Math.max(0, (t - (len - 0.25)) / 0.25));
   gl.uniform1f(U.t, t); gl.uniform1f(U.kick, kick); gl.uniform1f(U.bass, bass); gl.uniform1f(U.bar, bp * 4); gl.uniform1f(U.hit, hit + (t > len - 0.5 ? 1 : 0));
-  gl.uniform1f(U.intro, 1); const bb = Math.max(0, (t - A.t0) / bp), sg = Math.floor(bb / 4); gl.uniform1f(U.seg, Math.min(sg, 4)); gl.uniform1f(U.bt, sg > 4 ? 3.999 : bb - sg * 4); gl.uniform1f(U.outro, outro * 0.0);
+  gl.uniform1f(U.intro, 1); const bb = Math.max(0, (t - A.t0) / bp), sg = Math.floor(bb / 4); const fn = Math.floor(t * 30 + 1e-6); let vi = fn < 24 ? Math.floor(fn / 4) : fn < 40 ? 6 + Math.floor((fn - 24) / 2) : 14 + (fn - 40);
+    const vv = (vi * 3 + Math.floor(vi / 8)) % 8; gl.uniform1f(U.vari, (t < bp * 4 - 0.12) ? vv + 8 * Math.floor(vi / 8) : 0);
+    gl.uniform1f(U.seg, Math.min(sg, 4)); gl.uniform1f(U.bt, sg > 4 ? 3.999 : bb - sg * 4); gl.uniform1f(U.outro, outro * 0.0);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   octx.fillStyle = '#000'; octx.fillRect(0, 0, out.width, out.height);
   const SH = 608, SY = Math.round((out.height - SH) / 2), z = 1 + 0.02 * kick;

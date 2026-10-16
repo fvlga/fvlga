@@ -79,6 +79,11 @@ direct corrections (per-project notes) win.
   (src/crystal_ball_face.py). Don't bring the smiley back.
   The loud red/yellow/blue neon skull pattern around it is also retired: the
   mandala is now folded from teal-graded 1960s rapids footage, no hue cycling.
+- Zine layer (v28): NO red film strip and NO volume-meter pills (artist, Oct 16). Quote boxes
+  must change spot AND look every time (book page / receipt / sticky note / neon script /
+  ransom cut-outs / terminal) — artist wants variety, even whole new art styles.
+- Intro (v28): first bar is a flash-montage of title variants with squiggly neon lines; the
+  rest eases in (soft-attack beat envelope, no hard strobe).
 - Alone shot (65.13–69.25): the artist's cut-outs pop up as stickers on the beat (v21).
 - Picture layout: the legacy 16:9 strip, explicitly requested by the artist:
   1080x608 centred in a 1080x1920 black frame at y=656 (see

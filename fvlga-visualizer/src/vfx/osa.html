@@ -1,5 +1,9 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
 @font-face{font-family:Cap;src:url(../Inter.ttf)}
+@font-face{font-family:Mk;src:url(../PermanentMarker.ttf)}
+@font-face{font-family:Mono;src:url(../VT323.ttf)}
+@font-face{font-family:Scr;src:url(../Pinyon.ttf)}
+@font-face{font-family:Ser;src:url(../Playfair.ttf);font-weight:100 900}
 @font-face{font-family:Book;src:url(file:///usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf)}
 @font-face{font-family:BookB;src:url(file:///usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf)}
 html,body{margin:0;background:transparent}</style></head><body>
@@ -17,6 +21,7 @@ const PAGES = [
   ['A Small Promise', 'I will not dance tonight. I will keep my jacket on and my eyes open. I will count the money twice and the friends once. When the lights come up I will already be outside, already gone.'],
   ['Notes', 'Bring water. Bring nothing you would miss. The road out of town is longer at night. Remember the name of the field, remember the color of the shirt, forget the rest.']];
 const MICRO = ['you were never late, the world was early', 'keep the receipts', 'do not text back tonight', 'everything is temporary except the weather', 'stay outside longer', 'the river does not care', 'protect your peace', 'summer ends on a tuesday'];
+const QUOTES = ['dont wait for the song to end', 'i left before the lights came up', 'count the money twice and the friends once', 'everything is temporary except the weather', 'tell them you went to the river', 'stay outside', 'the light is only gold for a minute', 'no flash no photos just leave'];
 const BADGE = ['side a', 'bands up', 'no flash', 'tape 03'];
 let A, ctx, thumbs = [];
 const rng = s => () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
@@ -36,15 +41,46 @@ function render(t) {
     ctx.fillStyle = CREAM; ctx.fillText(cap[2].toLowerCase(), W / 2, cy); }
   if (inDrop) return;
   let boxX = null;   // where the quote box is this bar (so other elements keep clear of it)
-  // book page: a different spot every time
-  if (on(1, Math.floor(b / 2), 0.45)) { const k = Math.floor(b / 2), pg = PAGES[k % PAGES.length];
-    // box origins (330x150): TL, TR (clear of the badge), ML, MR, BL, BR (clear of the caption + status list), top-centre
-    const SL = [[20, 40], [W - 470, 40], [20, 230], [W - 350, 230], [20, H - 215], [W - 600, H - 215], [W / 2 - 165, 40]];
-    const sl = SL[(k * 5 + 2) % SL.length], jr = rng(k * 977 + 5), x = sl[0] + 14 + Math.round((jr() - 0.5) * 24), _bx = (boxX = sl[0]), y = sl[1] + 30 + Math.round((jr() - 0.5) * 16);
-    ctx.fillStyle = 'rgba(6,12,16,.42)'; ctx.fillRect(x - 14, y - 30, 330, 150);   // dark scrim behind the page
-    ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(255,255,255,.93)'; ctx.font = '22px BookB'; ctx.fillText(pg[0], x, y);
-    ctx.font = '12.5px Book'; const words = pg[1].split(' '); let line = '', yy = y + 26;
-    for (const w of words) { const tl = line + w + ' '; if (ctx.measureText(tl).width > 300) { ctx.fillText(line, x, yy); line = w + ' '; yy += 16; } else line = tl; } ctx.fillText(line, x, yy); }
+  // quotes: a different spot AND a different look every time (book page / receipt / sticky note / neon script / ransom cut-outs / terminal)
+  if (on(1, Math.floor(b / 2), 0.45)) { const k = Math.floor(b / 2), pg = PAGES[k % PAGES.length], q = QUOTES[(k * 3 + 1) % QUOTES.length];
+    const SL = [[20, 40], [W - 470, 40], [20, 230], [W - 350, 230], [20, H - 230], [W - 600, H - 230], [W / 2 - 165, 40]];   // 330x150 regions: TL, TR, ML, MR, BL, BR, top-centre
+    const sl = SL[(k * 5 + 2) % SL.length], jr = rng(k * 977 + 5); boxX = sl[0];
+    const sty = (k * 7 + 3) % 6, cx = Math.min(W - 195, Math.max(195, sl[0] + 165 + Math.round((jr() - 0.5) * 24))), cy = sl[1] + 75 + Math.round((jr() - 0.5) * 14);
+    const age = Math.max(0, t - (A.t0 + k * 8 * bp)), u = Math.min(1, age / 0.16), pop = u < 1 ? 1 + 2.7 * Math.pow(u - 1, 3) + 1.7 * Math.pow(u - 1, 2) : 1;   // ease-out-back
+    const wrap = (txt, maxW) => { const out = []; let line = ''; for (const w of txt.split(' ')) { const tl = line + w + ' '; if (ctx.measureText(tl).width > maxW && line) { out.push(line.trim()); line = w + ' '; } else line = tl; } out.push(line.trim()); return out; };
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(pop, pop); ctx.globalAlpha = Math.min(1, u * 2.5); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    if (sty === 0) {        // torn book page on a dark scrim
+      ctx.rotate((jr() - 0.5) * 0.04); ctx.fillStyle = 'rgba(6,12,16,.42)'; ctx.fillRect(-179, -105, 330 + 28, 150 + 28 - 20); const x = -165, y = -62;
+      ctx.fillStyle = 'rgba(255,255,255,.93)'; ctx.font = '22px BookB'; ctx.fillText(pg[0], x, y); ctx.font = '12.5px Book'; let yy = y + 26; for (const ln of wrap(pg[1], 300)) { ctx.fillText(ln, x, yy); yy += 16; }
+    } else if (sty === 1) { // receipt strip, typewriter font, torn zigzag edge
+      ctx.rotate(((k % 2) ? 1 : -1) * 0.05); const w = 230, lines = (ctx.font = '22px Mono', wrap(q.toUpperCase(), w - 36)), h = 74 + lines.length * 21;
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(-w / 2 + 5, -h / 2 + 6, w, h); ctx.fillStyle = '#f4efe2'; ctx.beginPath(); ctx.moveTo(-w / 2, -h / 2); ctx.lineTo(w / 2, -h / 2); ctx.lineTo(w / 2, h / 2);
+      for (let i = 0; i <= 12; i++) ctx.lineTo(w / 2 - i * (w / 12), h / 2 + (i % 2 ? 7 : 0)); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#1a1a1a'; ctx.font = '20px Mono'; ctx.fillText('RECEIPT  #0' + (140 + k), -w / 2 + 18, -h / 2 + 26); ctx.font = '22px Mono'; let yy = -h / 2 + 52; for (const ln of lines) { ctx.fillText(ln, -w / 2 + 18, yy); yy += 21; }
+      ctx.font = '20px Mono'; ctx.fillText('TOTAL:  0 DANCES', -w / 2 + 18, yy + 12);
+    } else if (sty === 2) { // marker on a sticky note with tape
+      ctx.rotate(((k % 2) ? -1 : 1) * 0.07); const w = 210, lines = (ctx.font = '25px Mk', wrap(q, w - 34)), h = 40 + lines.length * 30 + 14; const col = (k % 2) ? '#E4FF3F' : '#ff9ec7';
+      ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fillRect(-w / 2 + 6, -h / 2 + 8, w, h); ctx.fillStyle = col; ctx.fillRect(-w / 2, -h / 2, w, h);
+      ctx.fillStyle = 'rgba(235,225,200,.8)'; ctx.save(); ctx.translate(0, -h / 2); ctx.rotate(-0.06); ctx.fillRect(-34, -10, 68, 20); ctx.restore();
+      ctx.fillStyle = '#16120d'; ctx.font = '25px Mk'; let yy = -h / 2 + 46; for (const ln of lines) { ctx.fillText(ln, -w / 2 + 17, yy); yy += 30; }
+    } else if (sty === 3) { // neon script sign, no box
+      ctx.rotate(((k % 2) ? 1 : -1) * 0.025); ctx.font = '46px Scr'; const lines = wrap(q, 340), lh = 50, y0 = -((lines.length - 1) * lh) / 2 + 10;
+      ctx.textAlign = 'center';
+      for (let i = 0; i < lines.length; i++) { ctx.shadowColor = '#ff3fa4'; ctx.shadowBlur = 24; ctx.fillStyle = 'rgba(255,63,164,.55)'; ctx.fillText(lines[i], 2, y0 + i * lh + 2);
+        ctx.shadowColor = '#3ff0ff'; ctx.shadowBlur = 14; ctx.fillStyle = '#fff6e8'; ctx.fillText(lines[i], 0, y0 + i * lh); } ctx.shadowBlur = 0;
+    } else if (sty === 4) { // ransom-note cut-out words, each its own paper scrap and font
+      const FN = ['700 21px Ser', '23px Mk', '23px Mono', '600 18px Cap', 'italic 800 22px Ser'], BG = [['#F5E9A8', '#111'], ['#111', '#F5E9A8'], ['#c8102e', '#fff'], ['#E4FF3F', '#111'], ['#fff', '#222']];
+      const r = rng(k * 131 + 7); let x = -170, y = -34; const rows = [];
+      for (const w of q.split(' ')) { const f = FN[Math.floor(r() * FN.length)], bg = BG[Math.floor(r() * BG.length)]; ctx.font = f; const ww = ctx.measureText(w).width + 14; if (x + ww > 170) { x = -170; y += 40; } rows.push([w, f, bg, x, y, ww, (r() - 0.5) * 0.12]); x += ww + 5; }
+      for (const [w, f, bg, px, py, ww, rt] of rows) { ctx.save(); ctx.translate(px + ww / 2, py); ctx.rotate(rt); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-ww / 2 + 3, -17 + 4, ww, 33); ctx.fillStyle = bg[0]; ctx.fillRect(-ww / 2, -17, ww, 33); ctx.fillStyle = bg[1]; ctx.font = f; ctx.textAlign = 'center'; ctx.fillText(w, 0, 6); ctx.restore(); }
+    } else {                // green terminal window with blinking cursor
+      ctx.font = '23px Mono'; const w = 320, lines = wrap('> ' + q, w - 30), h = 40 + lines.length * 24;
+      ctx.fillStyle = 'rgba(0,10,4,.8)'; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.strokeStyle = '#38ff6a'; ctx.lineWidth = 2; ctx.strokeRect(-w / 2, -h / 2, w, h);
+      ctx.fillStyle = '#38ff6a'; ctx.fillRect(-w / 2, -h / 2, w, 16); ctx.fillStyle = '#031'; ctx.font = '14px Mono'; ctx.fillText('note.txt', -w / 2 + 8, -h / 2 + 12);
+      ctx.fillStyle = '#38ff6a'; ctx.font = '23px Mono'; let yy = -h / 2 + 42; lines.forEach((ln, i) => { ctx.fillText(ln + (i === lines.length - 1 && Math.floor(t * 3) % 2 ? '_' : ''), -w / 2 + 15, yy); yy += 24; });
+      ctx.fillStyle = 'rgba(56,255,106,.07)'; for (let yy2 = -h / 2 + 16; yy2 < h / 2; yy2 += 4) ctx.fillRect(-w / 2, yy2, w, 1);
+    }
+    ctx.restore(); }
   // micro-text in the top corners
   ctx.font = '400 10px Cap'; ctx.fillStyle = 'rgba(245,233,168,.85)';
   if (on(2, b, 0.6)) { ctx.textAlign = 'left'; ctx.fillText(MICRO[b % MICRO.length], 14, 18); }
@@ -70,7 +106,7 @@ const load = src => new Promise(res => { const im = new Image(); im.onload = () 
 (async () => {
   try {
     A = await fetch('../analysis.json').then(r => r.json()); ctx = document.getElementById('c').getContext('2d');
-    await document.fonts.load('20px Cap'); await document.fonts.load('20px Book'); await document.fonts.load('20px BookB');
+    await document.fonts.load('20px Cap'); await document.fonts.load('20px Mk'); await document.fonts.load('20px Mono'); await document.fonts.load('20px Scr'); await document.fonts.load('700 20px Ser'); await document.fonts.load('20px Book'); await document.fonts.load('20px BookB');
     const ims = await Promise.all([16, 17, 18, 20, 24, 25, 27, 41, 43, 49, 52, 55].map(i => load(`../foot/c${i}/0030.jpg`)));
     for (const im of ims.filter(Boolean)) { const c = document.createElement('canvas'); c.width = 120; c.height = 76; const x = c.getContext('2d');
       x.drawImage(im, 0, 0, 120, 76); x.globalCompositeOperation = 'multiply'; x.fillStyle = '#ff3b4a'; x.fillRect(0, 0, 120, 76); thumbs.push(c); }
