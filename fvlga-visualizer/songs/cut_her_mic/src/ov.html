@@ -44,11 +44,10 @@ function halftoneIcon(ch) {   // colour emoji with a white die-cut sticker edge 
 const EMO = { jeans: '👖', sun: '☀️', butter: '🧈', water: '💦', otter: '🦦', car: '🚙', dive: '🏊', cash: '💵' };
 function wrap(txt, maxW) { const out = []; let line = ''; for (const w of txt.split(' ')) { const tl = line + w + ' '; if (ctx.measureText(tl).width > maxW && line) { out.push(line.trim()); line = w + ' '; } else line = tl; } out.push(line.trim()); return out; }
 function giantWord(txt, age, rot, xf, yf, dur) {
-  const u = clamp(age / 0.16), pop = (1 + 0.5 * (1 - easeOut(u))) * (1 + 0.035 * (window.__kick || 0)), a = Math.min(1, u * 3) * (1 - ease((age - (dur - 0.25)) / 0.25));
+  const u = clamp(age / 0.16), pop = (1 + 0.5 * (1 - easeOut(u))) * (1 + 0.035 * (window.__kick || 0)), a = Math.min(1, u * 3) * (1 - ease((age - (dur - 0.45)) / 0.45));
   ctx.save(); ctx.globalAlpha = a; ctx.font = 'italic 900 100px Ser'; const m = ctx.measureText(txt).width, px = Math.min(300, 100 * 860 / m); ctx.font = 'italic 900 ' + px + 'px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.translate(W * xf, H * yf); ctx.rotate(rot * Math.PI / 180); ctx.scale(pop, pop); const off = 4 + 14 * (1 - easeOut(u));
-  ctx.fillStyle = 'rgba(255,138,61,.9)'; ctx.fillText(txt, off, off * 0.6); ctx.fillStyle = 'rgba(47,214,200,.9)'; ctx.fillText(txt, -off, -off * 0.6);
-  ctx.shadowColor = 'rgba(30,10,0,.45)'; ctx.shadowBlur = 20; if (CHROME.has(txt + Math.round(window.__wt || 0))) { const g = ctx.createLinearGradient(0, -px * 0.45, 0, px * 0.45); g.addColorStop(0, '#ffffff'); g.addColorStop(0.45, '#bcd3d8'); g.addColorStop(0.5, '#4e6f78'); g.addColorStop(0.62, '#9fe3ea'); g.addColorStop(1, '#ffffff'); ctx.fillStyle = g; } else ctx.fillStyle = '#fff4dc'; ctx.fillText(txt, 0, 0); ctx.restore(); }
+    ctx.shadowColor = 'rgba(20,6,0,.7)'; ctx.shadowBlur = 26; if (CHROME.has(txt + Math.round(window.__wt || 0))) { const g = ctx.createLinearGradient(0, -px * 0.45, 0, px * 0.45); g.addColorStop(0, '#ffffff'); g.addColorStop(0.45, '#bcd3d8'); g.addColorStop(0.5, '#4e6f78'); g.addColorStop(0.62, '#9fe3ea'); g.addColorStop(1, '#ffffff'); ctx.fillStyle = g; } else ctx.fillStyle = '#fff4dc'; ctx.fillText(txt, 0, 0); ctx.restore(); }
 const CHROME = new Set(['WATER57', 'OTTER61', 'SUMMER78']);
 function stamp(age, big) {
   const u = clamp(age / 0.1), s = (1 + 1.8 * (1 - easeOut(u))) * (big ? 1.25 : 1), a = clamp(1 - (age - 1.2) / 0.4), jx = age < 0.25 ? Math.sin(age * 120) * 6 * (1 - age / 0.25) : 0;
@@ -73,11 +72,84 @@ function sunDisc(x, y, r, a) {
   ctx.save(); ctx.globalAlpha = a; const g = ctx.createLinearGradient(0, y - r, 0, y + r); g.addColorStop(0, '#ffd34a'); g.addColorStop(0.55, '#ff7a3d'); g.addColorStop(1, '#ff3d7a');
   ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.clip(); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.globalCompositeOperation = 'destination-out';
   for (let i = 0; i < 5; i++) { ctx.fillRect(x - r, y + r * (0.05 + i * 0.19), r * 2, 2 + i * 1.6); } ctx.restore(); }
+// ---------- countdown devices (3 styles, switch: window.CDS || P.CD_STYLE; default 'ticket') ----------
+const CDRED = '#e8261c', INK = '#1c140d';
+const _tex = {};
+function paperTex(w, h, seed, tone) { const k = w + 'x' + h + seed + tone; if (_tex[k]) return _tex[k]; const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'), r = rng(seed);
+  for (let i = 0; i < w * h / 14; i++) { g.fillStyle = r() < 0.5 ? 'rgba(60,30,10,' + (0.03 + r() * 0.07) + ')' : 'rgba(255,255,255,' + (0.05 + r() * 0.1) + ')'; g.fillRect(r() * w, r() * h, 1 + r() * 1.5, 1 + r() * 1.5); }
+  for (let i = 0; i < 5; i++) { g.fillStyle = 'rgba(80,50,20,' + (0.03 + r() * 0.04) + ')'; g.fillRect(r() * w, 0, 1 + r() * 2, h); }
+  return (_tex[k] = c); }
+function dayAge(t) { const d = daysLeft(t); for (let k = 0; k <= 40; k++) if (daysLeft(t - k / 30) !== d) return (k - 0.5) / 30; return 9; }
+function cdState(t) { const a = win(t, P.HOOK1, 86, 0.5, 1.0), dl = daysLeft(t); let jx = 0, fl = 1;
+  if ((t > 20.4 && t < 20.62) || (t > 22.5 && t < 22.72) || (t > 77.4 && t < 77.62)) { jx = Math.sin(t * 90) * 6; fl = 0.45 + 0.55 * (Math.floor(t * 30) % 2); }
+  return { a, dl, ds: String(dl).padStart(3, '0'), jx, fl, red: dl <= 10, age: dayAge(t) }; }
+function cdFrame(t, kick, cy, rot, S, fn) {   // shared entrance (drops in on the beat at 13.71), kick breath, glitch shake/flicker
+  ctx.save(); const dy = -120 * (1 - easeOut((t - P.HOOK1) / 0.42)) - 40 * ease((t - 85) / 1.0), pulse = 1 + 0.025 * kick, wob = (t - P.HOOK1) < 0.9 ? Math.sin((t - P.HOOK1) * 14) * 0.05 * (1 - (t - P.HOOK1) / 0.9) : 0;
+  ctx.globalAlpha = clamp(S.a) * S.fl; ctx.translate(W / 2 + S.jx, cy + dy); ctx.rotate(rot + wob); ctx.scale(pulse, pulse); ctx.textBaseline = 'alphabetic'; fn(); ctx.restore(); }
+function lsp(px) { if ('letterSpacing' in ctx) ctx.letterSpacing = px + 'px'; }
+function drawTicket(t, kick, S) {   // option A: torn-off cream admission stub, ink digits stamp in on each tick
+  cdFrame(t, kick, 48, -0.016, S, () => {
+    const w = 300, h = 76, px = 100, x0 = -w / 2, y0 = -h / 2, nb = 6;
+    const path = () => { ctx.beginPath(); ctx.moveTo(x0, y0 + 3); ctx.quadraticCurveTo(x0, y0, x0 + 3, y0); ctx.lineTo(px - nb, y0); ctx.arc(px, y0, nb, Math.PI, 0, true); ctx.lineTo(-x0 - 3, y0); ctx.quadraticCurveTo(-x0, y0, -x0, y0 + 3); ctx.lineTo(-x0, -y0 - 3); ctx.quadraticCurveTo(-x0, -y0, -x0 - 3, -y0); ctx.lineTo(px + nb, -y0); ctx.arc(px, -y0, nb, 0, Math.PI, true); ctx.lineTo(x0 + 3, -y0); ctx.quadraticCurveTo(x0, -y0, x0, -y0 - 3); ctx.closePath(); };
+    ctx.save(); ctx.shadowColor = 'rgba(15,6,0,.6)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 5; ctx.fillStyle = '#f2e7c8'; path(); ctx.fill(); ctx.restore();
+    ctx.save(); path(); ctx.clip(); ctx.drawImage(paperTex(w, h, 31, 'a'), x0, y0);
+    const g = ctx.createLinearGradient(0, y0, 0, -y0); g.addColorStop(0, 'rgba(255,255,255,.25)'); g.addColorStop(1, 'rgba(120,70,20,.16)'); ctx.fillStyle = g; ctx.fillRect(x0, y0, w, h);
+    ctx.fillStyle = S.red ? CDRED : '#ff8a3d'; ctx.fillRect(x0, y0, w, 4);   // sunset-orange header rule, turns stamp red at the end
+    ctx.fillStyle = TEAL; ctx.fillRect(x0, -y0 - 4, w, 4);
+    ctx.restore();
+    ctx.save(); ctx.strokeStyle = 'rgba(60,34,12,.5)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3.5]); ctx.beginPath(); ctx.moveTo(px, y0 + nb + 2); ctx.lineTo(px, -y0 - nb - 2); ctx.stroke(); ctx.restore();
+    ctx.textAlign = 'left'; lsp(3); ctx.font = '800 12px Cap'; ctx.fillStyle = '#6b4a2b'; ctx.fillText('SUMMER ENDS IN', x0 + 16, y0 + 22);
+    const s = 1 + 0.16 * Math.exp(-S.age * 16); ctx.save(); ctx.translate(x0 + 16, y0 + 66); ctx.scale(s, s); lsp(0); ctx.font = '900 54px Cap'; ctx.fillStyle = S.red ? CDRED : INK; ctx.fillText(S.ds, 0, 0); const dw = ctx.measureText(S.ds).width; ctx.restore();
+    lsp(3); ctx.font = '800 17px Cap'; ctx.fillStyle = S.red ? CDRED : INK; ctx.fillText('DAYS', x0 + 16 + dw + 10, y0 + 65);
+    ctx.save(); ctx.translate(px + (-x0 - px) / 2 + 1, 0); ctx.rotate(Math.PI / 2); ctx.textAlign = 'center'; lsp(4); ctx.font = '800 8px Cap'; ctx.fillStyle = '#6b4a2b'; lsp(2.5); ctx.fillText('ADMIT ONE', 0, 3); ctx.restore(); }); }
+function flipHalf(x, y, w, h, d, top, sy, col, shade) {   // one half of a flip tile; sy scales it about the hinge
+  const hh = h / 2; ctx.save(); if (sy !== 1) { ctx.translate(0, y + hh); ctx.scale(1, Math.max(0.001, sy)); ctx.translate(0, -(y + hh)); }
+  ctx.beginPath(); ctx.roundRect(x, top ? y : y + hh, w, hh, top ? [7, 7, 0, 0] : [0, 0, 7, 7]); ctx.clip();
+  const g = ctx.createLinearGradient(0, top ? y : y + hh, 0, top ? y + hh : y + h); if (top) { g.addColorStop(0, '#34302b'); g.addColorStop(1, '#232019'); } else { g.addColorStop(0, '#1b1813'); g.addColorStop(1, '#2a2620'); } ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  ctx.font = '800 ' + Math.round(h * 0.84) + 'px Cap'; lsp(0); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = col; ctx.fillText(d, x + w / 2, y + hh + h * 0.035);
+  if (shade) { ctx.fillStyle = 'rgba(0,0,0,' + shade + ')'; ctx.fillRect(x, y, w, h); } ctx.restore(); }
+function tape(x, y, w, h, rot, txt, sz) {   // cream paper label tape with slightly ragged ends
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.shadowColor = 'rgba(15,6,0,.55)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3; ctx.fillStyle = '#f2e7c8'; ctx.beginPath(); ctx.moveTo(-w / 2, -h / 2); ctx.lineTo(w / 2, -h / 2 + 1.5);
+  for (let i = 0; i <= 4; i++) ctx.lineTo(w / 2 - (i % 2) * 3, -h / 2 + 1.5 + (h - 1.5) * i / 4); ctx.lineTo(-w / 2, h / 2 - 1); for (let i = 4; i >= 0; i--) ctx.lineTo(-w / 2 + (i % 2) * 3, -h / 2 + (h - 1) * i / 4); ctx.closePath(); ctx.fill(); ctx.shadowColor = 'transparent';
+  ctx.save(); ctx.clip(); ctx.drawImage(paperTex(Math.ceil(w), Math.ceil(h), 7, 't'), -w / 2, -h / 2); ctx.restore();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; lsp(3); ctx.font = '800 ' + sz + 'px Cap'; ctx.fillStyle = INK; ctx.fillText(txt, 1, 1); ctx.restore(); }
+function drawFlip(t, kick, S) {   // option B: three flip-clock tiles + two label-tape strips; each digit change flips
+  cdFrame(t, kick, 48, 0.0, S, () => {
+    const tw = 50, th = 68, gap = 5, n = 3, tot = n * tw + (n - 1) * gap, x0 = -tot / 2, y0 = -th / 2, col = S.red ? '#ff5a3c' : '#f6efdc';
+    tape(x0 - 96, -2, 168, 26, -0.035, 'SUMMER ENDS IN', 12); tape(-x0 + 52, 4, 78, 26, 0.04, 'DAYS', 13);
+    const pd = String(daysLeft(t - S.age - 1 / 60)).padStart(3, '0'), u = clamp(S.age / 0.2);
+    ctx.save(); ctx.shadowColor = 'rgba(15,6,0,.6)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 5; ctx.fillStyle = '#1b1813'; for (let i = 0; i < n; i++) { ctx.beginPath(); ctx.roundRect(x0 + i * (tw + gap), y0, tw, th, 7); ctx.fill(); } ctx.restore();
+    for (let i = 0; i < n; i++) { const x = x0 + i * (tw + gap), cur = S.ds[i], prev = pd[i], fl = cur !== prev && u < 1;
+      flipHalf(x, y0, tw, th, cur, true, 1, col, 0); flipHalf(x, y0, tw, th, fl ? prev : cur, false, 1, col, 0);
+      if (fl) { if (u < 0.5) flipHalf(x, y0, tw, th, prev, true, 1 - 2 * u, col, 0.35 * u); else flipHalf(x, y0, tw, th, cur, false, 2 * u - 1, col, 0.35 * (1 - u)); }
+      ctx.fillStyle = 'rgba(0,0,0,.85)'; ctx.fillRect(x, y0 + th / 2 - 1, tw, 2.2); ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fillRect(x, y0 + th / 2 + 1.2, tw, 1);
+      ctx.fillStyle = '#0b0906'; ctx.fillRect(x - 1, y0 + th / 2 - 4, 3, 8); ctx.fillRect(x + tw - 2, y0 + th / 2 - 4, 3, 8); } }); }
+function drawBand(t, kick, S) {   // option C: pool wristband (tyvek, adhesive tab), goes teal -> sunset -> red; one punched dot per day
+  cdFrame(t, kick, 46, -0.014, S, () => {
+    const w = 540, h = 46, x0 = -w / 2, y0 = -h / 2, p = prog(t), lerp = (a, b, k) => Math.round(a + (b - a) * k), tabX = -x0 - 74;
+    const A = [47, 214, 200], B = [255, 138, 61], R = [232, 38, 28], k = clamp(p * 1.15), c = S.red ? R : [lerp(A[0], B[0], k), lerp(A[1], B[1], k), lerp(A[2], B[2], k)], rgb = 'rgb(' + c.join(',') + ')';
+    const path = () => { ctx.beginPath(); ctx.roundRect(x0, y0, w, h, 5); };
+    ctx.save(); ctx.shadowColor = 'rgba(15,6,0,.55)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 5; ctx.fillStyle = rgb; path(); ctx.fill(); ctx.restore();
+    ctx.save(); path(); ctx.clip(); ctx.drawImage(paperTex(w, h, 52, 'b'), x0, y0);
+    const g = ctx.createLinearGradient(0, y0, 0, -y0); g.addColorStop(0, 'rgba(255,255,255,.22)'); g.addColorStop(0.5, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(0,0,0,.16)'); ctx.fillStyle = g; ctx.fillRect(x0, y0, w, h);
+    ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(tabX, y0, 74, h);   // adhesive tab with hatch + peel line
+    ctx.strokeStyle = 'rgba(18,10,4,.28)'; ctx.lineWidth = 2; for (let x = tabX + 6; x < tabX + 74; x += 8) { ctx.beginPath(); ctx.moveTo(x, y0 + 4); ctx.lineTo(x - 8, -y0 - 4); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(18,10,4,.5)'; ctx.fillRect(tabX - 1, y0, 2, h);
+    const nT = 92, tx0 = x0 + 30, tx1 = tabX - 18, gone = Math.round(92 - S.dl);
+    for (let i = 0; i < nT; i++) { const x = tx0 + (tx1 - tx0) * i / (nT - 1); ctx.fillStyle = i < gone ? 'rgba(0,0,0,.07)' : 'rgba(18,10,4,.62)'; ctx.beginPath(); ctx.arc(x, -y0 - 6, i % 10 === 0 ? 2 : 1.2, 0, 7); ctx.fill(); }
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(x0 + 14, 0, 4.5, 0, 7); ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; lsp(3); ctx.font = '800 8px Cap'; ctx.fillStyle = 'rgba(18,10,4,.6)'; ctx.fillText('PEEL', tabX + 37, 3);
+    lsp(0); ctx.font = '900 38px Cap'; const dw = ctx.measureText(S.ds).width; lsp(3); ctx.font = '800 14px Cap'; const l1 = ctx.measureText('SUMMER ENDS IN').width, l2 = ctx.measureText('DAYS').width, tot = l1 + dw + l2 + 28, sx = (tx0 + tx1) / 2 - tot / 2 + 6;
+    ctx.textAlign = 'left'; ctx.fillStyle = INK; ctx.fillText('SUMMER ENDS IN', sx, 5); const s = 1 + 0.14 * Math.exp(-S.age * 16); ctx.save(); ctx.translate(sx + l1 + 14, 10); ctx.scale(s, s); lsp(0); ctx.font = '900 38px Cap'; ctx.fillStyle = S.red ? '#fff4dc' : INK; ctx.fillText(S.ds, 0, 0); ctx.restore(); lsp(3); ctx.font = '800 14px Cap'; ctx.fillStyle = INK; ctx.fillText('DAYS', sx + l1 + dw + 28, 5); }); }
+function drawCountdown(t, kick) { const S = cdState(t); if (S.a < 0.005) return; const st = window.CDS || P.CD_STYLE || 'ticket'; if (st === 'flip') drawFlip(t, kick, S); else if (st === 'band') drawBand(t, kick, S); else drawTicket(t, kick, S); }
 function render(t) {
   ctx.clearRect(0, 0, W, H); if (MODE === 'mask') { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); for (const b of bands(t)) frostDraw(b, t); return; }
   window.__giantOn = P.WORDS.some(w => t >= w[0] && t < w[0] + w[2]); const bt0 = (t - P.T0) / P.BEAT; window.__kick = Math.exp(-(((bt0 % 1) + 1) % 1) * P.BEAT * 8); const bt = (t - P.T0) / P.BEAT, kick = Math.exp(-(((bt % 1) + 1) % 1) * P.BEAT * 8), inSong = t >= P.HOOK1 && t < P.OUTRO;
   // sun that keeps sinking (the countdown's second hand)
   if (inSong || (t >= P.OUTRO && t < 86)) { const p = prog(t), sink = t >= P.OUTRO ? ease((t - P.OUTRO) / 3.5) : 0, y = 76 + (H - 150) * Math.pow(p, 1.15) + sink * 120, a = Math.min(0.95, win(t, P.HOOK1, 90, 0.8, 0.1)) * (1 - ease((t - 84.5) / 1.5)) * (bands(t).some(b => b.h < 200 && b.u > 0.05) ? 0.15 : 1) * (t > 49.5 && t < 52.4 ? 0.1 : 1) * (window.__giantOn ? 0.12 : 1); sunDisc(W - 22, y, 42, a * 0.85); }
+  // colour decays on the section changes (hard cut, then the tint melts away)
+  for (const [wt, col, wa] of [[30.94, '182,255,46', 0.4], [41.267, '255,244,226', 0.45], [68.805, '255,138,61', 0.4]]) { const u = (t - wt) / 0.5; if (u > 0 && u < 1) { ctx.fillStyle = `rgba(${col},${wa * (1 - u) * (1 - u)})`; ctx.fillRect(0, 0, W, H); } }
   // kick breath
   if (inSong && Math.round(bt) % 4 === 0) { ctx.fillStyle = `rgba(255,236,200,${0.04 * kick})`; ctx.fillRect(0, 0, W, H); }
   // intro: racks thrown up (all ones)
@@ -102,16 +174,12 @@ function render(t) {
     ctx.textAlign = slot === 2 ? 'center' : left ? 'left' : 'right'; ctx.fillStyle = CREAM; ctx.shadowColor = 'rgba(20,6,0,.95)'; ctx.shadowBlur = 28; lines.forEach((ln, i) => { ctx.fillText(ln, x, y0 + i * lh - 6 * (t - a) / (b - a)); ctx.fillText(ln, x, y0 + i * lh - 6 * (t - a) / (b - a)); }); ctx.restore(); }
   // title
   { const a = win(t, 3.4, 8.5, 0.35, 0.6); if (a > 0.004) { const age = t - 3.4, u = clamp(age / 0.2), pop = 1 + 0.4 * (1 - easeOut(u)); ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'italic 900 150px Ser'; const m = ctx.measureText('Cut Her Mic').width, px = 150 * Math.min(1, 860 / m); ctx.font = 'italic 900 ' + px + 'px Ser';
-      ctx.translate(W / 2, H / 2 + 6); ctx.scale(pop, pop); const off = 3 + 10 * (1 - easeOut(u)); ctx.fillStyle = 'rgba(255,138,61,.9)'; ctx.fillText('Cut Her Mic', off, 0); ctx.fillStyle = 'rgba(47,214,200,.9)'; ctx.fillText('Cut Her Mic', -off, 0);
+      ctx.translate(W / 2, H / 2 + 6); ctx.scale(pop, pop); const off = 3 + 10 * (1 - easeOut(u)); 
       ctx.shadowColor = 'rgba(20,6,0,.5)'; ctx.shadowBlur = 24; ctx.fillStyle = '#f7edd3'; ctx.fillText('Cut Her Mic', 0, 0); ctx.shadowBlur = 0;
       const pr = easeOut((age - 0.3) / 0.8), w = ctx.measureText('Cut Her Mic').width; ctx.strokeStyle = '#ff2e7e'; ctx.lineWidth = Math.max(4, px * 0.04); ctx.lineCap = 'round'; ctx.beginPath(); const y0 = px * 0.47, xa = -w / 2; for (let x = xa; x <= xa + w * pr; x += 6) { const yy = y0 + Math.sin(x * 0.04) * 1.5; x === xa ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy); } ctx.stroke();
       ctx.font = '600 20px Cap'; ctx.fillStyle = 'rgba(247,237,211,.95)'; if ('letterSpacing' in ctx) ctx.letterSpacing = '9px'; ctx.fillText('FVLGA', 4, -px * 0.64); ctx.restore(); } }
-  // countdown spine: days left (calendar tile removed, artist: not needed)
-  { const a = win(t, P.HOOK1, 86, 0.5, 1.0); if (a > 0.005) { const dl = daysLeft(t), pulse = 1 + 0.06 * kick; ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round'; ctx.shadowColor = 'rgba(20,6,0,.85)'; ctx.shadowBlur = 14; if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
-      ctx.font = '700 19px Cap'; ctx.strokeStyle = 'rgba(18,8,0,.6)'; ctx.lineWidth = 6; ctx.strokeText('SUMMER ENDS IN', W / 2, 30); ctx.fillStyle = CREAM; ctx.fillText('SUMMER ENDS IN', W / 2, 30);
-      ctx.translate(W / 2, 74); ctx.scale(pulse, pulse); ctx.font = '800 48px Cap'; if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
-      let ds = String(dl).padStart(3, '0'); if ((t > 20.4 && t < 20.62) || (t > 22.5 && t < 22.72) || (t > 77.4 && t < 77.62)) { ctx.translate(Math.sin(t * 90) * 6, 0); ctx.globalAlpha *= 0.45 + 0.55 * (Math.floor(t * 30) % 2); }
-      ctx.strokeStyle = 'rgba(18,8,0,.65)'; ctx.lineWidth = 8; ctx.strokeText(ds + ' DAYS', 0, 0); ctx.fillStyle = dl <= 10 ? '#ff5a3c' : SLIME; ctx.fillText(ds + ' DAYS', 0, 0); ctx.restore(); } }
+  // countdown spine: days left (3 styles, see drawCountdown)
+  drawCountdown(t, kick);
   // fvlga sticker
   P.STICK.forEach((s, i) => { const a = win(t, s[0], s[1], 0.5, 0.5); if (a < 0.01) return; const c = SC[i] || ['#b6ff2e', '#10260b']; sticker(s[2] === 'BR' ? W - 78 : 78, H - 82 + Math.sin(t * 1.5) * 2, s[2] === 'BR' ? -0.07 : 0.06, a, c, 'fvlga', t); });
   // lyric caption
