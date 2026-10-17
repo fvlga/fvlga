@@ -33,3 +33,8 @@ Format: date, song/video, what worked, what failed (artist's words), steal next 
 
 ## 2026-10-17 CUT HER MIC v4 concept C board
 A measuring tape whose reading is derived from the lyric (32 at size 32, 34 at size 34) is a free, checkable spine; but without a cost mechanic the song tension is only a ruler running out. Soft low-res footage suffers under a heavy indigo grade.
+
+## 2026-10-17 CUT HER MIC v4 FUSION (A receipt + one B twin + C end label; board only, nothing rendered)
+- Artist said "put all the ideas into one but guide it". Fusing worked by giving each idea ONE job: A = spine (receipt, days as currency, 000 at 82.44, declined one day short), B = one moment (twin 20.4-24.3), C = end card (care label, size 32>34). Plan: songs/cut_her_mic/v4_fusion.md; boards cut_her_mic_v4_fusion_animatic.jpg / _layout.jpg.
+- Lessons: (1) a hard "max 3 objects" rule only works if it is checked by script (plan.py scans the timeline), and it forced cutting 7 giants + 3 quotes; (2) retracting a receipt to its number block keeps the spine readable under giant words; (3) a ledger must be computed, not eyeballed (92 - 80 spent = 12 burn, one per half beat to land 000 on the bar); (4) board bugs found by looking: stamp overlapped receipt, seal touched the slime band, stamp clipped at the strip edge, header collided with the label; (5) use the real grade.txt through ffmpeg for board frames instead of a numpy mock; (6) c80 (red-shirt boy) is only 60 frames, so three uses would repeat identical frames unless shots.py gets a flip/zoom override.
+- Not claimed: no motion, sync, audio or render verified; twin and slice are PIL mocks; the artist has not reacted yet.
