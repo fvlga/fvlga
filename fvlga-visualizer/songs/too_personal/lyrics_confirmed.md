@@ -1,11 +1,11 @@
 # Too Personal — lyrics (artist-corrected; approx. times from transcript)
-CONFIRMED by the artist: pendant/necklace lines, the bridge lines (0:52-1:12).
-STILL TO CONFIRM: intro (0:00-0:14), and the "reckless" line at 0:20 / 1:19.
+CONFIRMED by the artist: pendant/necklace lines, the reckless line, the bridge lines (0:52-1:12).
+STILL TO CONFIRM: intro (0:00-0:14) — anything sung?
 
 0:14  The times have changed, the times is different
 0:17  I'm finna buy me a diamond pendant
 0:19  I'm finna buy you a diamond necklace
-0:20  [?] Trusting this hoes, I'm too reckless
+0:20  I can't be trusting these hoes, I'm too reckless
 0:22  The times have changed, the times is different
 0:25  Yeah, yeah, the times have changed, the times is different
 0:28  Yeah, yeah, okay
@@ -30,7 +30,7 @@ STILL TO CONFIRM: intro (0:00-0:14), and the "reckless" line at 0:20 / 1:19.
 1:14  The times have changed, the times is different
 1:16  I'm finna buy me a diamond pendant
 1:17  I'm finna buy you a diamond necklace
-1:19  [?] Trusting this hoes, I'm too reckless
+1:19  I can't be trusting these hoes, I'm too reckless
 1:21  The times have changed, the times is different
 1:24  Yeah, yeah, the times have changed, the times is different
 1:27  Yeah, yeah, okay
