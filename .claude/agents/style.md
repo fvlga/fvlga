@@ -140,3 +140,9 @@ direct corrections (per-project notes) win.
 - v51: NO cut-outs of the artist anywhere on screen (artist dislikes them popping up): the alone scene is now four generated stills (src/genart, made with the Figma image connector — Canva's generate-image only returned a 199 px preview, too small) cut on the beat with push-ins; the ending card has no cut-outs. Quotes have no outline (soft glow only). Use image-gen connectors for visuals that are hard to draw in code.
 - v52: artist does NOT want the AI-generated images (removed genart + alone2). The frosted translucent "bands up" band is liked: three full-width bands across the screen (quote style 7, and stacked one per bar over the field shot 65.1-69.25 s). Quote pool = original lines in the old voice (the artist liked those; write MORE of the same mood) + real attributed public-domain quotes; author line only on the real ones. Quotes have no outline.
 - v53: no author names on any quote or book page (artist: "we don't need the auteur"). Quotes are just the line.
+
+## Per-song vibe + font discipline (artist, Oct 2026)
+- The guidelines are guardrails, not a template: every song gets its own vibe, sticker, type treatment and motion. Don't copy the last video's devices.
+- Fonts throw the artist off when mixed: maximum 2 families per video (one display serif italic + one UI sans). Numbers, stamps, tags, calendars and counters use the UI sans, not novelty/mono/condensed faces.
+- Run `preflight-checker` before every full render.
+- CUT HER MIC (summer/countdown, sticker-bomb): spine = "SUMMER ENDS IN n DAYS" counter + calendar tile + sinking sun; round rotating "fv" seal as the sticker; warm summer grade with teal water; red-shirt boy retired from cuts.

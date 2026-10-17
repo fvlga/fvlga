@@ -1,6 +1,6 @@
 # Music-video agent team: the efficient setup
 
-14 Claude Code subagents, loaded automatically from `.claude/agents/` in this repo. Ask for one by name ("use visualizer-qa on v19"), or ask for a stage ("run stage 2 for the new song").
+15 Claude Code subagents, loaded automatically from `.claude/agents/` in this repo. Ask for one by name ("use visualizer-qa on v19"), or ask for a stage ("run stage 2 for the new song").
 
 ## Shared files (not agents — every agent reads these every run)
 | File | What it is |
@@ -25,6 +25,7 @@
 | `performance-editor` | inherit | Selfie clips: lip-sync, face-track, film/xerox/neon looks |
 | `colorist` | sonnet | Grade looks and where to apply them |
 | `video-finisher` | sonnet | Composites a version, compresses it under 30 MB, runs checks, scans, commits (pushes only when asked) |
+| `preflight-checker` | inherit | Runs BEFORE the render: labelled still frames of every moment + font/overlap/legibility/footage checks, GO / NO-GO with exact fixes |
 | `visualizer-qa` | inherit | Frame-by-frame audit with timestamps and fixes |
 | `social-cutter` | sonnet | Bar-aligned 15 s hook cut (30 s cuts and loops only on request) |
 | `release-manager` | sonnet | Covers, captions, hashtags, platform spec checks and a posting plan (never posts) |
@@ -36,7 +37,8 @@
 1. **New song:** `beat-analyst` + `lyric-sync` + `mix-checker`, plus `reference-analyst` if the artist sent references. **Stage 1 exit gate (see contracts.md):** the artist confirms the BPM — beat-analyst reports half/double-time candidates for trap, and everything downstream inherits the pick — AND clears `captions_review.md`. Nothing in stage 2+ treats a med-confidence caption as confirmed.
 2. **Gather material:** `art-director-prompts` (the artist makes images in Gemini) + `footage-scout` + `performance-editor` (if selfie clips were sent).
 3. **Make shots:** one `card-animator` per new image (up to 3 at a time) + `colorist` on test frames.
-4. **Build:** `video-finisher` (one at a time; it uses the whole CPU for rendering).
+4. **Pre-render gate:** `preflight-checker` on the overlay + base (2 minutes). Fix its list, re-run until GO. Only then render.
+4b. **Build:** `video-finisher` (one at a time; it uses the whole CPU for rendering).
 5. **Check:** `visualizer-qa`, then loop back to 3 or 4 with its fix list. Stop when no High and at most 3 Medium tickets are open, or after 3 loops, then ask the artist whether to ship (see contracts.md).
 6. **Ship:** `social-cutter` + `release-manager` + `mix-checker` on the exports.
 
