@@ -1,6 +1,6 @@
 # Music-video agent team: the efficient setup
 
-15 Claude Code subagents, loaded automatically from `.claude/agents/` in this repo. Ask for one by name ("use visualizer-qa on v19"), or ask for a stage ("run stage 2 for the new song").
+16 Claude Code subagents, loaded automatically from `.claude/agents/` in this repo. Ask for one by name ("use visualizer-qa on v19"), or ask for a stage ("run stage 2 for the new song").
 
 ## Shared files (not agents — every agent reads these every run)
 | File | What it is |
@@ -25,6 +25,7 @@
 | `performance-editor` | inherit | Selfie clips: lip-sync, face-track, film/xerox/neon looks |
 | `colorist` | sonnet | Grade looks and where to apply them |
 | `video-finisher` | sonnet | Composites a version, compresses it under 30 MB, runs checks, scans, commits (pushes only when asked) |
+| `motion-designer` | inherit | Designs the on-screen graphics (counter, tags, stickers, titles): 3 real options on real footage, picks one, implements it |
 | `preflight-checker` | inherit | Runs BEFORE the render: labelled still frames of every moment + font/overlap/legibility/footage checks, GO / NO-GO with exact fixes |
 | `visualizer-qa` | inherit | Frame-by-frame audit with timestamps and fixes |
 | `social-cutter` | sonnet | Bar-aligned 15 s hook cut (30 s cuts and loops only on request) |
