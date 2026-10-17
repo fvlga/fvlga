@@ -27,3 +27,6 @@ Format: date, song/video, what worked, what failed (artist's words), steal next 
 - Steal: give a countdown a CONSEQUENCE (days as currency, ledger sums to 89, hook 2 overdrawn, CARD DECLINED); captions as native paper tags (answers the font complaint); cut that touches the picture itself (dashed line); thermal-paper fade as rewatch detail.
 - Engine lessons: sparks that name a world (mall, gas station) are useless when the footage is fixed 1960s outdoor film, so pick sparks on structure/object/constraint; board v1 was unreadable (receipt text 25 px, thumbnails 400 px of mostly black bars), so animatic = strip crops at >= 540 px wide, text >= 34 px; mock receipt box needed height = printed lines; giant words collided with the receipt (needs a retract rule). Animatic grade is a mock, not verified ffmpeg output.
 - Not claimed: nothing built, no audio or sync verified; the artist has not seen any of this.
+
+## 2026-10-17 CUT HER MIC v4 Concept B board (TWO CAMERAS, animatic only)
+- Built 8-strip + 4-frame layout board from real frames. Lessons: half-width lane crops cost faces and action; top/bottom dark scrims are needed or red UI is unreadable on bright footage; stale timestamps on a black lane collide with new text (hide them); wrap captions inside lane 1 so they do not cross the rope. Nothing rendered, grade is a mock; the artist has not yet reacted.
