@@ -1,6 +1,6 @@
 # Music-video agent team: the efficient setup
 
-13 Claude Code subagents, loaded automatically from `.claude/agents/` in this repo. Ask for one by name ("use visualizer-qa on v19"), or ask for a stage ("run stage 2 for the new song").
+14 Claude Code subagents, loaded automatically from `.claude/agents/` in this repo. Ask for one by name ("use visualizer-qa on v19"), or ask for a stage ("run stage 2 for the new song").
 
 ## Shared files (not agents — every agent reads these every run)
 | File | What it is |
@@ -14,6 +14,7 @@
 ## The team
 | Agent | Model | Job |
 |---|---|---|
+| `creative-director` | inherit | The idea engine: reads the song (lyrics, analysis) and returns a complete, buildable concept, even if the artist has no idea |
 | `beat-analyst` | sonnet | Song analysis: BPM, beat/bar grid, sections, energy (`analysis.json`) |
 | `lyric-sync` | sonnet | Timed captions and keyword hits; aligns phone clips to the song |
 | `mix-checker` | haiku | Loudness, true-peak/clipping and A/V sync checks; safe fix commands |
@@ -31,6 +32,7 @@
 "inherit" uses whatever model the main session uses (the strongest, for jobs that need visual judgment). "sonnet" is for routine, well-specified work; "haiku" is for pure measurement. This keeps quality where it matters and cost and time low elsewhere.
 
 ## Playbook (run each stage in parallel, at most 3–5 agents at once)
+0. **Concept (any time the artist has no idea):** `creative-director` reads the lyrics + analysis and writes `songs/<song>/concept.md` with one recommended concept and two alternatives.
 1. **New song:** `beat-analyst` + `lyric-sync` + `mix-checker`, plus `reference-analyst` if the artist sent references. **Stage 1 exit gate (see contracts.md):** the artist confirms the BPM — beat-analyst reports half/double-time candidates for trap, and everything downstream inherits the pick — AND clears `captions_review.md`. Nothing in stage 2+ treats a med-confidence caption as confirmed.
 2. **Gather material:** `art-director-prompts` (the artist makes images in Gemini) + `footage-scout` + `performance-editor` (if selfie clips were sent).
 3. **Make shots:** one `card-animator` per new image (up to 3 at a time) + `colorist` on test frames.
