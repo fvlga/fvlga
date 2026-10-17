@@ -4,11 +4,11 @@ DUR=89.42; T0=3.402; BEAT=60/69.84; HALF=2*BEAT
 HOOK1=13.71; V1=30.89; SH=41.20; V2=44.64; HOOK2=68.69; OUTRO=82.44
 # explicit cut plan in beat units (0 = first beat at T0): (start_beat, end_beat, step_beats)
 PLAN=[(0,8,8),(8,12,1),(12,20,2),(20,26,1),(26,32,2),(32,44,2),(44,48,2),(48,52,2),(52,56,1),(56,60,2),(60,64,4),(64,68,4),(68,76,2),(76,92,2)]
-CLIPS=[84, 74,70,75,71, 65,82,66,69, 68,81,86,89,77,71, 63,72,83, 88,87,85,62,67,61, 64,90, 2,7, 36,37,38,34, 59,15, 10, 73, 35,39,13,12, 37,5,4,14,48,11,31,58]
+CLIPS=[84, 74,70,75,71, 65,82,66,69, 68,81,78,89,77,60, 63,72,83, 88,87,85,62,67,61, 64,90, 2,7, 36,37,38,34, 59,15, 10, 73, 35,39,13,12, 37,5,13,14,48,11,34,58]
 cuts=[]
 for a,b,st in PLAN:
     k=a
-    while k<b: cuts.append(round(T0+k*BEAT,3)); k+=st
+    while k<b: cuts.append(round(T0+k*BEAT*1.0017,3)); k+=st
 assert len(cuts)==len(CLIPS),(len(cuts),len(CLIPS))
 SHOTS=[(cuts[i],CLIPS[i]) for i in range(len(CLIPS))]+[(OUTRO,0)]
 L=lambda s,t,x,end=None:[s,end,x]
@@ -39,6 +39,6 @@ BANDS=[ # (a, b, word, tint)
  (8.7,10.1,'racks in the air','w'),(10.2,11.8,'racks in the air','w'),(11.9,13.5,'racks in the air','w'),
  (22.5,24.3,'for the summer','w'),(77.4,79.2,'for the summer','w'),
  (34.6,40.8,'slime','g'),(56.5,58.3,'water','t'),(58.3,60.3,'ocean','t')]
-FACES=[(17.3,20.2,'f1',0),(46.0,48.4,'f2',1),(71.8,74.6,'f2',0)]
+FACES=[(17.3,20.2,'f1',0),(47.5,49.4,'f2',1),(71.8,74.6,'f2',0)]
 STICK=[(13.71,30.89,'BR'),(30.89,44.64,'BL'),(44.64,68.69,'BR'),(68.69,82.44,'BL')]
 json.dump(dict(DUR=DUR,T0=T0,BEAT=BEAT,HOOK1=HOOK1,OUTRO=OUTRO,CAPS=CAPS,WORDS=WORDS,STAMPS=STAMPS,QUOTES=QUOTES,POPS=POPS,ONES=ONES,BANDS=BANDS,FACES=FACES,STICK=STICK),open(S+'/cm/params.json','w'))

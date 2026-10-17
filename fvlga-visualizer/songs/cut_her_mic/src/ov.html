@@ -77,7 +77,7 @@ function render(t) {
   ctx.clearRect(0, 0, W, H); if (MODE === 'mask') { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); for (const b of bands(t)) frostDraw(b, t); return; }
   window.__giantOn = P.WORDS.some(w => t >= w[0] && t < w[0] + w[2]); const bt0 = (t - P.T0) / P.BEAT; window.__kick = Math.exp(-(((bt0 % 1) + 1) % 1) * P.BEAT * 8); const bt = (t - P.T0) / P.BEAT, kick = Math.exp(-(((bt % 1) + 1) % 1) * P.BEAT * 8), inSong = t >= P.HOOK1 && t < P.OUTRO;
   // sun that keeps sinking (the countdown's second hand)
-  if (inSong || (t >= P.OUTRO && t < 86)) { const p = prog(t), sink = t >= P.OUTRO ? ease((t - P.OUTRO) / 3.5) : 0, y = 76 + (H - 150) * Math.pow(p, 1.15) + sink * 120, a = Math.min(0.95, win(t, P.HOOK1, 90, 0.8, 0.1)) * (1 - ease((t - 84.5) / 1.5)) * (bands(t).some(b => b.h < 200 && b.u > 0.05) ? 0.15 : 1) * (t > 49.5 && t < 52.4 ? 0.1 : 1); sunDisc(W - 22, y, 42, a * 0.85); }
+  if (inSong || (t >= P.OUTRO && t < 86)) { const p = prog(t), sink = t >= P.OUTRO ? ease((t - P.OUTRO) / 3.5) : 0, y = 76 + (H - 150) * Math.pow(p, 1.15) + sink * 120, a = Math.min(0.95, win(t, P.HOOK1, 90, 0.8, 0.1)) * (1 - ease((t - 84.5) / 1.5)) * (bands(t).some(b => b.h < 200 && b.u > 0.05) ? 0.15 : 1) * (t > 49.5 && t < 52.4 ? 0.1 : 1) * (window.__giantOn ? 0.12 : 1); sunDisc(W - 22, y, 42, a * 0.85); }
   // kick breath
   if (inSong && Math.round(bt) % 4 === 0) { ctx.fillStyle = `rgba(255,236,200,${0.04 * kick})`; ctx.fillRect(0, 0, W, H); }
   // intro: racks thrown up (all ones)
@@ -98,7 +98,7 @@ function render(t) {
       const key2 = key + SLIME; ctx.save(); ctx.globalAlpha = a * 0.92; ctx.translate(x, y); ctx.rotate(((Math.floor(pt * 7) % 5) - 2) * 0.06); const sc = 0.62 * back(age / 0.2); ctx.scale(sc, sc);
       ctx.shadowColor = 'rgba(255,248,230,1)'; ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(ic, -140, -140); ctx.restore(); } }
   // quotes
-  for (const [a, b, txt, slot] of P.QUOTES) { const al = win(t, a, b, 1.0, 1.0); if (al < 0.005) continue; ctx.save(); ctx.globalAlpha = al * 0.95; ctx.font = 'italic 400 36px Ser'; const lines = wrap(txt, 400), lh = 46, left = slot !== 1, x = slot === 2 ? W / 2 : left ? 64 : W - 64, y0 = slot === 0 ? 150 : slot === 1 ? 190 : 250;
+  for (const [a, b, txt, slot] of P.QUOTES) { const al = win(t, a, b, 1.0, 1.0); if (al < 0.005) continue; ctx.save(); ctx.globalAlpha = al * 0.95; ctx.font = 'italic 600 37px Ser'; const lines = wrap(txt, 400), lh = 46, left = slot !== 1, x = slot === 2 ? W / 2 : left ? 64 : W - 64, y0 = slot === 0 ? 150 : slot === 1 ? 190 : 250;
     ctx.textAlign = slot === 2 ? 'center' : left ? 'left' : 'right'; ctx.fillStyle = CREAM; ctx.shadowColor = 'rgba(20,6,0,.95)'; ctx.shadowBlur = 28; lines.forEach((ln, i) => { ctx.fillText(ln, x, y0 + i * lh - 6 * (t - a) / (b - a)); ctx.fillText(ln, x, y0 + i * lh - 6 * (t - a) / (b - a)); }); ctx.restore(); }
   // title
   { const a = win(t, 3.4, 8.5, 0.35, 0.6); if (a > 0.004) { const age = t - 3.4, u = clamp(age / 0.2), pop = 1 + 0.4 * (1 - easeOut(u)); ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'italic 900 150px Ser'; const m = ctx.measureText('Cut Her Mic').width, px = 150 * Math.min(1, 860 / m); ctx.font = 'italic 900 ' + px + 'px Ser';
@@ -110,14 +110,15 @@ function render(t) {
   { const a = win(t, P.HOOK1, 86, 0.5, 1.0); if (a > 0.005) { const dl = daysLeft(t), pulse = 1 + 0.06 * kick; ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round'; ctx.shadowColor = 'rgba(20,6,0,.85)'; ctx.shadowBlur = 14; if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
       ctx.font = '700 19px Cap'; ctx.strokeStyle = 'rgba(18,8,0,.6)'; ctx.lineWidth = 6; ctx.strokeText('SUMMER ENDS IN', W / 2, 30); ctx.fillStyle = CREAM; ctx.fillText('SUMMER ENDS IN', W / 2, 30);
       ctx.translate(W / 2, 74); ctx.scale(pulse, pulse); ctx.font = '800 48px Cap'; if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
-      let ds = String(dl).padStart(3, '0'); if ((t > 20.4 && t < 20.62) || (t > 22.5 && t < 22.72) || (t > 77.4 && t < 77.62)) { ds = ds.replace(/\d/g, (c, i) => String(Math.floor(((t * 97 + i * 13) % 10)))); ctx.translate(Math.sin(t * 90) * 5, 0); }
+      let ds = String(dl).padStart(3, '0'); if ((t > 20.4 && t < 20.62) || (t > 22.5 && t < 22.72) || (t > 77.4 && t < 77.62)) { ctx.translate(Math.sin(t * 90) * 6, 0); ctx.globalAlpha *= 0.45 + 0.55 * (Math.floor(t * 30) % 2); }
       ctx.strokeStyle = 'rgba(18,8,0,.65)'; ctx.lineWidth = 8; ctx.strokeText(ds + ' DAYS', 0, 0); ctx.fillStyle = dl <= 10 ? '#ff5a3c' : SLIME; ctx.fillText(ds + ' DAYS', 0, 0); ctx.restore(); } }
   // fvlga sticker
   P.STICK.forEach((s, i) => { const a = win(t, s[0], s[1], 0.5, 0.5); if (a < 0.01) return; const c = SC[i] || ['#b6ff2e', '#10260b']; sticker(s[2] === 'BR' ? W - 78 : 78, H - 82 + Math.sin(t * 1.5) * 2, s[2] === 'BR' ? -0.07 : 0.06, a, c, 'fvlga', t); });
   // lyric caption
   const cap = P.CAPS.find(c => t >= c[0] && t < c[1]);
-  if (cap) { const a = Math.min(1, (t - cap[0]) / 0.08, (cap[1] - t) / 0.08); ctx.save(); ctx.globalAlpha = clamp(a); ctx.font = '600 26px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; const cw = ctx.measureText(cap[2]).width, cy = H - 26;
-    ctx.fillStyle = 'rgba(10,6,3,.74)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 14, cy - 27, cw + 28, 38, 8); ctx.fill(); ctx.fillStyle = '#fffaf0'; ctx.fillText(cap[2], W / 2, cy); ctx.restore(); }
+  if (cap) { const a = Math.min(1, (t - cap[0]) / 0.04 + 0.4, (cap[1] - t) / 0.06); ctx.save(); ctx.globalAlpha = clamp(a); ctx.font = '600 26px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; const cw = ctx.measureText(cap[2]).width, cy = H - 26;
+    ctx.fillStyle = 'rgba(10,6,3,.86)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 14, cy - 27, cw + 28, 38, 8); ctx.fill(); ctx.fillStyle = '#fffaf0'; ctx.fillText(cap[2], W / 2, cy); ctx.restore(); }
+  { const a = win(t, 85.6, 89.6, 0.8, 0.4); if (a > 0.005) { ctx.save(); ctx.globalAlpha = a * 0.9; ctx.textAlign = 'center'; if ('letterSpacing' in ctx) ctx.letterSpacing = '6px'; ctx.font = '700 17px Cap'; ctx.fillStyle = CREAM; ctx.shadowColor = 'rgba(20,6,0,.8)'; ctx.shadowBlur = 10; ctx.fillText('FVLGA  \u2022  CUT HER MIC', W / 2, 530); ctx.restore(); } }
   // ending: counter reads zero
   { const a = win(t, 83.6, 88.8, 0.8, 1.2); if (a > 0.005) { ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(20,6,0,.8)'; ctx.shadowBlur = 12; ctx.font = '800 110px Cap'; ctx.fillStyle = '#ff6a4d'; ctx.fillText('000', W / 2, 410); ctx.font = 'italic 400 34px Ser'; ctx.fillStyle = CREAM; ctx.fillText("that's the summer", W / 2, 460); ctx.restore(); } }
 }
@@ -126,7 +127,7 @@ const load = src => new Promise(res => { const im = new Image(); im.onload = () 
 (async () => {
   try { P = await fetch('params.json').then(r => r.json()); try { SC = await fetch('stickcol.json').then(r => r.json()); } catch (e) { SC = []; }
     FACE.f1 = await load('faces/f1.png'); FACE.f2 = await load('faces/f2.png'); ctx = document.getElementById('c').getContext('2d');
-    for (const f of ['20px Cap', 'italic 900 20px Ser', 'italic 400 20px Ser', 'italic 800 20px Ser', '20px "Noto Color Emoji"']) await document.fonts.load(f);
+    for (const f of ['20px Cap', 'italic 900 20px Ser', 'italic 400 20px Ser', 'italic 600 20px Ser', 'italic 800 20px Ser', '20px "Noto Color Emoji"']) await document.fonts.load(f);
     window.ready = true; } catch (e) { window.err = String(e.stack || e); }
 })();
 window.renderBatch = (t0, n, fps, mode) => { MODE = mode; const r = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); r.push(document.getElementById('c').toDataURL('image/png').slice(22)); } return r; };
