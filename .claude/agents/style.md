@@ -145,5 +145,5 @@ direct corrections (per-project notes) win.
 - The guidelines are guardrails, not a template: every song gets its own vibe, sticker, type treatment and motion. Don't copy the last video's devices.
 - Fonts throw the artist off when mixed: maximum 2 families per video (one display serif italic + one UI sans). Numbers, stamps, tags, calendars and counters use the UI sans, not novelty/mono/condensed faces.
 - Run `preflight-checker` before every full render.
-- CUT HER MIC (summer/countdown, sticker-bomb): spine = "SUMMER ENDS IN n DAYS" counter + calendar tile + sinking sun; round rotating "fv" seal as the sticker; warm summer grade with teal water; red-shirt boy retired from cuts.
+- CUT HER MIC (summer/countdown, sticker-bomb): spine = "SUMMER ENDS IN n DAYS" counter + calendar tile + sinking sun; round rotating "fv" seal as the sticker; warm summer grade with teal water; red-shirt boy: LESS of him (artist, Oct 2026: 'I just wanted less of red shirt boy but not him entirely'), about 2-4 short shots, spaced apart.
 - Title confirmed by the artist: "Cut Her Mic" (file CUT_HER_MIC.wav).
