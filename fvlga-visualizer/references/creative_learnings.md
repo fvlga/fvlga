@@ -21,3 +21,9 @@ Format: date, song/video, what worked, what failed (artist's words), steal next 
 
 ## Reference studies
 - 2026-10: six underground videos (OsamaSon, 2hollis, Nettspend, xaviersobased, Playboi Carti, Ken Carson), DESCRIBED ONLY because YouTube blocked downloads; see underground_inspiration_2026.md. Upload screen captures to upgrade to 'watched'.
+
+## 2026-10-17 CUT HER MIC v4 ideas (creative-director engine test, nothing rendered)
+- Tested: spark tool seeds 1+2 (used receipt-structure, physical-type, price-tag, removal/counter; rejected mall, clinical, HUD, kitchen/gas-station), 3 divergent concepts + fusion, metaphor mapping, lyric table, animatic board from real frames (PIL mock). Plan: songs/cut_her_mic/v4_ideas.md.
+- Steal: give a countdown a CONSEQUENCE (days as currency, ledger sums to 89, hook 2 overdrawn, CARD DECLINED); captions as native paper tags (answers the font complaint); cut that touches the picture itself (dashed line); thermal-paper fade as rewatch detail.
+- Engine lessons: sparks that name a world (mall, gas station) are useless when the footage is fixed 1960s outdoor film, so pick sparks on structure/object/constraint; board v1 was unreadable (receipt text 25 px, thumbnails 400 px of mostly black bars), so animatic = strip crops at >= 540 px wide, text >= 34 px; mock receipt box needed height = printed lines; giant words collided with the receipt (needs a retract rule). Animatic grade is a mock, not verified ffmpeg output.
+- Not claimed: nothing built, no audio or sync verified; the artist has not seen any of this.
