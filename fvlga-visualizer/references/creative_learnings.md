@@ -30,3 +30,6 @@ Format: date, song/video, what worked, what failed (artist's words), steal next 
 
 ## 2026-10-17 CUT HER MIC v4 Concept B board (TWO CAMERAS, animatic only)
 - Built 8-strip + 4-frame layout board from real frames. Lessons: half-width lane crops cost faces and action; top/bottom dark scrims are needed or red UI is unreadable on bright footage; stale timestamps on a black lane collide with new text (hide them); wrap captions inside lane 1 so they do not cross the rope. Nothing rendered, grade is a mock; the artist has not yet reacted.
+
+## 2026-10-17 CUT HER MIC v4 concept C board
+A measuring tape whose reading is derived from the lyric (32 at size 32, 34 at size 34) is a free, checkable spine; but without a cost mechanic the song tension is only a ruler running out. Soft low-res footage suffers under a heavy indigo grade.
