@@ -1,5 +1,5 @@
 # CUT HER MIC - timed lyrics (m:ss, word-level whisper timings; line starts +-0.3 s)
-0:00.8  I got racks in the air   (intro ad-lib, repeats at 0:03.3  0:05.0  0:08.7  0:10.2  0:11.9)
+0:00.8  I got racks in the air, throwing up all ones   (repeats at 0:03.3  0:05.0  0:08.7  0:10.2  0:11.9)
 0:13.5  Shawty made me have so much fun like Thugger
 0:15.8  So much fun like Thugger
 0:17.3  I look in her eyes, you know that I want her

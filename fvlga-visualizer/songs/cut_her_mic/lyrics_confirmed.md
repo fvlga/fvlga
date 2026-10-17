@@ -1,5 +1,5 @@
 # CUT HER MIC - lyrics (artist-confirmed except intro; times approximate from transcript)
-STILL TO CONFIRM: intro (0:00-0:13) - anything sung?
+Intro (0:00-0:13): "I got racks in the air, throwing up all ones" repeated.
 
 ## Hook (0:13)
 Shawty made me have so much fun like Thugger
