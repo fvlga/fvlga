@@ -1,0 +1,1 @@
+Generated with the Figma image connector (gemini-3.1-flash-image) from text prompts — found-footage style stills with no people and no text: chair in a daisy field, rainy payphone, handcuffs in wet grass, boombox on a porch. Used full-bleed in the 65.1-69.25 s scene (src/alone2.py).
