@@ -115,6 +115,10 @@ Promise.all([fetch('../analysis.json').then(r => r.json()), fetch('../../clips/f
 function strip(job) { const out = document.getElementById('out'), o = out.getContext('2d'); o.fillStyle = '#000'; o.fillRect(0, 0, 1080, 1920);
   const tr = TRACK[job.clip] || [], fy = tr.length ? tr[Math.min(tr.length - 1, LASTF)] : 540;
   const Y = Math.max(0, Math.min(1920 - 608, 960 + (fy * 1.5 - 960) * 1.13 - 608 * 0.5));
-  o.drawImage(gl.canvas, 0, Y, 1080, 608, 0, 656, 1080, 608); return out; }
+  // v49: pulled back (artist: the face felt too close on a phone) — the whole vertical frame is shown smaller, centred, with a blurred dark copy filling the sides
+  if (job.mode === 'neon' && !job.cycle) { o.drawImage(gl.canvas, 0, Y, 1080, 608, 0, 656, 1080, 608); return out; }   // the dark neon-edge faces stay exactly as they were (artist likes them)
+  o.save(); o.filter = 'blur(22px) brightness(.5)'; o.drawImage(gl.canvas, 0, Y, 1080, 608, 0, 656, 1080, 608); o.restore();
+  const ZS = 0.62, srcH = 608 / ZS, cY = Y + 304 + 40, Ys = Math.max(0, Math.min(1920 - srcH, cY - srcH / 2)), dw = 1080 * ZS;
+  o.drawImage(gl.canvas, 0, Ys, 1080, srcH, (1080 - dw) / 2, 656, dw, 608); return out; }
 window.renderBatch = async (job, i0, n, fps, q, maxf) => { const r = []; for (let i = i0; i < i0 + n; i++) { await render(job, i, fps, maxf); r.push((job.full ? gl.canvas : strip(job)).toDataURL('image/jpeg', q).slice(23)); } return r; };
 </script></body></html>
