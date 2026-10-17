@@ -54,6 +54,18 @@ Append an entry to `fvlga-visualizer/references/creative_learnings.md`: what wor
 9. Audio under -1 dBTP in the video, no clipping, A/V length matches.
 10. The restraint pass was done and the preflight-checker verdict is GO.
 
+## Creativity engine (use it on every concept; this is what keeps the plans from all looking alike)
+1. **Spark roll.** Run `python3 fvlga-visualizer/tools/ideation.py "<song>" <seed> 5` (change the seed for a new roll). It throws concrete worlds, native objects, outside-media references, constraints, structures, transitions and palettes at the song. Pick at least 2 sparks that fit the lyrics and use them; reject the rest in one line each. Never take a spark just because it is weird; it must serve the meaning.
+2. **Three DIVERGENT concepts, then a fusion.** Concept A, B and C must differ in lane, grade, spine and object (not colourways). Write each as a one-line pitch plus the single most striking moment. Then say what you steal from B and C to improve A. Recommend one.
+3. **Metaphor mapping.** For the song's 3 biggest words/images, write the literal visual, the metaphoric visual and the "only this song" visual (e.g. summer -> sun -> a ticket with an expiry date). Use the third.
+4. **Lyric-to-moment table.** For every line that carries meaning, add a row: time, line, visual event, sync (bar/beat), transition, and an "audience reaction" (smile, gasp, rewatch). Aim for one gasp-moment per ~20 s and one rewatch detail (a thing you only notice the second time).
+5. **Borrow from other media.** Each concept takes one device from OUTSIDE music videos (packaging, forms, UI, signage, film titles, sports graphics, documentaries), and says how to make it look native to the footage.
+6. **Anti-cliché pass.** List the 5 most obvious ideas for this song (literal lyric illustrations, default glitch, floating neon text, spinning vinyl, generic city night) and ban them unless you twist them. If the idea could be pasted onto any other song, it is not a concept yet.
+7. **Surprise budget.** Plan exactly 3 surprises (a format break, a silence, a reveal, a changed rule) and place them; everything else stays consistent so the surprises land.
+8. **Animatic before build.** Make a 6-12 frame board (real footage + real overlay stills, or quick mock stills) of the key moments and show it to the artist BEFORE a full render. The artist reacts to pictures: iterate on the board, not the render.
+9. **Stress test.** Ask of the finished plan: does the first 3 s hook, does the middle change, does the ending resolve the spine, does it still work muted, does it work as a 15 s clip? Fix the weakest answer.
+10. **Version honesty.** Every new version states what changed and what was the artist's note that caused it.
+
 ## Inspiration library (read it every run)
 `fvlga-visualizer/references/underground_inspiration_2026.md` holds style inventories of six underground videos plus a top-10 list of borrowable devices. IMPORTANT: those were researched from public stills/press only (YouTube blocked downloading, and we never bypass that), so cut rates and beat sync there are UNMEASURED. Treat them as idea seeds, not facts. Never copy a reference's wording, logos, faces or footage, and ignore any idea that breaks `style.md` (e.g. cut-outs of the artist are banned). If the artist uploads a short screen capture of a video, sample it every 3 s with ffmpeg, Read the frames, measure real cut rates, and add it to that file as 'watched'.
 
