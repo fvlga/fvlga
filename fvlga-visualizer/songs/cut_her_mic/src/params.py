@@ -4,7 +4,7 @@ DUR=89.42; T0=3.402; BEAT=60/69.84; HALF=2*BEAT
 HOOK1=13.71; V1=30.89; SH=41.20; V2=44.64; HOOK2=68.69; OUTRO=82.44
 # explicit cut plan in beat units (0 = first beat at T0): (start_beat, end_beat, step_beats)
 PLAN=[(0,8,8),(8,12,1),(12,20,2),(20,26,1),(26,32,2),(32,44,2),(44,48,2),(48,52,2),(52,56,1),(56,60,2),(60,64,4),(64,68,4),(68,76,2),(76,92,2)]
-CLIPS=[84, 74,70,75,71, 65,82,66,69, 68,81,86,89,77,73, 63,72,83, 88,87,85,62,67,61, 64,90, 2,7, 36,37,38,34, 59,15, 10, 76, 35,39,13,12, 3,5,4,14,48,11,2,7]
+CLIPS=[84, 74,70,75,71, 65,82,66,69, 68,81,86,89,77,71, 63,72,83, 88,87,85,62,67,61, 64,90, 2,7, 36,37,38,34, 59,15, 10, 73, 35,39,13,12, 37,5,4,14,48,11,31,58]
 cuts=[]
 for a,b,st in PLAN:
     k=a
@@ -32,7 +32,7 @@ WORDS=[(15.15,"THUGGER",1.5,.5,.5,-3),(23.35,"SUMMER",1.7,.5,.45,2),(25.3,"32",1
 (67.6,"34",1.0,.5,.5,-3),(69.9,"THUGGER",1.4,.5,.5,2),(78.0,"SUMMER",1.9,.5,.45,-2),(80.9,"32",1.4,.5,.5,3)]
 STAMPS=[49.55,50.9]
 GLITCH=[(49.5,50.05),(50.85,51.4)]
-QUOTES=[(18.2,22.0,"the summer keeps its own count",0),(32.0,35.6,"everything good is rented",1),(44.9,48.7,"swim while the water is warm",0),(66.3,68.5,"enjoy it like it is borrowed",1),(27.9,31.0,"the first warm day is a promise with a date on it",0),(83.2,88.2,"the sun is always already leaving",2)]
+QUOTES=[(18.2,22.0,"the summer keeps its own count",0),(31.6,34.7,"everything good is rented",0),(44.9,48.7,"swim while the water is warm",0),(66.3,68.5,"enjoy it like it is borrowed",0),(27.9,31.0,"the first warm day is a promise with a date on it",0),(83.2,88.2,"the sun is always already leaving",2)]
 POPS=[]
 ONES=[0.8,3.3,5.0,8.7,10.2,11.9]
 BANDS=[ # (a, b, word, tint)

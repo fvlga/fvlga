@@ -146,3 +146,4 @@ direct corrections (per-project notes) win.
 - Fonts throw the artist off when mixed: maximum 2 families per video (one display serif italic + one UI sans). Numbers, stamps, tags, calendars and counters use the UI sans, not novelty/mono/condensed faces.
 - Run `preflight-checker` before every full render.
 - CUT HER MIC (summer/countdown, sticker-bomb): spine = "SUMMER ENDS IN n DAYS" counter + calendar tile + sinking sun; round rotating "fv" seal as the sticker; warm summer grade with teal water; red-shirt boy retired from cuts.
+- Title confirmed by the artist: "Cut Her Mic" (file CUT_HER_MIC.wav).

@@ -25,6 +25,20 @@ You are the last gate before rendering. You have shell access to the frames and 
 - **Variety.** Compare with the previous song's devices in `style.md`. If the same sticker shape, giant-word style, band style or transition vocabulary is reused without a reason in the concept, flag it as "same as <song>".
 - **Audio** (when a render exists): true peak, no clipping, A/V length match.
 
+
+## Whole-video critique (from the artist's critique skill; run on any rendered video)
+Never judge from one frame. Get the facts, then sample across time and Read every frame:
+- `ffprobe -v error -select_streams v:0 -show_entries stream=width,height,avg_frame_rate,duration -of default=noprint_wrappers=1 <file>`.
+- One frame every 10 s (`-vf fps=1/10`); every 3 s when the complaint is flicker/strobing/glitches. Scene-change frames: `-vf "select='gt(scene,0.4)',showinfo" -vsync 0`. Almost none means no real cuts: a finding.
+- `-vf blackdetect=d=0.5:pix_th=0.10 -an -f null -` for dead black stretches. Report how much of the frame is dead space.
+- Aspect ratio: check it against `render.json` (this artist's standing layout is 1080x1920 with a 16:9 strip and pure-black bars). Do not "fix" it; if the destination is unclear, list it as a question for the artist (full-bleed 9:16 vs. strip).
+- Focal point: what does the eye land on first in each frame? No anchor in most frames is a finding. Overlays (bands, tickers, text) covering more than a third of the image: flag. Two elements overlapping accidentally (sun on ticker, badge on caption): flag.
+- Arc: first, middle and last frames must not look interchangeable.
+- Text: readable at phone size at a glance; contrast against what is behind it; on-screen time (a caption under 1 s is decoration; a watermark that never leaves is wallpaper); captions match the song section.
+- Pacing: count cuts per 30 s (under 2 reads frozen in a high-energy song; over 12 reads frantic). Check cuts land on musical boundaries (name any that fight the beat). Any 15 s run with no visual change is a hole: name the timestamps. A glitch on a hard lyric is a choice; a glitch every few seconds regardless of lyric is a filter.
+- Brand and fit: artist mark present, spelled right, consistent; the visual world matches the song section (quote the lyric the visual fights); recurring motifs pay off (the countdown reaches zero, a stamp that returns).
+- Report like a director: lead with the single biggest problem, give every problem WHAT / WHERE (timestamps) / the one fix, quote the song for fit problems, say what is working before closing, keep it to ten sharp problems.
+
 ## Output
 Write `WORKDIR/preflight/report.md` and reply with a short version:
 - **VERDICT:** `GO` (no High, at most 3 Medium) or `NO-GO`.

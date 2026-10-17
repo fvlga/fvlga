@@ -1,8 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
-@font-face{font-family:Cap;src:url(Inter.ttf)}
-@font-face{font-family:Mono;src:url(VT323.ttf)}
+@font-face{font-family:Cap;src:url(Inter.ttf);font-weight:100 900}
 @font-face{font-family:Ser;src:url(Playfair.ttf);font-weight:100 900}
-@font-face{font-family:Ant;src:url(Anton.ttf)}
 html,body{margin:0;background:transparent}</style></head><body>
 <canvas id="c" width="1080" height="608"></canvas>
 <script>
@@ -20,7 +18,7 @@ function daysLeft(t) { return t < P.HOOK1 ? 92 : Math.round(92 * (1 - prog(t)));
 // ---------- frosted bands ----------
 function bands(t) {
   const B = [];
-  for (const [a, b, word, tint] of P.BANDS) { const u = Math.min(easeOut((t - a) / 0.3), 1 - easeOut((t - (b - 0.3)) / 0.3)); if (u > 0.003) { const n = tint === 'g' ? 2 : 3; for (let k = 0; k < n; k++) B.push({ y: n === 2 ? 200 + k * 190 : 118 + k * 186, h: n === 2 ? 130 : 150, word, tint, dir: k % 2 ? 1 : -1, u, sz: 86 }); } }
+  P.BANDS.forEach(([a, b, word, tint], bi) => { const u = Math.min(easeOut((t - a) / 0.3), 1 - easeOut((t - (b - 0.3)) / 0.3)); if (u > 0.003) B.push({ y: bi % 2 ? 450 : 170, h: tint === 'g' ? 112 : 124, word, tint, dir: bi % 2 ? 1 : -1, u, sz: 74 }); });
   // outro: warm glass closes from the top and bottom
   { const u = easeOut((t - 84.0) / 3.2) * (1 - ease((t - 87.4) / 1.6)); if (u > 0.002) { B.push({ y: 150 * u, h: 300 * u, word: '', tint: 'w', dir: 1, u: 0.999, sz: 60 }); B.push({ y: H - 150 * u, h: 300 * u, word: '', tint: 'w', dir: 1, u: 0.999, sz: 60 }); } }
   return B;
@@ -32,8 +30,8 @@ function frostDraw(b, t) {
   if (MODE === 'mask') { ctx.filter = 'blur(1.2px)'; ctx.fillStyle = '#fff'; ctx.fillRect(x0, y0, W, b.h); ctx.restore(); return; }
   ctx.fillStyle = TINT[b.tint]; ctx.fillRect(x0, y0, W, b.h);
   ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fillRect(x0, y0, W, 2); ctx.fillStyle = 'rgba(30,14,4,.2)'; ctx.fillRect(x0, y0 + b.h - 2, W, 2);
-  if (b.word) { ctx.beginPath(); ctx.rect(x0, y0, W, b.h); ctx.clip(); ctx.font = 'italic 800 ' + b.sz + 'px Ser'; ctx.textBaseline = 'middle'; ctx.fillStyle = b.tint === 'g' ? 'rgba(10,30,4,.85)' : 'rgba(26,14,6,.82)';
-    const s = b.word + '     ', ww = ctx.measureText(s).width, off = (((t * 90 * b.dir) % ww) + ww) % ww; for (let x = -ww; x < W + ww; x += ww) ctx.fillText(s, x - off, b.y + b.sz * 0.04); }
+  if (b.word) { ctx.beginPath(); ctx.rect(x0, y0, W, b.h); ctx.clip(); ctx.font = 'italic 800 ' + b.sz + 'px Ser'; ctx.textBaseline = 'middle'; ctx.fillStyle = b.tint === 'g' ? 'rgba(10,30,4,.85)' : 'rgba(26,14,6,.82)'; if (window.__giantOn) ctx.globalAlpha = 0.35;
+    const s = b.word + '     ', ww = ctx.measureText(s).width, off = (((t * 160 * b.dir) % ww) + ww) % ww; for (let x = -ww; x < W + ww; x += ww) ctx.fillText(s, x - off, b.y + b.sz * 0.04); }
   ctx.restore();
 }
 // ---------- helpers ----------
@@ -46,7 +44,7 @@ function halftoneIcon(ch) {   // colour emoji with a white die-cut sticker edge 
 const EMO = { jeans: '👖', sun: '☀️', butter: '🧈', water: '💦', otter: '🦦', car: '🚙', dive: '🏊', cash: '💵' };
 function wrap(txt, maxW) { const out = []; let line = ''; for (const w of txt.split(' ')) { const tl = line + w + ' '; if (ctx.measureText(tl).width > maxW && line) { out.push(line.trim()); line = w + ' '; } else line = tl; } out.push(line.trim()); return out; }
 function giantWord(txt, age, rot, xf, yf, dur) {
-  const u = clamp(age / 0.16), pop = 1 + 0.5 * (1 - easeOut(u)), a = Math.min(1, u * 3) * (1 - ease((age - (dur - 0.25)) / 0.25));
+  const u = clamp(age / 0.16), pop = (1 + 0.5 * (1 - easeOut(u))) * (1 + 0.035 * (window.__kick || 0)), a = Math.min(1, u * 3) * (1 - ease((age - (dur - 0.25)) / 0.25));
   ctx.save(); ctx.globalAlpha = a; ctx.font = 'italic 900 100px Ser'; const m = ctx.measureText(txt).width, px = Math.min(300, 100 * 860 / m); ctx.font = 'italic 900 ' + px + 'px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.translate(W * xf, H * yf); ctx.rotate(rot * Math.PI / 180); ctx.scale(pop, pop); const off = 4 + 14 * (1 - easeOut(u));
   ctx.fillStyle = 'rgba(255,138,61,.9)'; ctx.fillText(txt, off, off * 0.6); ctx.fillStyle = 'rgba(47,214,200,.9)'; ctx.fillText(txt, -off, -off * 0.6);
@@ -56,40 +54,43 @@ function stamp(age, big) {
   const u = clamp(age / 0.1), s = (1 + 1.8 * (1 - easeOut(u))) * (big ? 1.25 : 1), a = clamp(1 - (age - 1.2) / 0.4), jx = age < 0.25 ? Math.sin(age * 120) * 6 * (1 - age / 0.25) : 0;
   if (age < 0.08) { ctx.fillStyle = `rgba(255,255,255,${0.55 * (1 - age / 0.08)})`; ctx.fillRect(0, 0, W, H); }
   ctx.save(); ctx.translate(W / 2 + jx, H / 2 - 20); ctx.rotate(big ? -0.1 : -0.14); ctx.scale(s, s); ctx.globalAlpha = a * clamp(u * 2) * 0.95;
-  ctx.font = '230px Ant'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText('CUT HER').width; ctx.strokeStyle = '#e8261c'; ctx.fillStyle = '#e8261c'; ctx.lineWidth = 12; ctx.strokeRect(-tw / 2 - 34, -140, tw + 68, 280); ctx.lineWidth = 4; ctx.strokeRect(-tw / 2 - 50, -156, tw + 100, 312);
+  ctx.font = '900 175px Cap'; if ('letterSpacing' in ctx) ctx.letterSpacing = '6px'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const tw = ctx.measureText('CUT HER').width; ctx.strokeStyle = '#e8261c'; ctx.fillStyle = '#e8261c'; ctx.lineWidth = 12; ctx.strokeRect(-tw / 2 - 34, -140, tw + 68, 280); ctx.lineWidth = 4; ctx.strokeRect(-tw / 2 - 50, -156, tw + 100, 312);
   ctx.fillText('CUT HER', 0, 8);
   ctx.globalCompositeOperation = 'destination-out'; const r = rng(77); for (let i = 0; i < 380; i++) { ctx.globalAlpha = 0.5 + r() * 0.5; ctx.beginPath(); ctx.arc((r() - 0.5) * (tw + 110), (r() - 0.5) * 330, 0.6 + r() * 3.6, 0, 7); ctx.fill(); }
   ctx.restore(); }
-function sticker(x, y, rot, a, c, label) {
-  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(4, 5, 82, 29, 0, 0, 7); ctx.fill();
-  ctx.fillStyle = c[0]; ctx.beginPath(); ctx.ellipse(0, 0, 82, 29, 0, 0, 7); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(0, 0, 77, 24, 0, 0, 7); ctx.stroke();
-  ctx.fillStyle = c[1]; ctx.font = 'italic 800 27px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, 0, 1); ctx.restore(); }
+function sticker(x, y, rot, a, c, label, t) {   // round summer seal: ring of text turns slowly, "fv" in the middle
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.arc(3, 5, 48, 0, 7); ctx.fill();
+  ctx.fillStyle = c[0]; ctx.beginPath(); ctx.arc(0, 0, 48, 0, 7); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.beginPath(); ctx.arc(0, 0, 44, 0, 7); ctx.stroke();
+  ctx.fillStyle = c[1]; ctx.font = '800 11px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const ring = 'FVLGA \u2022 SUMMER \u2022 FVLGA \u2022 SUMMER \u2022 ', n = ring.length;
+  for (let i = 0; i < n; i++) { const an = (i / n) * Math.PI * 2 + t * 0.5; ctx.save(); ctx.rotate(an); ctx.translate(0, -34); ctx.fillText(ring[i], 0, 0); ctx.restore(); }
+  ctx.font = 'italic 900 30px Ser'; ctx.fillText('fv', 0, 2); ctx.restore(); }
 function sizeTag(x, y, rot, a, txt) {
   ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(-52, -34, 108, 78);
   ctx.fillStyle = '#f2f0e8'; ctx.beginPath(); ctx.moveTo(-54, -30); ctx.lineTo(-30, -48); ctx.lineTo(54, -48); ctx.lineTo(54, 40); ctx.lineTo(-54, 40); ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(-30, -34, 5, 0, 7); ctx.fill(); ctx.font = '600 12px Cap'; ctx.textAlign = 'center'; ctx.fillStyle = '#333'; ctx.fillText('SIZE', 10, -26);
-  ctx.font = '52px Ant'; ctx.fillStyle = '#111'; ctx.fillText(txt, 10, 22); ctx.restore(); }
+  ctx.font = '800 46px Cap'; ctx.fillStyle = '#111'; ctx.fillText(txt, 10, 22); ctx.restore(); }
 function sunDisc(x, y, r, a) {
   ctx.save(); ctx.globalAlpha = a; const g = ctx.createLinearGradient(0, y - r, 0, y + r); g.addColorStop(0, '#ffd34a'); g.addColorStop(0.55, '#ff7a3d'); g.addColorStop(1, '#ff3d7a');
   ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.clip(); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.globalCompositeOperation = 'destination-out';
   for (let i = 0; i < 5; i++) { ctx.fillRect(x - r, y + r * (0.05 + i * 0.19), r * 2, 2 + i * 1.6); } ctx.restore(); }
 function render(t) {
   ctx.clearRect(0, 0, W, H); if (MODE === 'mask') { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); for (const b of bands(t)) frostDraw(b, t); return; }
-  const bt = (t - P.T0) / P.BEAT, kick = Math.exp(-(((bt % 1) + 1) % 1) * P.BEAT * 8), inSong = t >= P.HOOK1 && t < P.OUTRO;
+  window.__giantOn = P.WORDS.some(w => t >= w[0] && t < w[0] + w[2]); const bt0 = (t - P.T0) / P.BEAT; window.__kick = Math.exp(-(((bt0 % 1) + 1) % 1) * P.BEAT * 8); const bt = (t - P.T0) / P.BEAT, kick = Math.exp(-(((bt % 1) + 1) % 1) * P.BEAT * 8), inSong = t >= P.HOOK1 && t < P.OUTRO;
   // sun that keeps sinking (the countdown's second hand)
-  if (inSong || (t >= P.OUTRO && t < 86)) { const p = prog(t), sink = t >= P.OUTRO ? ease((t - P.OUTRO) / 3.5) : 0, y = 76 + (H - 150) * Math.pow(p, 1.15) + sink * 120, a = Math.min(0.95, win(t, P.HOOK1, 90, 0.8, 0.1)) * (1 - ease((t - 84.5) / 1.5)); sunDisc(W - 74, y, 44, a); }
+  if (inSong || (t >= P.OUTRO && t < 86)) { const p = prog(t), sink = t >= P.OUTRO ? ease((t - P.OUTRO) / 3.5) : 0, y = 76 + (H - 150) * Math.pow(p, 1.15) + sink * 120, a = Math.min(0.95, win(t, P.HOOK1, 90, 0.8, 0.1)) * (1 - ease((t - 84.5) / 1.5)) * (bands(t).some(b => b.h < 200 && b.u > 0.05) ? 0.15 : 1) * (t > 49.5 && t < 52.4 ? 0.1 : 1); sunDisc(W - 22, y, 42, a * 0.85); }
   // kick breath
   if (inSong && Math.round(bt) % 4 === 0) { ctx.fillStyle = `rgba(255,236,200,${0.04 * kick})`; ctx.fillRect(0, 0, W, H); }
   // intro: racks thrown up (all ones)
-  for (const o of P.ONES) { const age = t - o; if (age > 0 && age < 1.9) { const r = rng(Math.round(o * 100)); for (let i = 0; i < 9; i++) { const sp = 0.08 * i, a2 = age - sp; if (a2 < 0) continue; const x = 140 + r() * 800, v = 520 + r() * 300, y = H + 40 - v * a2 + 520 * a2 * a2, al = clamp(1 - a2 / 1.6); ctx.save(); ctx.globalAlpha = al; ctx.translate(x, y); ctx.rotate((r() - 0.5) * (1 + a2)); ctx.font = (70 + r() * 70) + 'px Ant'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 10; ctx.fillStyle = i % 3 === 0 ? '#fff4dc' : SLIME; ctx.fillText('1', 0, 0); ctx.restore(); } } }
+  for (const o of P.ONES) { const age = t - o; if (age > 0 && age < 1.9) { const r = rng(Math.round(o * 100)); for (let i = 0; i < 9; i++) { const sp = 0.08 * i, a2 = age - sp; if (a2 < 0) continue; const x = 140 + r() * 800, v = 520 + r() * 300, y = H + 40 - v * a2 + 520 * a2 * a2, al = clamp(1 - a2 / 1.6); ctx.save(); ctx.globalAlpha = al; ctx.translate(x, y); ctx.rotate((r() - 0.5) * (1 + a2)); ctx.font = '900 ' + (70 + r() * 70) + 'px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 10; ctx.fillStyle = i % 3 === 0 ? '#fff4dc' : SLIME; ctx.fillText('1', 0, 0); ctx.restore(); } } }
   // face prints (small)
-  for (const f of P.FACES) { const a = win(t, f[0], f[1], 0.5, 0.5); if (a > 0.003 && FACE[f[2]]) { const k = (t - f[0]) / (f[1] - f[0]), w = 165, h = 198, x = f[3] ? W - 250 - 16 * k : 80 + 16 * k, y = 300 - 8 * k; ctx.save(); ctx.globalAlpha = a * 0.9; ctx.translate(x + w / 2, y + h / 2); ctx.rotate((f[3] ? 1 : -1) * 0.03); ctx.drawImage(FACE[f[2]], -w / 2, -h / 2, w, h); ctx.restore(); } }
+  for (const f of P.FACES) { const a = win(t, f[0], f[1], 0.5, 0.5); if (a > 0.003 && FACE[f[2]]) { const k = (t - f[0]) / (f[1] - f[0]), w = 165, h = 198, x = f[3] ? W - 250 - 16 * k : 80 + 16 * k, y = 300 - 8 * k - (f[0] > 70 ? 30 : 0); ctx.save(); ctx.globalAlpha = a * 0.9; ctx.translate(x + w / 2, y + h / 2); ctx.rotate((f[3] ? 1 : -1) * 0.03); ctx.drawImage(FACE[f[2]], -w / 2, -h / 2, w, h); ctx.restore(); } }
   for (const b of bands(t)) frostDraw(b, t);
   // sticker-bomb: size tags
   { const a1 = win(t, 24.3, 27.1, 0.2, 0.3) + win(t, 79.0, 82.3, 0.2, 0.3); if (a1 > 0.01) sizeTag(W - 190, 150, 0.1, clamp(a1) * back((t - (t < 40 ? 24.3 : 79.0)) / 0.25 > 1 ? 1 : 1), '32');
     const a2 = win(t, 66.7, 68.2, 0.2, 0.25); if (a2 > 0.01) sizeTag(W - 190, 160, -0.08, a2, '34'); }
-    { const a3 = win(t, 24.3, 27.1, 0.2, 0.3) + win(t, 79.0, 82.3, 0.2, 0.3); if (a3 > 0.01) { ctx.save(); ctx.globalAlpha = clamp(a3); ctx.translate(W - 200, 232); ctx.rotate(-0.05); ctx.font = 'italic 800 30px Ser'; ctx.textAlign = 'center'; const g = ctx.createLinearGradient(0, -20, 0, 14); g.addColorStop(0, '#fff'); g.addColorStop(.5, '#7fa3ab'); g.addColorStop(1, '#e9fbff'); ctx.shadowColor = 'rgba(20,6,0,.7)'; ctx.shadowBlur = 8; ctx.fillStyle = g; ctx.fillText('chrome heart jeans', 0, 0); ctx.restore(); } }
+    { const a3 = win(t, 25.3, 27.1, 0.2, 0.3) + win(t, 80.1, 82.3, 0.2, 0.3); if (a3 > 0.01) { ctx.save(); ctx.globalAlpha = clamp(a3); ctx.translate(W - 200, 232); ctx.rotate(-0.05); ctx.font = 'italic 800 30px Ser'; ctx.textAlign = 'center'; const g = ctx.createLinearGradient(0, -20, 0, 14); g.addColorStop(0, '#fff'); g.addColorStop(.5, '#7fa3ab'); g.addColorStop(1, '#e9fbff'); ctx.shadowColor = 'rgba(20,6,0,.7)'; ctx.shadowBlur = 8; ctx.fillStyle = g; ctx.fillText('chrome heart jeans', 0, 0); ctx.restore(); } }
   // giant words
+  window.__giantOn = P.WORDS.some(w => t >= w[0] && t < w[0] + w[2]);
   for (const [wt, txt, hold, xf, yf, rot] of P.WORDS) { const age = t - wt; if (age >= 0 && age < hold) { window.__wt = wt; giantWord(txt, age, rot, xf, yf, hold); } }
   P.STAMPS.forEach((s, i) => { const age = t - s; if (age >= 0 && age < 1.7) stamp(age, i === 1); });
   // halftone pop-ups
@@ -98,34 +99,34 @@ function render(t) {
       ctx.shadowColor = 'rgba(255,248,230,1)'; ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(ic, -140, -140); ctx.restore(); } }
   // quotes
   for (const [a, b, txt, slot] of P.QUOTES) { const al = win(t, a, b, 1.0, 1.0); if (al < 0.005) continue; ctx.save(); ctx.globalAlpha = al * 0.95; ctx.font = 'italic 400 36px Ser'; const lines = wrap(txt, 400), lh = 46, left = slot !== 1, x = slot === 2 ? W / 2 : left ? 64 : W - 64, y0 = slot === 0 ? 150 : slot === 1 ? 190 : 250;
-    ctx.textAlign = slot === 2 ? 'center' : left ? 'left' : 'right'; ctx.fillStyle = CREAM; ctx.shadowColor = 'rgba(30,10,0,.85)'; ctx.shadowBlur = 22; lines.forEach((ln, i) => { ctx.fillText(ln, x, y0 + i * lh - 6 * (t - a) / (b - a)); ctx.fillText(ln, x, y0 + i * lh - 6 * (t - a) / (b - a)); }); ctx.restore(); }
+    ctx.textAlign = slot === 2 ? 'center' : left ? 'left' : 'right'; ctx.fillStyle = CREAM; ctx.shadowColor = 'rgba(20,6,0,.95)'; ctx.shadowBlur = 28; lines.forEach((ln, i) => { ctx.fillText(ln, x, y0 + i * lh - 6 * (t - a) / (b - a)); ctx.fillText(ln, x, y0 + i * lh - 6 * (t - a) / (b - a)); }); ctx.restore(); }
   // title
   { const a = win(t, 3.4, 8.5, 0.35, 0.6); if (a > 0.004) { const age = t - 3.4, u = clamp(age / 0.2), pop = 1 + 0.4 * (1 - easeOut(u)); ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'italic 900 150px Ser'; const m = ctx.measureText('Cut Her Mic').width, px = 150 * Math.min(1, 860 / m); ctx.font = 'italic 900 ' + px + 'px Ser';
       ctx.translate(W / 2, H / 2 + 6); ctx.scale(pop, pop); const off = 3 + 10 * (1 - easeOut(u)); ctx.fillStyle = 'rgba(255,138,61,.9)'; ctx.fillText('Cut Her Mic', off, 0); ctx.fillStyle = 'rgba(47,214,200,.9)'; ctx.fillText('Cut Her Mic', -off, 0);
       ctx.shadowColor = 'rgba(20,6,0,.5)'; ctx.shadowBlur = 24; ctx.fillStyle = '#f7edd3'; ctx.fillText('Cut Her Mic', 0, 0); ctx.shadowBlur = 0;
       const pr = easeOut((age - 0.3) / 0.8), w = ctx.measureText('Cut Her Mic').width; ctx.strokeStyle = '#ff2e7e'; ctx.lineWidth = Math.max(4, px * 0.04); ctx.lineCap = 'round'; ctx.beginPath(); const y0 = px * 0.47, xa = -w / 2; for (let x = xa; x <= xa + w * pr; x += 6) { const yy = y0 + Math.sin(x * 0.04) * 1.5; x === xa ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy); } ctx.stroke();
-      ctx.font = '500 17px Cap'; ctx.fillStyle = 'rgba(247,237,211,.9)'; if ('letterSpacing' in ctx) ctx.letterSpacing = '9px'; ctx.fillText('FVLGA', 4, -px * 0.64); ctx.restore(); } }
-  // countdown spine: calendar tile + days left
-  { const a = win(t, P.HOOK1, 86, 0.5, 1.0); if (a > 0.005) { const p = prog(t), d = Math.floor(92 * p), dt = new Date(SUM0 + d * 86400000), mon = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][dt.getUTCMonth()], day = dt.getUTCDate();
-      const fl = clamp(1 - Math.abs(((92 * p) % 1) - 0.0) * 8); ctx.save(); ctx.globalAlpha = a; ctx.translate(58, 56); ctx.scale(1, 1 - 0.35 * fl);
-      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(-36, -36, 80, 86); ctx.fillStyle = '#f4f1e8'; ctx.fillRect(-40, -40, 80, 86); ctx.fillStyle = '#e8261c'; ctx.fillRect(-40, -40, 80, 24); ctx.fillStyle = '#fff'; ctx.font = '600 16px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(mon, 0, -28);
-      ctx.fillStyle = '#111'; ctx.font = '50px Ant'; ctx.fillText(String(day), 0, 14); ctx.restore();
-      const dl = daysLeft(t); ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.shadowColor = 'rgba(20,6,0,.8)'; ctx.shadowBlur = 8; ctx.font = '26px Mono'; ctx.fillStyle = CREAM; ctx.fillText('SUMMER ENDS IN', W / 2, 30); ctx.font = '50px Mono'; ctx.fillStyle = dl <= 10 ? '#ff6a4d' : SLIME; let ds = String(dl).padStart(3, '0'); if ((t > 20.4 && t < 20.85) || (t > 22.5 && t < 22.75) || (t > 77.4 && t < 77.65)) { ds = ds.replace(/\d/g, (c, i) => String(Math.floor(((t * 97 + i * 13) % 10)))); ctx.translate(Math.sin(t * 90) * 5, 0); } ctx.fillText(ds + ' DAYS', W / 2, 72); ctx.restore(); } }
+      ctx.font = '600 20px Cap'; ctx.fillStyle = 'rgba(247,237,211,.95)'; if ('letterSpacing' in ctx) ctx.letterSpacing = '9px'; ctx.fillText('FVLGA', 4, -px * 0.64); ctx.restore(); } }
+  // countdown spine: days left (calendar tile removed, artist: not needed)
+  { const a = win(t, P.HOOK1, 86, 0.5, 1.0); if (a > 0.005) { const dl = daysLeft(t), pulse = 1 + 0.06 * kick; ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round'; ctx.shadowColor = 'rgba(20,6,0,.85)'; ctx.shadowBlur = 14; if ('letterSpacing' in ctx) ctx.letterSpacing = '4px';
+      ctx.font = '700 19px Cap'; ctx.strokeStyle = 'rgba(18,8,0,.6)'; ctx.lineWidth = 6; ctx.strokeText('SUMMER ENDS IN', W / 2, 30); ctx.fillStyle = CREAM; ctx.fillText('SUMMER ENDS IN', W / 2, 30);
+      ctx.translate(W / 2, 74); ctx.scale(pulse, pulse); ctx.font = '800 48px Cap'; if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
+      let ds = String(dl).padStart(3, '0'); if ((t > 20.4 && t < 20.62) || (t > 22.5 && t < 22.72) || (t > 77.4 && t < 77.62)) { ds = ds.replace(/\d/g, (c, i) => String(Math.floor(((t * 97 + i * 13) % 10)))); ctx.translate(Math.sin(t * 90) * 5, 0); }
+      ctx.strokeStyle = 'rgba(18,8,0,.65)'; ctx.lineWidth = 8; ctx.strokeText(ds + ' DAYS', 0, 0); ctx.fillStyle = dl <= 10 ? '#ff5a3c' : SLIME; ctx.fillText(ds + ' DAYS', 0, 0); ctx.restore(); } }
   // fvlga sticker
-  P.STICK.forEach((s, i) => { const a = win(t, s[0], s[1], 0.5, 0.5); if (a < 0.01) return; const c = SC[i] || ['#b6ff2e', '#10260b']; sticker(s[2] === 'BR' ? W - 125 : 115, H - 56 + Math.sin(t * 1.5) * 2, s[2] === 'BR' ? -0.07 : 0.06, a, c, 'fvlga'); });
+  P.STICK.forEach((s, i) => { const a = win(t, s[0], s[1], 0.5, 0.5); if (a < 0.01) return; const c = SC[i] || ['#b6ff2e', '#10260b']; sticker(s[2] === 'BR' ? W - 78 : 78, H - 82 + Math.sin(t * 1.5) * 2, s[2] === 'BR' ? -0.07 : 0.06, a, c, 'fvlga', t); });
   // lyric caption
   const cap = P.CAPS.find(c => t >= c[0] && t < c[1]);
-  if (cap) { const a = Math.min(1, (t - cap[0]) / 0.08, (cap[1] - t) / 0.08); ctx.save(); ctx.globalAlpha = clamp(a); ctx.font = '400 21px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; const cw = ctx.measureText(cap[2]).width, cy = H - 28;
-    ctx.fillStyle = 'rgba(14,8,4,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, cy - 22, cw + 24, 31, 6); ctx.fill(); ctx.fillStyle = CREAM; ctx.fillText(cap[2], W / 2, cy); ctx.restore(); }
+  if (cap) { const a = Math.min(1, (t - cap[0]) / 0.08, (cap[1] - t) / 0.08); ctx.save(); ctx.globalAlpha = clamp(a); ctx.font = '600 26px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; const cw = ctx.measureText(cap[2]).width, cy = H - 26;
+    ctx.fillStyle = 'rgba(10,6,3,.74)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 14, cy - 27, cw + 28, 38, 8); ctx.fill(); ctx.fillStyle = '#fffaf0'; ctx.fillText(cap[2], W / 2, cy); ctx.restore(); }
   // ending: counter reads zero
-  { const a = win(t, 83.6, 88.8, 0.8, 1.2); if (a > 0.005) { ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(20,6,0,.8)'; ctx.shadowBlur = 12; ctx.font = '120px Mono'; ctx.fillStyle = '#ff6a4d'; ctx.fillText('000', W / 2, 410); ctx.font = 'italic 400 34px Ser'; ctx.fillStyle = CREAM; ctx.fillText("that's the summer", W / 2, 460); ctx.restore(); } }
+  { const a = win(t, 83.6, 88.8, 0.8, 1.2); if (a > 0.005) { ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(20,6,0,.8)'; ctx.shadowBlur = 12; ctx.font = '800 110px Cap'; ctx.fillStyle = '#ff6a4d'; ctx.fillText('000', W / 2, 410); ctx.font = 'italic 400 34px Ser'; ctx.fillStyle = CREAM; ctx.fillText("that's the summer", W / 2, 460); ctx.restore(); } }
 }
 window.ready = false;
 const load = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
 (async () => {
   try { P = await fetch('params.json').then(r => r.json()); try { SC = await fetch('stickcol.json').then(r => r.json()); } catch (e) { SC = []; }
     FACE.f1 = await load('faces/f1.png'); FACE.f2 = await load('faces/f2.png'); ctx = document.getElementById('c').getContext('2d');
-    for (const f of ['20px Cap', '20px Mono', 'italic 900 20px Ser', 'italic 400 20px Ser', 'italic 800 20px Ser', '20px Ant', '20px "Noto Color Emoji"']) await document.fonts.load(f);
+    for (const f of ['20px Cap', 'italic 900 20px Ser', 'italic 400 20px Ser', 'italic 800 20px Ser', '20px "Noto Color Emoji"']) await document.fonts.load(f);
     window.ready = true; } catch (e) { window.err = String(e.stack || e); }
 })();
 window.renderBatch = (t0, n, fps, mode) => { MODE = mode; const r = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); r.push(document.getElementById('c').toDataURL('image/png').slice(22)); } return r; };
