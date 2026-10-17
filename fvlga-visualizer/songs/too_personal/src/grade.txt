@@ -1,0 +1,1 @@
+eq=saturation=0.36:contrast=0.98:gamma=1.05,colorbalance=rs=-0.28:gs=0.02:bs=0.28:rm=-0.2:gm=0.04:bm=0.2:rh=-0.1:bh=0.1,curves=all='0/0 0.8/0.74 1/0.84',noise=alls=6:allf=t,vignette=angle=PI/5

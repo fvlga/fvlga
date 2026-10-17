@@ -1,0 +1,105 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Cap;src:url(Inter.ttf)}
+@font-face{font-family:Mono;src:url(VT323.ttf)}
+@font-face{font-family:Ser;src:url(Playfair.ttf);font-weight:100 900}
+html,body{margin:0;background:transparent}</style></head><body>
+<canvas id="c" width="1080" height="608"></canvas>
+<script>
+const W = 1080, H = 608, CREAM = '#f6efdc';
+let P, ctx, MODE = 'rgba', FACE = {}, SC = [];
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = u => { u = clamp(u); return u * u * (3 - 2 * u); };
+const easeOut = u => 1 - Math.pow(1 - clamp(u), 3);
+const rng = s => () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+const win = (t, a, b, fi, fo) => Math.min(ease((t - a) / fi), ease((b - t) / fo));   // 0..1 envelope inside [a,b]
+// ---------- frosted bands: rect list (y centre, h, word, dir, u = how far in: 1 = fully across) ----------
+function bands(t) {
+  const B = [];
+  // opening: three bands cover the strip, then slide away like breath leaving a window
+  [0, 1, 2].forEach(k => { const u = 1 - easeOut((t - 2.674 - k * 0.3) / 2.0); if (u > 0.003) B.push({ y: 101.3 + k * 203.3, h: 203.4, word: '', dir: k % 2 ? 1 : -1, u, sz: 84 }); });
+  // blocked-number lines: two bands slide in, "not delivered" under them
+  for (const [a, b] of P.BLOCK) { const u = Math.min(easeOut((t - a) / 0.35), 1 - easeOut((t - (b - 0.1)) / 0.4)); if (u > 0.003) { B.push({ y: 190, h: 104, word: 'blocked', dir: -1, u, sz: 66 }); B.push({ y: 308, h: 104, word: 'no answer', dir: 1, u, sz: 66 }); } }
+  // "too personal": three tall bands close over the picture
+  { const a = 71.69, b = 73.62, u = Math.min(easeOut((t - a) / 0.4), 1 - easeOut((t - b) / 0.45)); if (u > 0.003) [0, 1, 2].forEach(k => B.push({ y: 138 + k * 166, h: 158, word: 'too personal', dir: k % 2 ? 1 : -1, u, sz: 88 })); }
+  // glass over the face prints (lower part of each print is behind frosting)
+  for (const f of P.FACES) { const u = Math.min(ease((t - f[0] - 0.5) / 1.6), ease((f[1] - t) / 0.8)); if (u > 0.003) B.push({ y: 395, h: 120, word: '', dir: f[3] ? 1 : -1, u: 0.999, sz: 60, fade: u }); }
+  // outro: the glass closes from top and bottom
+  { const u = easeOut((t - 105.6) / 4.2); if (u > 0.002) { const fo = 1 - ease((t - 110.3) / 1.6); B.push({ y: 304 * u / 2, h: 304 * u, word: '', dir: 1, u: 0.999, sz: 60, fade: fo }); B.push({ y: H - 304 * u / 2, h: 304 * u, word: '', dir: 1, u: 0.999, sz: 60, fade: fo }); } }
+  return B;
+}
+function frostBandDraw(b, t) {
+  const shift = (1 - b.u) * W * b.dir, x0 = b.x !== undefined ? b.x : shift, w = b.w !== undefined ? b.w : W, y0 = b.y - b.h / 2, al = b.fade !== undefined ? b.fade : 1;
+  ctx.save(); ctx.globalAlpha = al;
+  if (MODE === 'mask') { ctx.filter = 'blur(1.2px)'; ctx.fillStyle = '#fff'; ctx.fillRect(x0, y0, w, b.h); ctx.restore(); return; }
+  ctx.fillStyle = 'rgba(226,236,236,.26)'; ctx.fillRect(x0, y0, w, b.h);
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(x0, y0, w, 2); ctx.fillStyle = 'rgba(10,24,28,.22)'; ctx.fillRect(x0, y0 + b.h - 2, w, 2);
+  if (b.word) { ctx.beginPath(); ctx.rect(x0, y0, w, b.h); ctx.clip(); ctx.font = 'italic 800 ' + b.sz + 'px Ser'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(14,26,30,.82)';
+    const s = b.word + '     ', ww = ctx.measureText(s).width, off = (((t * 70 * b.dir) % ww) + ww) % ww; for (let x = -ww; x < W + ww; x += ww) ctx.fillText(s, x - off, b.y + b.sz * 0.04); }
+  ctx.restore();
+}
+// ---------- bits ----------
+function star(x, y, r, a, rot) {
+  if (a <= 0.01) return; ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = a;
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 1.5); g.addColorStop(0, 'rgba(235,250,255,.65)'); g.addColorStop(0.3, 'rgba(190,235,250,.22)'); g.addColorStop(1, 'rgba(190,235,250,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r * 1.5, 0, 7); ctx.fill();
+  ctx.fillStyle = '#f4fdff'; ctx.beginPath(); for (let i = 0; i < 8; i++) { const rr = i % 2 ? r * 0.11 : r, an = i * Math.PI / 4 - Math.PI / 2; ctx[i ? 'lineTo' : 'moveTo'](Math.cos(an) * rr, Math.sin(an) * rr); } ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function wrap(txt, maxW) { const out = []; let line = ''; for (const w of txt.split(' ')) { const tl = line + w + ' '; if (ctx.measureText(tl).width > maxW && line) { out.push(line.trim()); line = w + ' '; } else line = tl; } out.push(line.trim()); return out; }
+function dateAt(t) { let days = 0; for (const [a, b] of P.TIMELINES) days += 20 * clamp(t - a, 0, b - a); const d = new Date(Date.UTC(2019, 5, 14) + days * 86400000);
+  return ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][d.getUTCMonth()] + ' ' + String(d.getUTCDate()).padStart(2, '0') + ' ' + d.getUTCFullYear(); }
+function notDelivered(x, y, sz, a, align) {
+  ctx.save(); ctx.globalAlpha = a; ctx.font = sz + 'px Mono'; ctx.textBaseline = 'middle'; const tw = ctx.measureText('not delivered').width, r = sz * 0.34, tot = r * 2 + sz * 0.35 + tw, x0 = align === 'c' ? x - tot / 2 : x;
+  ctx.shadowColor = 'rgba(6,18,22,.6)'; ctx.shadowBlur = 8; ctx.fillStyle = '#ff6a62'; ctx.beginPath(); ctx.arc(x0 + r, y, r, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = '700 ' + sz * 0.5 + 'px Cap'; ctx.fillText('!', x0 + r, y + 1); ctx.textAlign = 'left'; ctx.font = sz + 'px Mono'; ctx.fillStyle = CREAM; ctx.shadowColor = 'rgba(6,18,22,.6)'; ctx.shadowBlur = 8;
+  ctx.fillText('not delivered', x0 + r * 2 + sz * 0.35, y + 1); ctx.restore();
+}
+function render(t) {
+  ctx.fillStyle = '#000'; ctx.clearRect(0, 0, W, H); if (MODE === 'mask') ctx.fillRect(0, 0, W, H);
+  const bt = (t - P.T0) / P.BEAT, kick = Math.exp(-((bt % 1 + 1) % 1) * P.BEAT * 9);
+  if (MODE === 'mask') { for (const b of bands(t)) frostBandDraw(b, t); return; }
+  const inHook = P.HOOKS.some(h => t >= h[0] && t < h[1]);
+  // gold wash on "i only just want you"
+  for (const g of P.GOLD) { const u = (t - g) / 1.1; if (u > 0 && u < 1) { ctx.fillStyle = `rgba(255,190,90,${0.20 * Math.sin(Math.PI * u)})`; ctx.fillRect(0, 0, W, H); } }
+  // very faint kick breath in the hooks
+  if (inHook && Math.round(bt) % 4 === 0) { ctx.fillStyle = `rgba(255,255,255,${0.035 * kick})`; ctx.fillRect(0, 0, W, H); }
+  // halftone face prints (bridge only)
+  for (const f of P.FACES) { const a = win(t, f[0], f[1], 1.4, 1.0); if (a > 0.003 && FACE[f[2]]) { const k = (t - f[0]) / (f[1] - f[0]), sc = 0.78, w = 300 * sc * 0.72, h = 360 * sc * 0.72, x = f[3] ? 800 - 30 * k : 150 + 30 * k, y = 120 - 10 * k;
+      ctx.save(); ctx.globalAlpha = a * 0.86; ctx.translate(x + w / 2, y + h / 2); ctx.rotate((f[3] ? 1 : -1) * 0.018); ctx.drawImage(FACE[f[2]], -w / 2, -h / 2, w, h); ctx.restore(); } }
+  // frosted glass
+  for (const b of bands(t)) frostBandDraw(b, t);
+  // diamond glints
+  for (const [d, k] of P.DIAMOND) { const u = (t - d) / 1.2; if (u > 0 && u < 1) { const s = Math.pow(Math.sin(Math.PI * u), 1.4), x = k ? 962 : 880, y = k ? 118 : 160; star(x, y, 44 * s + 6, s, u * 0.5); star(x - 46, y + 34, 15 * s, s * 0.8, -u); star(x + 40, y + 52, 11 * s, s * 0.7, u); } }
+  // quotes: lettering, no box, no outline
+  for (const [a, b, txt, slot] of P.QUOTES) { const al = win(t, a, b, 1.2, 1.2); if (al < 0.005) continue; ctx.save(); ctx.globalAlpha = al * 0.95; ctx.font = 'italic 400 36px Ser'; const maxW = 420, lines = wrap(txt, maxW), lh = 47;
+    const left = slot !== 2, x = left ? 64 : W - 64, y0 = slot === 0 ? 96 : slot === 1 ? 330 : 270; ctx.textAlign = left ? 'left' : 'right'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = CREAM; ctx.shadowColor = 'rgba(4,16,20,.85)'; ctx.shadowBlur = 22;
+    lines.forEach((ln, i) => { ctx.fillText(ln, x, y0 + i * lh - 7 * (t - a) / (b - a)); ctx.fillText(ln, x, y0 + i * lh - 7 * (t - a) / (b - a)); }); ctx.restore(); }
+  // title
+  { const a = win(t, 1.0, 10.0, 0.9, 0.9); if (a > 0.004) { ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'italic 900 150px Ser'; const m = ctx.measureText('Too Personal').width, px = 150 * Math.min(1, 880 / m); ctx.font = 'italic 900 ' + px + 'px Ser';
+      const dr = (t - 1.0) * 0.012; ctx.translate(W / 2, H / 2 - 4 + dr * 20); ctx.shadowColor = 'rgba(4,16,20,.55)'; ctx.shadowBlur = 24; ctx.fillStyle = '#f7edd3'; ctx.fillText('Too Personal', 0, 0); ctx.shadowBlur = 0;
+      const pr = easeOut((t - 1.9) / 1.1), w = ctx.measureText('Too Personal').width; ctx.strokeStyle = '#ff2e7e'; ctx.lineWidth = Math.max(4, px * 0.04); ctx.lineCap = 'round'; ctx.beginPath(); const y0 = px * 0.47, xa = -w / 2; for (let x = xa; x <= xa + w * pr; x += 6) { const yy = y0 + Math.sin(x * 0.04) * 1.5; x === xa ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy); } ctx.stroke();
+      ctx.font = '500 17px Cap'; ctx.fillStyle = 'rgba(247,237,211,.85)'; if ('letterSpacing' in ctx) ctx.letterSpacing = '9px'; ctx.fillText('FVLGA', 4, -px * 0.62); ctx.restore(); } }
+  // date stamp: runs forward while the song says "the times have changed"
+  for (const h of P.HOOKS) { const a = win(t, h[0], h[1], 0.4, 0.5); if (a > 0.003) { ctx.save(); ctx.globalAlpha = a * 0.9; ctx.font = '31px Mono'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = CREAM; ctx.shadowColor = 'rgba(4,16,20,.7)'; ctx.shadowBlur = 8; ctx.fillText(dateAt(t), W - 28, 40); ctx.restore(); } }
+  // fvlga sticker: one spot per hold (>= 7 s), colour taken from the scene
+  P.STICK.forEach((s, i) => { const a = win(t, s[0], s[1], 0.5, 0.5); if (a < 0.01) return; const c = SC[i] || ['#8fd3d6', '#10262b'], x = s[2] === 'BR' ? W - 125 : 115, y = H - 56 + Math.sin(t * 1.5) * 2;
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y); ctx.rotate(s[2] === 'BR' ? -0.07 : 0.06); ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(4, 5, 82, 29, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = c[0]; ctx.beginPath(); ctx.ellipse(0, 0, 82, 29, 0, 0, 7); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(0, 0, 77, 24, 0, 0, 7); ctx.stroke();
+    ctx.fillStyle = c[1]; ctx.font = 'italic 800 27px Ser'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('fvlga', 0, 1); ctx.restore(); });
+  // blocked-number lines: "not delivered"
+  for (const [a, b] of P.BLOCK) { const u = win(t, a + 0.5, b, 0.3, 0.3); if (u > 0.01) notDelivered(64, 420, 34, u, 'l'); }
+  // lyric caption
+  const cap = P.CAPS.find(c => t >= c[0] && t < c[1]);
+  if (cap) { const a = Math.min(1, (t - cap[0]) / 0.1, (cap[1] - t) / 0.1); ctx.save(); ctx.globalAlpha = clamp(a); ctx.font = '400 21px Cap'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; const cw = ctx.measureText(cap[2]).width, cy = H - 28;
+    ctx.fillStyle = 'rgba(8,14,18,.55)'; ctx.beginPath(); ctx.roundRect(W / 2 - cw / 2 - 12, cy - 22, cw + 24, 31, 6); ctx.fill(); ctx.fillStyle = CREAM; ctx.fillText(cap[2], W / 2, cy); ctx.restore(); }
+  // end card: a blank, undelivered screen
+  { const a = ease((t - 112.4) / 1.4); if (a > 0.005) notDelivered(W / 2, H / 2, 40, a, 'c'); }
+}
+window.ready = false;
+const load = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+(async () => {
+  try { P = await fetch('params.json').then(r => r.json()); try { SC = await fetch('stickcol.json').then(r => r.json()); } catch (e) { SC = []; }
+    FACE.f1 = await load('faces/f1.png'); FACE.f2 = await load('faces/f2.png'); ctx = document.getElementById('c').getContext('2d');
+    for (const f of ['20px Cap', '20px Mono', 'italic 900 20px Ser', 'italic 400 20px Ser', 'italic 800 20px Ser']) await document.fonts.load(f);
+    window.ready = true; } catch (e) { window.err = String(e.stack || e); }
+})();
+window.renderBatch = (t0, n, fps, mode) => { MODE = mode; const r = []; for (let i = 0; i < n; i++) { render(t0 + i / fps); r.push(document.getElementById('c').toDataURL('image/png').slice(22)); } return r; };
+</script></body></html>
