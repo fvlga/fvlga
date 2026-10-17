@@ -147,3 +147,5 @@ direct corrections (per-project notes) win.
 - Run `preflight-checker` before every full render.
 - CUT HER MIC (summer/countdown, sticker-bomb): spine = "SUMMER ENDS IN n DAYS" counter + calendar tile + sinking sun; round rotating "fv" seal as the sticker; warm summer grade with teal water; red-shirt boy: LESS of him (artist, Oct 2026: 'I just wanted less of red shirt boy but not him entirely'), about 2-4 short shots, spaced apart.
 - Title confirmed by the artist: "Cut Her Mic" (file CUT_HER_MIC.wav).
+
+- Cut-outs of the artist (Oct 2026): NOT banned, just LESS. Use a few short, small ones per video (about 2-3 moments), never a pile, never in the intro, never over the lyrics' key words; the earlier 'no cut-outs' was about too many popping up.
