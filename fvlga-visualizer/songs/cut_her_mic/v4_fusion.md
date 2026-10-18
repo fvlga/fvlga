@@ -3,6 +3,18 @@ Written 2026-10-17 by the creative director. Nothing is rendered. The artist's d
 Boards: `/home/user/fvlga/fvlga-visualizer/cut_her_mic_v4_fusion_animatic.jpg` (9 strip frames 1080x608 shown at 540 + legend) and `/home/user/fvlga/fvlga-visualizer/cut_her_mic_v4_fusion_layout.jpg` (4 frames in the 1080x1920 layout: twin, cut, declined, end label). Scripts: `/tmp/claude-0/-home-user-fvlga/f42938d8-1da3-5da3-94b6-13fe2d019814/scratchpad/cm4f/` (plan.py = ledger + object-count checker, board.py).
 Board honesty: footage = real frames with the REAL `grade.txt` run through ffmpeg; overlays, twin blend and slice are PIL mocks, no motion, no dissolves. Phone-size check was done on a 390 px contact sheet.
 
+## Revision 2: quieter countdown (2026-10-18)
+Artist note (message partly cut off): "The countdown looks too barge in. [...] it takes away too much." Read as: the receipt competes with the footage. Boards: `/home/user/fvlga/fvlga-visualizer/cut_her_mic_v4_fusion_animatic_r2.jpg` (top = 3 BEFORE|AFTER pairs, then 10 frames) and `/home/user/fvlga/fvlga-visualizer/cut_her_mic_v4_fusion_layout_r2.jpg`. Script: `cm4f/board_r2.py` (+ `r2_check()` in `plan.py`). Everything below overrides sections 1-12 where they differ; the rest stands.
+1. AT REST = small number only: Inter ExtraBold 46 px, 3 digits at 29 px advance (about 87 px) under a 13 px "D A Y S  L E F T" label at 70 % opacity, right-aligned 28 px from the edge, block about 130 px = 12 % of the strip width. Cream text, soft black shadow plus a very soft dark glow (no box, no outline). Red (#FF5C4E) when under the declined line.
+2. PAPER = 5 short events, 1.2-1.8 s, 320 px wide, 2 rows max, top-right third only (never the centre third, never faces; checked against face windows by script): 13.5-15.0 FUN 08 (hook 1), 22.5-24.0 THE SUMMER, 49.55-51.2 CUT HER / VOID, 66.7-68.4 SIZE 32>34, 77.4-78.95 CARD DECLINED. Paper pulls up out of the strip top (0.25 s) and the number stays as the mini block. Exception: the 0-3.4 s intro on black (no picture to cover), now 1.0x not 1.18x, docks and shrinks to the corner at 3.4.
+3. HIDE: number leaves completely during all 9 giants and the 3 quote bars (27.9-30.9, 31.6-34.4, 75.3-77.3), 19.5 s of 82.4; it returns with a tick and a 0.25 s fade. Paper total 7.9 s.
+4. SLIME TAX has no paper any more: a 0.9 s green "SLIME TAX -03" chip under the number at 34.6 / 37.5 / 39.5.
+5. Object rule: paper and mini number share ONE slot (paper replaces the number), so receipt + seal + one other = max 3; script says max 3, 0 paper/giant/face collisions.
+6. Giant 34 (67.6) deleted: it overlapped the 66.7 paper. Giants 10 > 9.
+7. Burn-down 77.7-82.44 is now a small red number ticking (no paper on the sky), which is quieter and reads better.
+Lost: the always-on ledger rows (the running "what it cost" list), giant 34, the big centred intro paper. Kept: spine (92 > 000 at 82.44, declined one day short), the three surprises, ledger sums, care-label ending, grade, fonts.
+Open risks: chip text (17 px) is the weakest thing at phone size; CUT HER paper edge sits close to the man's shoulder (board frame 5), move it to y-only retraction if it touches in the real render; hook 1 paper arrives with the drop at 13.5 and may feel late for the "first look" of the ledger, but the number slam stays.
+
 ## 1. Pitch (one sentence)
 A summer you pay for in days: a thermal receipt prints one priced line per lyric, the big DAYS LEFT number runs 092 to 000 at 82.44 s, the card is declined one day short at "for the summer" (77.4), and the video ends on a sunset with a care label that says SIZE 34 / DO NOT KEEP.
 
@@ -10,7 +22,7 @@ A summer you pay for in days: a thermal receipt prints one priced line per lyric
 A fling he already plans to cut, but it feels like a shopping spree: every good thing is a purchase and the bill is the calendar.
 
 ## 3. Direction check (artist's 9 points)
-1. ONE spine: the receipt replaces the v3 ticket (same top-right job, same "days" number, now with a consequence). Number is Inter ExtraBold 92 px (about 33 px on a phone) and never leaves the screen, even when giant words retract the item rows. Start 092, total spent 80 + 12 expired = 92, 000 at 82.44.
+1. ONE spine: the receipt replaces the v3 ticket (same top-right job, same "days" number, now with a consequence). [R2: number is now 46 px, small corner block, hides during giants and quotes; see Revision 2.] Start 092, total spent 80 + 12 expired = 92, 000 at 82.44.
 2. B = the twin at 20.4-24.3 only. The lane-black idea is folded into the cut at 49.55 (the lower half of the sliced frame slips away and leaves a black wedge). No two-lane layout, no rope.
 3. C = end card only (woven label, SIZE 32 struck, 34 woven on, over the sunset) + the 32>34 line on the receipt at 66.7. No tape, no indigo.
 4. Kept from v3: warm grade (grade.txt unchanged), frosted bands, chrome giants (WATER, OTTER, SUMMER), CUT HER stamp + glitch, fade_plan dissolves/fades (F1-F5, C1-C3, O1-O4, E1-E2), the round seal, 3 small halftone faces, red-shirt boy x3 short, no cut-outs of the artist (0 used; allowed, not needed).
@@ -20,7 +32,7 @@ A fling he already plans to cut, but it feels like a shopping spree: every good 
 8. Verse 1 idea: SLIME TAX (section 6).
 9. First 3 s: black strip, paper feeds down from the strip's top edge and prints, number ticks 092 > 091 at 0.8 (works muted).
 
-DISAGREE 1: the receipt number stays visible through all 10 giants, so the top-right corner is never empty; I would let it leave entirely, but your "readable number" rule wins.
+DISAGREE 1 [superseded by R2: number now hides during giants]: the receipt number stays visible through all 10 giants, so the top-right corner is never empty; I would let it leave entirely, but your "readable number" rule wins.
 DISAGREE 2: four objects at once is where the v3 chaos came from; 3 is right but it forced me to cut 7 giants and 3 quotes (list in section 9), more than the 30% asked.
 DISAGREE 3: the twin on a flat-energy beat may read as a glitch on phone; I made it a clean ghost with a seam-free offset, but it is the riskiest surprise.
 
@@ -28,7 +40,7 @@ DISAGREE 3: the twin on a flat-energy beat may read as a glitch on phone; I made
 - Grade: v3 `grade.txt` (eq sat 1.25, warm highlights, teal-leaning shadows, grain 6, vignette) for the whole video. Section washes C1 green 30.94, C2 warm 41.27, C3 orange 68.8. Teal water, orange sunset come from the footage plus this grade.
 - Type: Playfair Black Italic = giant words, header "Summer Mart", quotes (Medium italic 37 px), "thank you, come again", "fvlga" on the label. Inter = everything else (receipt, captions, stamps, label). Max 2 families.
 - Objects (one family: paper/ink/stamp): receipt (cream #ECE4CC, ink #1C140D, brown #7A6242; red #DD261C = void/declined/under 10 days; green ink #1E802C = slime tax only), round seal, rubber stamps, woven label, frosted bands, chrome giants, 3 halftone faces.
-- Receipt spec: 340 px wide, top edge flush with the strip top, x = 714; label "DAYS LEFT", number 92 px with fixed digit advance 58 px, dashed rule, 3 rows newest first (rows fade 100/72/50 %), zigzag bottom, soft shadow. Rows 27 px label + 29 px price with dot leaders. Retracted state = number block only (about 120 px tall).
+- Receipt spec (R2: appears only as a 1.2-1.8 s, 320 px, 2-row event; at rest = 46 px mini number): 340 px wide, top edge flush with the strip top, x = 714; label "DAYS LEFT", number 92 px with fixed digit advance 58 px, dashed rule, 3 rows newest first (rows fade 100/72/50 %), zigzag bottom, soft shadow. Rows 27 px label + 29 px price with dot leaders. Retracted state = number block only (about 120 px tall).
 - Transitions: hard cuts on the grid for burst bars (10.29-13.73, 21.47-24.06, 48.15-51.59, 77.41 on); dissolves only F2 18.89, F3 20.61, F4 58.48, F5 75.69; fade-throughs only F1 3.4 rise and E1 dip before the sunset at 82.44; the new transition is the dashed-line slice at 49.55 (plus the 12-frame receipt drop at 50.9). No other transitions.
 - Seal: v3 round seal, fixed spot >= 7 s, handovers 13.71 BR, 30.89 BL, 44.64 BR, 68.69 BL with 0.5 s fades (O2). Leaves at 82.44. Slime band moved up to y 404 so the BL seal does not touch it.
 
@@ -57,7 +69,7 @@ Bar.beat counted from the first kick 3.402 (bar 1). Objects always include recei
 | 27.9 (8.1) | (waist) | quote "the first warm day is a promise with a date on it" | | fade | quiet |
 | 30.9 (9.1) | I got a Glock on my waist | hook>verse hard cut, green wash C1, seal to BL; receipt holds still | bar | hard | quiet |
 | 31.6 | choppa | quote "everything good is rented" 31.6-34.4 | | fade | rewatch (rent/price) |
-| 34.6 (10.1) | slime x3 | green band "slime"; SLIME TAX 03 at 34.6 / 37.5 / 39.5 (057, 054, 051) | each slime line | hard | smile (the tax) |
+| 34.6 (10.1) | slime x3 | green band "slime"; R2: green chip SLIME TAX -03 under the corner number at 34.6 / 37.5 / 39.5 (057, 054, 051), no paper | each slime line | hard | smile (the tax) |
 | 40.9 (11.4) | short hook | warm wash C2, FUN AGAIN 02 (049) | bar | hard | |
 | 44.3 (12.4) | Summer Walker | WALKER FIT 03 (046), seal BR, hard cut 44.71, halftone face at 47.5 | bar | hard | |
 | 45.6 (13.2) | built like | giant SUMMER WALKER, rows retract | vocal | hard | |
@@ -70,12 +82,12 @@ Bar.beat counted from the first kick 3.402 (bar 1). Objects always include recei
 | 60.3 (17.3) | otter | OTTER 01 (038); giant OTTER chrome 60.9 | | hard | |
 | 61.4 (17.4) | GLE | GLE 08 (030), giant GLE 62.9 | | hard | |
 | 63.7-65.1 | a hundred / number 9 | A HUNDRED 03, NO.9 JEANS 03 (024) | line | hard | |
-| 66.7 (19.2) | size 34 | SIZE 32>34 +02: the 32 gets a red biro strike, price goes UP (022); giant 34 at 67.6 | line | hard | rewatch / gag 1 |
+| 66.7 (19.2) | size 34 | R2 paper event 66.7-68.4: SIZE 32>34 +02: the 32 gets a red biro strike, price goes UP (022); giant 34 DELETED | line | hard | rewatch / gag 1 |
 | 68.7 (20.1) | hook 2 | warm wash C3, FUN x2 04 (018) | bar 20 | hard | |
 | 71.8 / 74.0 | eyes / each other | HER EYES x2 03 (015), EACH OTHER x2 03 (012); face print 71.8 | line | hard | |
 | 75.1 (21.4) | how long we'll last | LAST ?? again; dissolve to clouds F5 75.69; quote "enjoy it like it is borrowed" 75.3-77.3 | line | dissolve | tension |
 | 77.4 (22.3) | for the summer | SURPRISE 3: THE SUMMER 13 prints in red, number 012 red, CARD DECLINED stamp (1.4 s), counter glitch jump; quote gone before (77.3) | line | hard | GASP 3 (joke) |
-| 77.7-82.44 | for the summer / Chrome Heart | 12 days burn off at 0.43 s per tick (011 ... 001); giant SUMMER chrome 79.0-80.7 (number stays) | half-beats | | the number melts |
+| 77.7-82.44 | for the summer / Chrome Heart | 12 days burn off at 0.43 s per tick (011 ... 001) as a small red number; paper gone at 78.95; giant SUMMER chrome 79.0-80.7 (number hides, resumes 80.7) | half-beats | | the number melts |
 | 82.44 (24.1) | outro | 000 lands on the bar over the E1 dip; receipt pulled up and out in 0.3 s, seal and giants gone; sunset rises out of black | bar 24 | fade-through | silence |
 | 83.1-84.5 | (instrumental) | three quiet lines print: TOTAL ... 92 DAYS / REFUND ... NONE / "thank you, come again." (Playfair) | beats | | quiet |
 | 85.6-89.4 | tail | lines fade 85.3-85.7; woven care label fades in (0.5 s); 87.2 the 32 is struck by thread and 34 woven on; label fades 89.0; picture dips to black 86.9-89.4 | | fade | rewatch / gag 2 |
@@ -98,7 +110,7 @@ Order of build (look at real frames after each step):
 5. compose.sh (ffmpeg): (a) twin: after the grade, `split` the picture; delayed branch `setpts=PTS+0.859/TB`, `colorchannelmixer` desaturate/cool + `format=rgba,colorchannelmixer=aa=0.6`, `overlay=x='90*...'` with `enable=between(t,20.4,24.3)` and a 6-frame slide; (b) slice: two PNG masks (diagonal top/bottom), `alphamerge` the lower piece, `overlay=x/y` expressions in t for 49.55-49.95 over a black base (the existing GL glitch window stays); (c) the existing E1/E2 fades. (about 2 h)
 6. Preflight-checker, re-extract frames at: 0.5, 2.9, 3.4-3.8, 13.7, 21.6, 36, 49.5-50.0, 51.4, 57.9, 66.7, 77.4-77.8, 82.2, 82.6, 84.7, 87.4, 89.2; run `plan.py` objects check against the real ov (screenshots at 10 random times); fix; re-check. (about 2 h)
 7. 15 s clip 44.3-59.3 (contains Summer Walker, VOID, both stamps, slice, butter, water; the number block is always on, so the clip needs no pre-roll).
-Cost estimate (honest, not measured): about 11-13 working hours of build and iteration including one full fix round; the twin and the slice are the likeliest to need a second round. Render time: v3 overlay chunks run 4 in parallel; the receipt adds one cached texture and a few text draws per frame, so overlay time should stay within about +20 % of v3, compose adds two branches (about +15-25 %). I did not time v3, so treat "5-7 min total" as a guess to confirm on the first run. New tools: none (masks are two PIL PNGs).
+Cost estimate (R2: drawReceipt becomes mini number + 5 paper events, hide windows; about 0.5 h less than before; honest, not measured): about 10.5-12.5 working hours of build and iteration including one full fix round; the twin and the slice are the likeliest to need a second round. Render time: v3 overlay chunks run 4 in parallel; the receipt adds one cached texture and a few text draws per frame, so overlay time should stay within about +20 % of v3, compose adds two branches (about +15-25 %). I did not time v3, so treat "5-7 min total" as a guess to confirm on the first run. New tools: none (masks are two PIL PNGs).
 Sound: print chirp per tick (very short, quiet), tear on 50.9, one low thud on the CARD DECLINED stamp; synthesised in sfx25.py style; video mix only, limit stays under -1 dBTP.
 
 ## 11. Stress test
@@ -106,7 +118,7 @@ Sound: print chirp per tick (very short, quiet), tear on 50.9, one low thud on t
 - Middle changes: yes (green tax verse, slice, water giants, declined).
 - Ending: resolves the spine (000 on the bar, TOTAL 92 matches the ledger, size gag lands).
 - Muted: works (numbers, stamps, receipt).
-- 15 s clip: works, number always visible.
+- 15 s clip: works; the 44.3-59.3 clip holds the CUT HER paper event and the mini number (hidden only during WATER/BUTTER giants).
 - Weakest answer: the twin (glitch vs gesture) and the 82.44 to 85 span: sunset plus three lines is very quiet after a loud 77.4; that is intended.
 - Colour check: slime band y moved so the BL seal clears it; stamp narrowed so the receipt clears; board black bars checked = 0 before JPEG.
 
