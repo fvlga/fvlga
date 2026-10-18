@@ -85,7 +85,7 @@ function cdState(t) { const a = win(t, P.HOOK1, 86, 0.5, 1.0), dl = daysLeft(t);
   return { a, dl, ds: String(dl).padStart(3, '0'), jx, fl, red: dl <= 10, age: dayAge(t) }; }
 function cdFrame(t, kick, cy, rot, S, fn) {   // shared entrance (drops in on the beat at 13.71), kick breath, glitch shake/flicker
   ctx.save(); const dy = -120 * (1 - easeOut((t - P.HOOK1) / 0.42)) - 40 * ease((t - 85) / 1.0), pulse = 1 + 0.025 * kick, wob = (t - P.HOOK1) < 0.9 ? Math.sin((t - P.HOOK1) * 14) * 0.05 * (1 - (t - P.HOOK1) / 0.9) : 0;
-  ctx.globalAlpha = clamp(S.a) * S.fl; ctx.translate(W / 2 + S.jx, cy + dy); ctx.rotate(rot + wob); ctx.scale(pulse, pulse); ctx.textBaseline = 'alphabetic'; fn(); ctx.restore(); }
+  ctx.globalAlpha = clamp(S.a) * S.fl; ctx.translate(W / 2 + S.jx, cy - 18 + dy * 0.6); ctx.rotate(rot + wob); ctx.scale(pulse * 0.6, pulse * 0.6); ctx.textBaseline = 'alphabetic'; fn(); ctx.restore(); }
 function lsp(px) { if ('letterSpacing' in ctx) ctx.letterSpacing = px + 'px'; }
 function drawTicket(t, kick, S) {   // option A: torn-off cream admission stub, ink digits stamp in on each tick
   cdFrame(t, kick, 48, -0.016, S, () => {
