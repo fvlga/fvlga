@@ -155,3 +155,12 @@ ONE idea to borrow: the fake "warning" card at the start. Implementation: 2 s of
 
 - Stills and contact sheets (outside the repo, not committed): `/tmp/claude-0/-home-user-fvlga/f42938d8-1da3-5da3-94b6-13fe2d019814/scratchpad/inspo/<1-6>/sheet.jpg`.
 - To upgrade any entry to "watched", the artist can upload a short capture of the video; then sample 1 frame per 3 s and re-measure cut rate.
+
+
+## Animated-visualizer references (added from the artist's pasted notes; SECOND-HAND, not watched or verified by us)
+Source: a summary the artist pasted from another session about a series of cartoon visualizers for one rapper's album (about 17 videos, a small core team: creative director, director, rotating animators; the house style holds the set together). Treat as idea seeds only.
+- Reference-match is real: the lyrics pick the cartoon (one video goes full Dragon Ball Z with energy beams and a flying cloud, another stages a ghost-hunting cartoon's motif, another is 16-bit pixel art, another is a fantasy-knight RPG world).
+- One persona, re-costumed per track (same signature red hair everywhere; the hair is the brand, the world changes around it).
+- Lyric karaoke is the house device (bold white caps, bottom third); the biggest hit of the set (about 110M views) drops text entirely for pure performance in a red void.
+- Drift, not cuts: slow continuous camera moves and loops; hard cuts only as punctuation.
+- Borrowable for us (within our rules): reference-match when a song name-drops a world; a recurring drawn mascot/silhouette as the brand; a text-free hit moment in one colour; slow drift between punctuation cuts. NOT borrowable: black outlines on lyric text, AI-generated images.

@@ -44,3 +44,6 @@ A measuring tape whose reading is derived from the lyric (32 at size 32, 34 at s
 - Lesson: a countdown object must not barge in. At rest it is a small corner number (about 12 % width, label at 70 %), a big object appears only for a few lyric events (1.2-1.8 s, 2 rows, never the centre third or faces) and may disappear in quiet or held moments. A spine can be quiet and still pay off. Same fix applies to any future spine object: size by rest state first, event state second.
 - Process: checked by script (paper vs giants/faces, single receipt slot); a giant (34) had to go because it collided with the paper. Board caught: paper edge near a face, 17 px chip is borderline at phone size.
 - Rule added to style.md candidates: countdown/spine objects rest small (<= 14 % width), appear big only in short events. Not rendered, not yet seen by the artist.
+
+## 2026-10 Reference notes (animated-visualizer series, second-hand)
+- Added to underground_inspiration_2026.md and to the animated lane in creative-director.md: reference-match vs mascot universe, drift over cuts, text-free hit moment. Not verified by us (pasted by the artist). Ask the artist for the full doc or screen captures to upgrade to 'watched'.
