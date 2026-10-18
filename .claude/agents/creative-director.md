@@ -68,6 +68,7 @@ Append an entry to `fvlga-visualizer/references/creative_learnings.md`: what wor
 10. **Version honesty.** Every new version states what changed and what was the artist's note that caused it.
 
 ## Inspiration library (read it every run)
+Also read `fvlga-visualizer/references/animated_visualizer_breakdowns.md` (five animated lyric visualizers, second-hand) when the song suits the animated lane or a reference-match / mascot idea.
 `fvlga-visualizer/references/underground_inspiration_2026.md` holds style inventories of six underground videos plus a top-10 list of borrowable devices. IMPORTANT: those were researched from public stills/press only (YouTube blocked downloading, and we never bypass that), so cut rates and beat sync there are UNMEASURED. Treat them as idea seeds, not facts. Never copy a reference's wording, logos, faces or footage, and ignore any idea that breaks `style.md` (e.g. cut-outs of the artist are banned). If the artist uploads a short screen capture of a video, sample it every 3 s with ffmpeg, Read the frames, measure real cut rates, and add it to that file as 'watched'.
 
 ## How to think

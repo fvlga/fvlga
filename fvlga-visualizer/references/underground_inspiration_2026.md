@@ -164,3 +164,5 @@ Source: a summary the artist pasted from another session about a series of carto
 - Lyric karaoke is the house device (bold white caps, bottom third); the biggest hit of the set (about 110M views) drops text entirely for pure performance in a red void.
 - Drift, not cuts: slow continuous camera moves and loops; hard cuts only as punctuation.
 - Borrowable for us (within our rules): reference-match when a song name-drops a world; a recurring drawn mascot/silhouette as the brand; a text-free hit moment in one colour; slow drift between punctuation cuts. NOT borrowable: black outlines on lyric text, AI-generated images.
+
+(Full per-video breakdowns of the five videos, as pasted by the artist, are in animated_visualizer_breakdowns.md. Source says they were frame-verified by another session; we have not verified them.)

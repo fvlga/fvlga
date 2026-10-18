@@ -47,3 +47,6 @@ A measuring tape whose reading is derived from the lyric (32 at size 32, 34 at s
 
 ## 2026-10 Reference notes (animated-visualizer series, second-hand)
 - Added to underground_inspiration_2026.md and to the animated lane in creative-director.md: reference-match vs mascot universe, drift over cuts, text-free hit moment. Not verified by us (pasted by the artist). Ask the artist for the full doc or screen captures to upgrade to 'watched'.
+
+## 2026-10 Animated breakdowns received
+- Artist pasted full breakdowns of 5 cartoon visualizers (second-hand): saved as references/animated_visualizer_breakdowns.md with a translated steal-list (persona re-costumed per track, one-colour stage, lyric-as-reference, black-frame beat-drop word, drift over cuts, text-free hero moment). Outline/AI-image/font rules still win.
